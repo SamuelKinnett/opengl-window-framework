@@ -9,7 +9,7 @@ LDLIBS=-lGL -lGLU -lglut
 all: opengl-window-framework
 
 opengl-window-framework: $(OBJS) 
-	$(CXX) -Wall -g -o opengl-window-framework $(OBJS) $(LDLIBS)
+	$(CXX) -Wall -g -o ../bin/opengl-window-framework $(OBJS) $(LDLIBS)
 
 window.o: window.cpp window.h element.h
 	g++ -Wall -g -c window.cpp -o window.o
