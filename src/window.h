@@ -21,9 +21,11 @@ public:
 
 	virtual void Draw();
 	virtual void Resize();
-
+	void Move(int x, int y);
+	int CheckMouseCollision(int x, int y, int* clickLocation);
 private:
 	void PixelToFloat(int x, int y, float* returnArray);
+	void FloatToPixel(float x, float y, int* returnArray);
 };
 
 #endif

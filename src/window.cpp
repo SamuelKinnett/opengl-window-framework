@@ -1,4 +1,6 @@
 #include "window.h"
+#include <iostream>
+using namespace std;
 
 #define WINDOW_DISCRETE 0
 #define WINDOW_SCALING 1
@@ -63,15 +65,19 @@ void Window::Draw() {
 	if (windowType == WINDOW_DISCRETE) {
 		//We need to convert the pixel co-ordinates to world co-ordinates
 		PixelToFloat(this->xPosition, this->yPosition, tempArray);
+		//The top left corner of the window
 		windowVectors[0][0] = tempArray[0];
 		windowVectors[0][1] = tempArray[1];
 
 		PixelToFloat(this->xPosition + this->width, this->yPosition + this->height, tempArray);
+		//The bottom right corner of the window
 		windowVectors[1][0] = tempArray[0];
 		windowVectors[1][1] = tempArray[1];
 	} else {
+		//The top left corner of the window
 		windowVectors[0][0] = this->xPosition;
 		windowVectors[0][1] = this->yPosition;
+		//The bottom right corner of the window
 		windowVectors[1][0] = this->xPosition + this->width;
 		windowVectors[1][1] = this->yPosition + this->height;
 	}
@@ -110,4 +116,65 @@ void Window::PixelToFloat(int x, int y, float* returnArray) {
 		returnArray[1] = 1;
 	else if (returnArray[1] < -1)
 		returnArray[1] = -1;
+}
+
+//Converts a float co-ordinate into a pixel co-ordinate
+void Window::FloatToPixel(float x, float y, int* returnArray) {
+	returnArray[0] = ((this->xPosition + 1) / 2.0) * this->screenWidth;
+	returnArray[1] = ((this->yPosition + 1) / 2.0) * this->screenHeight;
+}
+
+//Checks to see if the mouse falls within the bounds of the window. If it does, the
+//function will return true. In addition, it will set the clickLocation array to the
+//x and y values of the mouse relative to the top left corner of the window.
+int Window::CheckMouseCollision(int x, int y, int* clickLocation) {
+	if (windowType == WINDOW_DISCRETE) {
+		if (x < this->xPosition + this->width
+			&& x > this->xPosition
+			&& y < this->yPosition + this->height
+			&& y > this->yPosition) {
+
+			clickLocation[0] = x - this->xPosition;
+			clickLocation[1] = y - this->yPosition;
+
+			return 1;
+		}
+	} else {
+		int tempArray[2];
+		int tempSizeArray[2];
+		FloatToPixel(this->xPosition, this->yPosition, tempArray);
+		FloatToPixel(this->xPosition + this->width,
+				this->yPosition + this->height,
+				tempSizeArray);
+		cout << "Window X, Y = " << tempArray[0] << "," << tempArray[1] << endl;
+		cout << "Window Width, Height = " << tempSizeArray[0] << "," << tempSizeArray[1] << endl;
+		if (x < tempArray[0] + tempSizeArray[0]
+			&& x > tempArray[0]
+			&& y < tempArray[1] + tempSizeArray[1]
+			&& y > tempArray[1]) {
+
+			clickLocation[0] = x - tempArray[0];
+			clickLocation[1] = y - tempArray[1];
+
+			cout << "Collision Detected At: " << tempArray[0] << "," << tempArray[1];
+			return 1;
+		}
+	}
+	cout << "No Collision Detected" << endl;
+	return 0;
+}
+
+//Moves the window to the specified position. Eventually, this could be extended to allow
+//for moving animations and the like. X and Y are screen position values given in pixels
+//and so need to be converted if the window is a scaling type.
+void Window::Move(int x, int y) {
+	if (windowType == WINDOW_DISCRETE) {
+		this->xPosition = x;
+		this->yPosition = y;
+	} else {
+		float tempArray[2];
+		PixelToFloat(x, y, tempArray);
+		this->xPosition = tempArray[0];
+		this->yPosition = tempArray[1];
+	}
 }

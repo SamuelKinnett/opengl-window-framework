@@ -4,6 +4,7 @@
 #include <GL/freeglut.h>
 #include <GL/gl.h>
 #include <vector>
+#include <iostream>
 
 //Custom classes
 #include "window.h"
@@ -13,8 +14,13 @@ using namespace std;
 #define FPS 60
 #define DEFAULT_WIDTH 800
 #define DEFAULT_HEIGHT 600
+#define TRUE 1
+#define FALSE 0
 
 int windowHandle = 0;
+int draggingWindow = FALSE;	//Is the user currently dragging a window?
+int activeWindow = -1;		//The window currently being interacted with
+int mouseRelativePosition[2];	//The position of the mouse relative to the window being dragged
 
 void Initialise(int, char*[]);
 void InitWindow(int, char*[]);
@@ -22,6 +28,10 @@ bool InitOpenGL();
 void Update();
 void Render();
 void MainLoop(int);
+
+//Input handling
+void HandleMouseClick(int, int, int, int);
+void HandleMouseMoving(int, int);
 
 vector <Window*> windows; //Points to all of the current windows
 
@@ -65,6 +75,12 @@ void InitWindow(int argc, char* argv[]) {
 	//of milliseconds. The time is calculated by 1000 / FPS so that
 	//the main loop is run at the specified framerate.
 	glutTimerFunc(1000 / FPS, MainLoop, 0);
+	//Sets the HandleMouseClick function to be called whenever any mouse
+	//button is clicked.
+	glutMouseFunc(HandleMouseClick);
+	//Sets the HandleMouseMoving function to be called whenever the mouse
+	//is moved whilst a mouse button is held down
+	glutMotionFunc(HandleMouseMoving);
 }
 
 //Initialises OpenGL
@@ -114,4 +130,44 @@ void MainLoop(int val) {
 	//Set another timed function call. In this way, the main loop is
 	//looped at the framerate specified by the FPS constant
 	glutTimerFunc(1000 / FPS, MainLoop, val);
+}
+
+//Handles mouse clicks
+void HandleMouseClick(int button, int state, int x, int y) {
+	if (button == GLUT_LEFT_BUTTON) {
+		activeWindow = -1;	//Reset the active window
+		for (uint i = 0; i < windows.size(); ++i) {
+			//Loop through every window and see if the mouse collides with them.
+			//If it does, make that the current window being dragged and move it
+			if (windows[i]->CheckMouseCollision(x, y, mouseRelativePosition))
+				activeWindow = i;
+		}
+		if (activeWindow > 0) {
+			//If the user has clicked on a window, move that window to the back of
+			//the vector, meaning it will be rendered last and therefore "at the
+			//front"
+			windows.push_back(windows[activeWindow]);
+			windows.erase(windows.begin() + activeWindow);
+
+			if (state == GLUT_DOWN) {
+				draggingWindow = TRUE;
+			} else {
+				draggingWindow = FALSE;
+			}
+		} else {
+			draggingWindow = FALSE;
+		}
+	}
+	cout << "Mouse X: " << x << endl;
+	cout << "Mouse Y: " << y << endl;
+	cout << "Active Window: " << activeWindow << endl;
+}
+
+//Handles the mouse moving while a mouse button is pressed
+void HandleMouseMoving(int x, int y) {
+	cout << "Wew" << endl;
+	/*if (draggingWindow) {
+		windows[activeWindow]->Move(x - mouseRelativePosition[0],
+						y - mouseRelativePosition[1]);
+	}*/
 }
