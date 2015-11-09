@@ -3,6 +3,12 @@
 #include <string.h>
 #include <GL/freeglut.h>
 #include <GL/gl.h>
+#include <vector>
+
+//Custom classes
+#include "window.h"
+
+using namespace std;
 
 #define FPS 60
 #define DEFAULT_WIDTH 800
@@ -17,6 +23,8 @@ void Update();
 void Render();
 void MainLoop(int);
 
+vector <Window*> windows; //Points to all of the current windows
+
 int main(int argc, char* argv[]) {
 	Initialise(argc, argv);
 }
@@ -25,6 +33,11 @@ int main(int argc, char* argv[]) {
 void Initialise(int argc, char* argv[]) {
 	InitWindow(argc, argv);
 	InitOpenGL();
+
+	//TESTING
+	//Add a single window to the beginning of the windows vector
+
+	windows.push_back(new Window(0.2f, 0.2f, 0.2f, 0.2f));
 
 	//Start running GLut's loop
 	glutMainLoop();
@@ -63,6 +76,10 @@ bool InitOpenGL() {
 	//Initialise the OpenGL clear colour, in this case black
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
+	//Initialise blending
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	//Code goes here to check for errors
 
 	return true;
@@ -79,12 +96,10 @@ void Render() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	//Drawing code goes here
-	//Draw a triangle to test that the code works
-	glBegin(GL_TRIANGLES);
-		glVertex2f(0.0f, 0.0f);
-		glVertex2f(0.5f, 0.0f);
-		glVertex2f(0.0f, 0.5f);
-	glEnd();
+	for(vector<Window*>::iterator it = windows.begin(); it != windows.end(); ++it) {
+		Window& currentWindow = **it;	//The current window being drawn
+		currentWindow.Draw();
+	}
 
 	//Update the screen by swapping the buffers
 	glutSwapBuffers();
@@ -97,6 +112,6 @@ void MainLoop(int val) {
 	Render();
 
 	//Set another timed function call. In this way, the main loop is
-	//looped at the framerate speicifed by the FPS constant
+	//looped at the framerate specified by the FPS constant
 	glutTimerFunc(1000 / FPS, MainLoop, val);
 }

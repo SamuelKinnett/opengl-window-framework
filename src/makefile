@@ -4,7 +4,7 @@ RM=rm -f
 
 SRCS=window.cpp main.cpp
 OBJS=window.o main.o
-LDLIBS=-lGL -lGLU -lglut
+LDLIBS=-lGL -LGLU  -lglut
 
 all: opengl-window-framework
 
