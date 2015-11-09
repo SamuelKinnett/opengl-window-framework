@@ -6,8 +6,8 @@
 class Element {
 	int _xPosition, _yPosition;
 public:
-	virtual void Draw() = 0;	//Called to draw the element to the screen
-	virtual void Resize() = 0;	//Called to resize the element
+	virtual void Draw() = 0;		//Called to draw the element to the screen
+	virtual void Resize(int, int) = 0;	//Called to resize the element
 };
 
 #endif

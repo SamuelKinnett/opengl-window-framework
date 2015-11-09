@@ -26,6 +26,8 @@ Window::Window(int x, int y, int width, int height) {
 	this->colour[1] = 255;
 	this->colour[2] = 255;
 	this->colour[3] = 255;
+
+	cout << "Created New Discrete Window" << endl;
 }
 
 /* Float constructor taking arguments as values between 0 and 1
@@ -65,19 +67,19 @@ void Window::Draw() {
 	if (windowType == WINDOW_DISCRETE) {
 		//We need to convert the pixel co-ordinates to world co-ordinates
 		PixelToFloat(this->xPosition, this->yPosition, tempArray);
-		//The top left corner of the window
+		//The bottom left corner of the window
 		windowVectors[0][0] = tempArray[0];
 		windowVectors[0][1] = tempArray[1];
 
 		PixelToFloat(this->xPosition + this->width, this->yPosition + this->height, tempArray);
-		//The bottom right corner of the window
+		//The top right corner of the window
 		windowVectors[1][0] = tempArray[0];
 		windowVectors[1][1] = tempArray[1];
 	} else {
-		//The top left corner of the window
+		//The bottom left corner of the window
 		windowVectors[0][0] = this->xPosition;
 		windowVectors[0][1] = this->yPosition;
-		//The bottom right corner of the window
+		//The top right corner of the window
 		windowVectors[1][0] = this->xPosition + this->width;
 		windowVectors[1][1] = this->yPosition + this->height;
 	}
@@ -88,16 +90,17 @@ void Window::Draw() {
 			this->colour[2],
 			this->colour[3]);
 	*/
-	glVertex2f(windowVectors[0][0], windowVectors[1][1]);
-	glVertex2f(windowVectors[1][0], windowVectors[1][1]);
-	glVertex2f(windowVectors[1][0], windowVectors[0][1]);
 	glVertex2f(windowVectors[0][0], windowVectors[0][1]);
+	glVertex2f(windowVectors[1][0], windowVectors[0][1]);
+	glVertex2f(windowVectors[1][0], windowVectors[1][1]);
+	glVertex2f(windowVectors[0][0], windowVectors[1][1]);
 	glEnd();
 }
 
 //Called whenever the window needs to be resized
-void Window::Resize() {
-
+void Window::Resize(int width, int height) {
+	//this->screenWidth = width;
+	//this->screenHeight = height;
 }
 
 //Converts a pixel co-ordinate into a float co-ordinate

@@ -20,7 +20,7 @@ public:
 	~Window();
 
 	virtual void Draw();
-	virtual void Resize();
+	virtual void Resize(int, int);
 	void Move(int x, int y);
 	int CheckMouseCollision(int x, int y, int* clickLocation);
 private:

@@ -21,12 +21,14 @@ int windowHandle = 0;
 int draggingWindow = FALSE;	//Is the user currently dragging a window?
 int activeWindow = -1;		//The window currently being interacted with
 int mouseRelativePosition[2];	//The position of the mouse relative to the window being dragged
+int screenSize[2] = {DEFAULT_WIDTH, DEFAULT_HEIGHT};
 
 void Initialise(int, char*[]);
 void InitWindow(int, char*[]);
 bool InitOpenGL();
 void Update();
 void Render();
+void Resize(int, int);
 void MainLoop(int);
 
 //Input handling
@@ -47,7 +49,7 @@ void Initialise(int argc, char* argv[]) {
 	//TESTING
 	//Add a single window to the beginning of the windows vector
 
-	windows.push_back(new Window(0.2f, 0.2f, 0.2f, 0.2f));
+	windows.push_back(new Window(0, 0, 50, 50));
 
 	//Start running GLut's loop
 	glutMainLoop();
@@ -81,6 +83,9 @@ void InitWindow(int argc, char* argv[]) {
 	//Sets the HandleMouseMoving function to be called whenever the mouse
 	//is moved whilst a mouse button is held down
 	glutMotionFunc(HandleMouseMoving);
+	//Sets the Resize function to be called whenever the main window is
+	//resized.
+	glutReshapeFunc(Resize);
 }
 
 //Initialises OpenGL
@@ -139,10 +144,12 @@ void HandleMouseClick(int button, int state, int x, int y) {
 		for (uint i = 0; i < windows.size(); ++i) {
 			//Loop through every window and see if the mouse collides with them.
 			//If it does, make that the current window being dragged and move it
-			if (windows[i]->CheckMouseCollision(x, y, mouseRelativePosition))
+			if (windows[i]->CheckMouseCollision(x, y,
+				mouseRelativePosition))
+
 				activeWindow = i;
 		}
-		if (activeWindow > 0) {
+		if (activeWindow > -1) {
 			//If the user has clicked on a window, move that window to the back of
 			//the vector, meaning it will be rendered last and therefore "at the
 			//front"
@@ -166,8 +173,16 @@ void HandleMouseClick(int button, int state, int x, int y) {
 //Handles the mouse moving while a mouse button is pressed
 void HandleMouseMoving(int x, int y) {
 	cout << "Wew" << endl;
-	/*if (draggingWindow) {
+	if (draggingWindow) {
 		windows[activeWindow]->Move(x - mouseRelativePosition[0],
 						y - mouseRelativePosition[1]);
-	}*/
+	}
+}
+
+//Handles the freeglut window being resized
+void Resize(int width, int height) {
+	for (uint i = 0; i < windows.size(); ++i)
+		windows[i]->Resize(width, height);
+	screenSize[0] = width;
+	screenSize[1] = height;
 }
