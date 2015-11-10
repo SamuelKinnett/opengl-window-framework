@@ -140,7 +140,7 @@ void MainLoop(int val) {
 
 //Handles mouse clicks
 void HandleMouseClick(int button, int state, int x, int y) {
-	if (button == GLUT_LEFT_BUTTON) {
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
 		activeWindow = -1;	//Reset the active window
 		for (uint i = 0; i < windows.size(); ++i) {
 			//Loop through every window and see if the mouse collides with them.
@@ -155,15 +155,17 @@ void HandleMouseClick(int button, int state, int x, int y) {
 			windows.push_back(windows[activeWindow]);
 			windows.erase(windows.begin() + activeWindow);
 
-			if (state == GLUT_DOWN) {
-				draggingWindow = TRUE;
-			} else {
-				draggingWindow = FALSE;
-			}
+			//The active window will now be incorrect, so let's update it
+			activeWindow = windows.size() - 1;
+			draggingWindow = TRUE;
 		} else {
 			draggingWindow = FALSE;
 		}
+	} else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
+		activeWindow = -1;
+		draggingWindow = FALSE;
 	}
+
 	cout << "Mouse X: " << x << endl;
 	cout << "Mouse Y: " << y << endl;
 	cout << "Active Window: " << activeWindow << endl;
