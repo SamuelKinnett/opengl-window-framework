@@ -52,6 +52,8 @@ Window::Window(float x, float y, float width, float height) {
 	this->colour[1] = 255;
 	this->colour[2] = 255;
 	this->colour[3] = 255;
+
+	cout << "Created New Scaling Window" << endl;
 }
 
 //Destructor
@@ -99,8 +101,8 @@ void Window::Draw() {
 
 //Called whenever the window needs to be resized
 void Window::Resize(int width, int height) {
-	//this->screenWidth = width;
-	//this->screenHeight = height;
+	this->screenWidth = width;
+	this->screenHeight = height;
 }
 
 //Converts a pixel co-ordinate into a float co-ordinate
@@ -123,8 +125,8 @@ void Window::PixelToFloat(int x, int y, float* returnArray) {
 
 //Converts a float co-ordinate into a pixel co-ordinate
 void Window::FloatToPixel(float x, float y, int* returnArray) {
-	returnArray[0] = ((this->xPosition + 1) / 2.0) * this->screenWidth;
-	returnArray[1] = ((this->yPosition + 1) / 2.0) * this->screenHeight;
+	returnArray[0] = ((x + 1) / 2.0) * this->screenWidth;
+	returnArray[1] = ((y + 1) / 2.0) * this->screenHeight;
 }
 
 //Checks to see if the mouse falls within the bounds of the window. If it does, the

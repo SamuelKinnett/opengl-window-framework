@@ -49,7 +49,7 @@ void Initialise(int argc, char* argv[]) {
 	//TESTING
 	//Add a single window to the beginning of the windows vector
 
-	windows.push_back(new Window(0, 0, 50, 50));
+	windows.push_back(new Window(0.0f, 0.0f, 0.5f, 0.5f));
 
 	//Start running GLut's loop
 	glutMainLoop();
@@ -144,9 +144,7 @@ void HandleMouseClick(int button, int state, int x, int y) {
 		for (uint i = 0; i < windows.size(); ++i) {
 			//Loop through every window and see if the mouse collides with them.
 			//If it does, make that the current window being dragged and move it
-			if (windows[i]->CheckMouseCollision(x, y,
-				mouseRelativePosition))
-
+			if (windows[i]->CheckMouseCollision(x, screenSize[1] - y, mouseRelativePosition))
 				activeWindow = i;
 		}
 		if (activeWindow > -1) {
@@ -174,8 +172,7 @@ void HandleMouseClick(int button, int state, int x, int y) {
 void HandleMouseMoving(int x, int y) {
 	cout << "Wew" << endl;
 	if (draggingWindow) {
-		windows[activeWindow]->Move(x - mouseRelativePosition[0],
-						y - mouseRelativePosition[1]);
+		windows[activeWindow]->Move(x - mouseRelativePosition[0], (screenSize[1] - y) - mouseRelativePosition[1]);
 	}
 }
 
