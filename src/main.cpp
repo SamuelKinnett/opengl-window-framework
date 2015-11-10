@@ -47,9 +47,10 @@ void Initialise(int argc, char* argv[]) {
 	InitOpenGL();
 
 	//TESTING
-	//Add a single window to the beginning of the windows vector
+	//Add two windows to the beginning of the windows vector
 
 	windows.push_back(new Window(0.0f, 0.0f, 0.5f, 0.5f));
+	windows.push_back(new Window(10, 10, 50, 50));
 
 	//Start running GLut's loop
 	glutMainLoop();

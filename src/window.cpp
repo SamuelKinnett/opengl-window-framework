@@ -77,6 +77,7 @@ void Window::Draw() {
 		//The top right corner of the window
 		windowVectors[1][0] = tempArray[0];
 		windowVectors[1][1] = tempArray[1];
+
 	} else {
 		//The bottom left corner of the window
 		windowVectors[0][0] = this->xPosition;
@@ -107,8 +108,8 @@ void Window::Resize(int width, int height) {
 
 //Converts a pixel co-ordinate into a float co-ordinate
 void Window::PixelToFloat(int x, int y, float* returnArray) {
-	returnArray[0] = 2 * (x / this->screenWidth) - 1;
-	returnArray[1] = 2 * (y / this->screenHeight) - 1;
+	returnArray[0] = 2 * ((float)x / this->screenWidth) - 1;
+	returnArray[1] = 2 * ((float)y / this->screenHeight) - 1;
 
 	//Clamp the float values between -1 and 1
 
@@ -151,11 +152,9 @@ int Window::CheckMouseCollision(int x, int y, int* clickLocation) {
 		FloatToPixel(this->xPosition + this->width,
 				this->yPosition + this->height,
 				tempSizeArray);
-		cout << "Window X, Y = " << tempArray[0] << "," << tempArray[1] << endl;
-		cout << "Window Width, Height = " << tempSizeArray[0] << "," << tempSizeArray[1] << endl;
-		if (x < tempArray[0] + tempSizeArray[0]
+		if (x < tempSizeArray[0]
 			&& x > tempArray[0]
-			&& y < tempArray[1] + tempSizeArray[1]
+			&& y < tempSizeArray[1]
 			&& y > tempArray[1]) {
 
 			clickLocation[0] = x - tempArray[0];
