@@ -22,10 +22,11 @@ Window::Window(int x, int y, int width, int height) {
 	this->height = height;
 	this->windowType = WINDOW_DISCRETE;
 
-	this->colour[0] = 255;
-	this->colour[1] = 255;
-	this->colour[2] = 255;
-	this->colour[3] = 255;
+	//Set the colour to a nice, slightly transparent blue
+	this->colour[0] = 80;
+	this->colour[1] = 84;
+	this->colour[2] = 248;
+	this->colour[3] = 222;
 
 	cout << "Created New Discrete Window" << endl;
 }
@@ -48,10 +49,10 @@ Window::Window(float x, float y, float width, float height) {
 	this->height = height;
 	this->windowType = WINDOW_SCALING;
 
-	this->colour[0] = 255;
-	this->colour[1] = 255;
-	this->colour[2] = 255;
-	this->colour[3] = 255;
+	this->colour[0] = 80;
+	this->colour[1] = 84;
+	this->colour[2] = 248;
+	this->colour[3] = 222;
 
 	cout << "Created New Scaling Window" << endl;
 }
@@ -86,13 +87,11 @@ void Window::Draw() {
 		windowVectors[1][0] = this->xPosition + this->width;
 		windowVectors[1][1] = this->yPosition + this->height;
 	}
+
+	//Set the colour
+	glColor4ub(this->colour[0], this->colour[1], this->colour[2], this->colour[3]);
+	
 	glBegin(GL_QUADS);
-	/*
-	glColor4i(this->colour[0],
-			this->colour[1],
-			this->colour[2],
-			this->colour[3]);
-	*/
 	glVertex2f(windowVectors[0][0], windowVectors[0][1]);
 	glVertex2f(windowVectors[1][0], windowVectors[0][1]);
 	glVertex2f(windowVectors[1][0], windowVectors[1][1]);
