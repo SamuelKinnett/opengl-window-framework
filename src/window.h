@@ -15,14 +15,16 @@ class Window : public Element {
 	int screenWidth, screenHeight;
 
 public:
-	Window(int x, int y, int width, int height);
-	Window(float x, float y, float width, float height);
+	Window(int x, int y, int width, int height, float parentX, float parentY);
+	Window(float x, float y, float width, float height, float parentX, float parentY);
 	~Window();
 
-	virtual void Draw();
+	virtual void Draw(float, float);
 	virtual void Resize(int, int);
-	void Move(int x, int y);
-	int CheckMouseCollision(int x, int y, int* clickLocation);
+	virtual void Move(int x, int y, float, float);
+	virtual int Click(int x, int y, int* clickLocation, float, float);
+	virtual void AddChild(Element*);
+	virtual void RemoveChild(int);
 private:
 	void PixelToFloat(int x, int y, float* returnArray);
 	void FloatToPixel(float x, float y, int* returnArray);

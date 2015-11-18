@@ -35,7 +35,7 @@ void MainLoop(int);
 void HandleMouseClick(int, int, int, int);
 void HandleMouseMoving(int, int);
 
-vector <Window*> windows; //Points to all of the current windows
+vector <Element*> windows; //Points to all of the current windows
 
 int main(int argc, char* argv[]) {
 	Initialise(argc, argv);
@@ -49,8 +49,8 @@ void Initialise(int argc, char* argv[]) {
 	//TESTING
 	//Add two windows to the beginning of the windows vector
 
-	windows.push_back(new Window(0.0f, 0.0f, 0.5f, 0.5f));
-	windows.push_back(new Window(10, 10, 50, 50));
+	windows.push_back(new Window(0.0f, 0.0f, 0.5f, 0.5f, -1, -1));
+	windows.push_back(new Window(400, 300, 50, 50, -1, -1));
 
 	//Start running GLut's loop
 	glutMainLoop();
@@ -121,9 +121,9 @@ void Render() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	//Drawing code goes here
-	for(vector<Window*>::iterator it = windows.begin(); it != windows.end(); ++it) {
-		Window& currentWindow = **it;	//The current window being drawn
-		currentWindow.Draw();
+	for(vector<Element*>::iterator it  = windows.begin(); it != windows.end(); ++it) {
+		Element& currentWindow = **it;	//The current window being drawn
+		currentWindow.Draw(-1, -1);
 	}
 
 	//Update the screen by swapping the buffers
@@ -148,7 +148,7 @@ void HandleMouseClick(int button, int state, int x, int y) {
 		for (uint i = 0; i < windows.size(); ++i) {
 			//Loop through every window and see if the mouse collides with them.
 			//If it does, make that the current window being dragged and move it
-			if (windows[i]->CheckMouseCollision(x, screenSize[1] - y, mouseRelativePosition))
+			if (windows[i]->Click(x, screenSize[1] - y, mouseRelativePosition, -1, -1))
 				activeWindow = i;
 		}
 		if (activeWindow > -1) {
@@ -178,7 +178,7 @@ void HandleMouseClick(int button, int state, int x, int y) {
 void HandleMouseMoving(int x, int y) {
 	cout << "Wew" << endl;
 	if (draggingWindow) {
-		windows[activeWindow]->Move(x - mouseRelativePosition[0], (screenSize[1] - y) - mouseRelativePosition[1]);
+		windows[activeWindow]->Move(x - mouseRelativePosition[0], (screenSize[1] - y) - mouseRelativePosition[1], -1, -1);
 	}
 }
 
