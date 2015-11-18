@@ -8,7 +8,7 @@
 
 //Custom classes
 #include "window.h"
-
+#include "windowinfo.h"
 using namespace std;
 
 #define FPS 60
@@ -16,12 +16,16 @@ using namespace std;
 #define DEFAULT_HEIGHT 600
 #define TRUE 1
 #define FALSE 0
+#define SCREEN_ORIGIN_X -1
+#define SCREEN_ORIGIN_Y -1
 
 int windowHandle = 0;
 int draggingWindow = FALSE;	//Is the user currently dragging a window?
 int activeWindow = -1;		//The window currently being interacted with
 int mouseRelativePosition[2];	//The position of the mouse relative to the window being dragged
 int screenSize[2] = {DEFAULT_WIDTH, DEFAULT_HEIGHT};
+
+struct window_t mScreen;	//Information about the main screen
 
 void Initialise(int, char*[]);
 void InitWindow(int, char*[]);
@@ -46,11 +50,15 @@ void Initialise(int argc, char* argv[]) {
 	InitWindow(argc, argv);
 	InitOpenGL();
 
+	mScreen.x = -1;
+	mScreen.y = -1;
+	mScreen.width = 2;
+	mScreen.height = 2;
 	//TESTING
 	//Add two windows to the beginning of the windows vector
 
-	windows.push_back(new Window(0.0f, 0.0f, 0.5f, 0.5f, -1, -1));
-	windows.push_back(new Window(400, 300, 50, 50, -1, -1));
+	windows.push_back(new Window(0.0f, 0.0f, 0.5f, 0.5f, mScreen));
+	windows.push_back(new Window(400, 300, 50, 50, mScreen));
 
 	//Start running GLut's loop
 	glutMainLoop();
@@ -148,7 +156,7 @@ void HandleMouseClick(int button, int state, int x, int y) {
 		for (uint i = 0; i < windows.size(); ++i) {
 			//Loop through every window and see if the mouse collides with them.
 			//If it does, make that the current window being dragged and move it
-			if (windows[i]->Click(x, screenSize[1] - y, mouseRelativePosition, -1, -1))
+			if (windows[i]->Click(x, screenSize[1] - y, mouseRelativePosition, mScreen))
 				activeWindow = i;
 		}
 		if (activeWindow > -1) {
@@ -176,9 +184,8 @@ void HandleMouseClick(int button, int state, int x, int y) {
 
 //Handles the mouse moving while a mouse button is pressed
 void HandleMouseMoving(int x, int y) {
-	cout << "Wew" << endl;
 	if (draggingWindow) {
-		windows[activeWindow]->Move(x - mouseRelativePosition[0], (screenSize[1] - y) - mouseRelativePosition[1], -1, -1);
+		windows[activeWindow]->Move(x - mouseRelativePosition[0], (screenSize[1] - y) - mouseRelativePosition[1], mScreen);
 	}
 }
 

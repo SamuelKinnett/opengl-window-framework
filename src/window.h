@@ -4,7 +4,7 @@
 #include <GL/freeglut.h>
 #include <GL/gl.h>
 #include "element.h"
-
+#include "windowinfo.h"
 //A class describing a window
 class Window : public Element {
 
@@ -15,14 +15,14 @@ class Window : public Element {
 	int screenWidth, screenHeight;
 
 public:
-	Window(int x, int y, int width, int height, float parentX, float parentY);
-	Window(float x, float y, float width, float height, float parentX, float parentY);
+	Window(int x, int y, int width, int height, window_t);
+	Window(float x, float y, float width, float height, window_t);
 	~Window();
 
-	virtual void Draw(float, float);
+	virtual void Draw(window_t);
 	virtual void Resize(int, int);
-	virtual void Move(int x, int y, float, float);
-	virtual int Click(int x, int y, int* clickLocation, float, float);
+	virtual void Move(int x, int y, window_t);
+	virtual int Click(int x, int y, int* clickLocation, window_t);
 	virtual void AddChild(Element*);
 	virtual void RemoveChild(int);
 private:

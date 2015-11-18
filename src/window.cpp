@@ -1,5 +1,6 @@
 #include "window.h"
 #include <iostream>
+#include "windowinfo.h"
 using namespace std;
 
 #define WINDOW_DISCRETE 0
@@ -20,7 +21,9 @@ Window::Window(int x, int y, int width, int height, float parentX, float parentY
 	int parentPixel[2];
 	FloatToPixel(parentX, parentY, parentPixel);
 	this->xPosition = parentPixel[0] + x;
+	cout << "Relative X: " << this->xPosition << endl;
 	this->yPosition = parentPixel[1] + y;
+	cout << "Relative Y:" << this->yPosition << endl;
 	this->width = width;
 	this->height = height;
 	this->windowType = WINDOW_DISCRETE;
@@ -75,15 +78,17 @@ void Window::Draw(float parentX, float parentY) {
 
 	if (windowType == WINDOW_DISCRETE) {
 		//We need to convert the pixel co-ordinates to world co-ordinates
-		PixelToFloat(this->xPosition, this->yPosition, tempArray);
+		int parentPixel[2];
+		FloatToPixel(parentX, parentY, parentPixel);
+		PixelToFloat(parentPixel[0] + this->xPosition, parentPixel[1] + this->yPosition, tempArray);
 		//The bottom left corner of the window
-		windowVectors[0][0] = parentX + tempArray[0];
-		windowVectors[0][1] = parentY + tempArray[1];
+		windowVectors[0][0] = tempArray[0];
+		windowVectors[0][1] = tempArray[1];
 
-		PixelToFloat(this->xPosition + this->width, this->yPosition + this->height, tempArray);
+		PixelToFloat(parentPixel[0] + this->xPosition + this->width, parentPixel[1] +  this->yPosition + this->height, tempArray);
 		//The top right corner of the window
-		windowVectors[1][0] = parentX + tempArray[0];
-		windowVectors[1][1] = parentY + tempArray[1];
+		windowVectors[1][0] = tempArray[0];
+		windowVectors[1][1] = tempArray[1];
 
 	} else {
 		//The bottom left corner of the window
@@ -207,6 +212,8 @@ void Window::AddChild(Element* newChild) {
 }
 
 void Window::RemoveChild(int childIndex) {
-	if (childIndex < this->childCount)
+	if (childIndex < this->childCount) {
 		this->children.erase(this->children.begin() + childIndex);
+		childCount--;
+	}
 }
