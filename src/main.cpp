@@ -131,7 +131,7 @@ void Render() {
 	//Drawing code goes here
 	for(vector<Element*>::iterator it  = windows.begin(); it != windows.end(); ++it) {
 		Element& currentWindow = **it;	//The current window being drawn
-		currentWindow.Draw(-1, -1);
+		currentWindow.Draw(mScreen);
 	}
 
 	//Update the screen by swapping the buffers
@@ -195,4 +195,6 @@ void Resize(int width, int height) {
 		windows[i]->Resize(width, height);
 	screenSize[0] = width;
 	screenSize[1] = height;
+	//Change the viewport size so that discrete/scaling windows work properly
+	glViewport(0, 0, width, height);
 }
