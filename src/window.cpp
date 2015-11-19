@@ -9,7 +9,7 @@ using namespace std;
 /* Standard constructor, taking arguments in terms of pixels
 A window instantiated with this constructor will remain the same size and in the same
 position regardless of the main window resizing.  */
-Window::Window(int x, int y, int width, int height, float parentX, float parentY) {
+Window::Window(int x, int y, int width, int height, window_t parentInfo) {
 	float viewportData[4];
 
 	//Get information about the size of the viewport
@@ -19,13 +19,13 @@ Window::Window(int x, int y, int width, int height, float parentX, float parentY
 	this->screenHeight = viewportData[3];
 	
 	int parentPixel[2];
-	FloatToPixel(parentX, parentY, parentPixel);
-	this->xPosition = parentPixel[0] + x;
-	cout << "Relative X: " << this->xPosition << endl;
-	this->yPosition = parentPixel[1] + y;
-	cout << "Relative Y:" << this->yPosition << endl;
-	this->width = width;
-	this->height = height;
+	FloatToPixel(parentInfo.x, parentInfo.y, parentPixel);
+	this->elementInfo.x = parentPixel[0] + x;
+	//cout << "Relative X: " << this->xPosition << endl;
+	this->elementInfo.y = parentPixel[1] + y;
+	//cout << "Relative Y:" << this->yPosition << endl;
+	this->elementInfo.width = width;
+	this->elementInfo.height = height;
 	this->windowType = WINDOW_DISCRETE;
 	this->childCount = 0; 	//Storing the childcount rather than checking it
 				//every time a child needs to be removed.
@@ -43,7 +43,7 @@ Window::Window(int x, int y, int width, int height, float parentX, float parentY
 A window instantiated with this constructor will remain at a relative size and position
 to the main window, according to the float values.
 */
-Window::Window(float x, float y, float width, float height, float parentX, float parentY) {
+Window::Window(float x, float y, float width, float height, window_t parentInfo) {
 	float viewportData[4];
 
 	//Get information about the size of the viewport
@@ -51,10 +51,10 @@ Window::Window(float x, float y, float width, float height, float parentX, float
 
 	this->screenWidth = viewportData[2];
 	this->screenHeight = viewportData[3];
-	this->xPosition = parentX + x;
-	this->yPosition = parentY + y;
-	this->width = width;
-	this->height = height;
+	this->elementInfo.x = parentInfo.x + x;
+	this->elementInfo.y = parentInfo.y + y;
+	this->elementInfo.width = width;
+	this->elementInfo.height = height;
 	this->windowType = WINDOW_SCALING;
 	this->childCount = 0;
 	
@@ -72,31 +72,33 @@ Window::~Window() {
 }
 
 //Called whenever the window needs to be drawn
-void Window::Draw(float parentX, float parentY) {
+void Window::Draw(window_t parentInfo) {
 	float windowVectors[2][2];	//2D array containing the vector of each point of the window
 	float tempArray[2];	//Stores the return value until it is inserted into the 2D array
 
 	if (windowType == WINDOW_DISCRETE) {
 		//We need to convert the pixel co-ordinates to world co-ordinates
 		int parentPixel[2];
-		FloatToPixel(parentX, parentY, parentPixel);
-		PixelToFloat(parentPixel[0] + this->xPosition, parentPixel[1] + this->yPosition, tempArray);
+		FloatToPixel(parentInfo.x, parentInfo.y, parentPixel);
+		PixelToFloat(parentPixel[0] + this->elementInfo.x, parentPixel[1] + this->elementInfo.y, tempArray);
 		//The bottom left corner of the window
 		windowVectors[0][0] = tempArray[0];
 		windowVectors[0][1] = tempArray[1];
 
-		PixelToFloat(parentPixel[0] + this->xPosition + this->width, parentPixel[1] +  this->yPosition + this->height, tempArray);
+		PixelToFloat(parentPixel[0] + this->elementInfo.x + this->elementInfo.width, 
+				parentPixel[1] +  this->elementInfo.y + this->elementInfo.height, 
+				tempArray);
 		//The top right corner of the window
 		windowVectors[1][0] = tempArray[0];
 		windowVectors[1][1] = tempArray[1];
 
 	} else {
 		//The bottom left corner of the window
-		windowVectors[0][0] = parentX + this->xPosition;
-		windowVectors[0][1] = parentY + this->yPosition;
+		windowVectors[0][0] = parentInfo.x + this->elementInfo.x;
+		windowVectors[0][1] = parentInfo.y + this->elementInfo.y;
 		//The top right corner of the window
-		windowVectors[1][0] = parentX + this->xPosition + this->width;
-		windowVectors[1][1] = parentY + this->yPosition + this->height;
+		windowVectors[1][0] = parentInfo.x + this->elementInfo.x + this->elementInfo.width;
+		windowVectors[1][1] = parentInfo.y + this->elementInfo.y + this->elementInfo.height;
 	}
 
 	//Set the colour
@@ -110,12 +112,7 @@ void Window::Draw(float parentX, float parentY) {
 	glEnd();
 
 	for (int i = 0; i < childCount; ++i){
-		if (windowType == WINDOW_DISCRETE) {
-			PixelToFloat(this->xPosition, this->yPosition, tempArray);
-			this->children[i]->Draw(parentX + tempArray[0], parentY + tempArray[1]);
-		} else {
-			this->children[i]->Draw(parentX + xPosition, parentY + yPosition);
-		}
+		this->children[i]->Draw(this->elementInfo);
 	}
 }
 
@@ -152,26 +149,26 @@ void Window::FloatToPixel(float x, float y, int* returnArray) {
 //Checks to see if the mouse falls within the bounds of the window. If it does, the
 //function will return true. In addition, it will set the clickLocation array to the
 //x and y values of the mouse relative to the top left corner of the window.
-int Window::Click(int x, int y, int* clickLocation, float parentX, float parentY) {
+int Window::Click(int x, int y, int* clickLocation, window_t parentInfo) {
 	if (windowType == WINDOW_DISCRETE) {
 		int parentPixel[2];
-		FloatToPixel(parentX, parentY, parentPixel);
-		if (x < parentPixel[0] + this->xPosition + this->width
-			&& x > parentPixel[0] + this->xPosition
-			&& y < parentPixel[1] + this->yPosition + this->height
-			&& y > parentPixel[1] + this->yPosition) {
+		FloatToPixel(parentInfo.x, parentInfo.y, parentPixel);
+		if (x < parentPixel[0] + this->elementInfo.x + this->elementInfo.width
+			&& x > parentPixel[0] + this->elementInfo.x
+			&& y < parentPixel[1] + this->elementInfo.y + this->elementInfo.height
+			&& y > parentPixel[1] + this->elementInfo.y) {
 
-			clickLocation[0] = x - (parentPixel[0] + this->xPosition);
-			clickLocation[1] = y - (parentPixel[1] + this->yPosition);
+			clickLocation[0] = x - (parentPixel[0] + this->elementInfo.x);
+			clickLocation[1] = y - (parentPixel[1] + this->elementInfo.y);
 
 			return 1;
 		}
 	} else {
 		int tempArray[2];
 		int tempSizeArray[2];
-		FloatToPixel(parentX + this->xPosition, parentY + this->yPosition, tempArray);
-		FloatToPixel(parentX + this->xPosition + this->width,
-				parentY + this->yPosition + this->height,
+		FloatToPixel(parentInfo.x + this->elementInfo.x, parentInfo.y + this->elementInfo.y, tempArray);
+		FloatToPixel(parentInfo.x + this->elementInfo.x + this->elementInfo.width,
+				parentInfo.y + this->elementInfo.y + this->elementInfo.height,
 				tempSizeArray);
 		if (x < tempSizeArray[0]
 			&& x > tempArray[0]
@@ -192,17 +189,17 @@ int Window::Click(int x, int y, int* clickLocation, float parentX, float parentY
 //Moves the window to the specified position. Eventually, this could be extended to allow
 //for moving animations and the like. X and Y are screen position values given in pixels
 //and so need to be converted if the window is a scaling type.
-void Window::Move(int x, int y, float parentX, float parentY) {
+void Window::Move(int x, int y, window_t parentInfo) {
 	if (windowType == WINDOW_DISCRETE) {
 		int parentPixel[2];
-		FloatToPixel(parentX, parentY, parentPixel);
-		this->xPosition = parentPixel[0] + x;
-		this->yPosition = parentPixel[1] + y;
+		FloatToPixel(parentInfo.x, parentInfo.y, parentPixel);
+		this->elementInfo.x = parentPixel[0] + x;
+		this->elementInfo.y = parentPixel[1] + y;
 	} else {
 		float tempArray[2];
 		PixelToFloat(x, y, tempArray);
-		this->xPosition = parentX + tempArray[0];
-		this->yPosition = parentY + tempArray[1];
+		this->elementInfo.x = parentInfo.x + tempArray[0];
+		this->elementInfo.y = parentInfo.y + tempArray[1];
 	}
 }
 

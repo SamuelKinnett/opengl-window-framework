@@ -1,5 +1,6 @@
 //This structure provides a way to pass information about the parent element
-//to its children.
+//to its children. It stores the x and y positions, the width and the height
+//of the element in worldspace.
 
 #ifndef WINDOW_INFO_H
 #define WINDOW_INFO_H

@@ -8,12 +8,9 @@
 //A class describing a window
 class Window : public Element {
 
-	float xPosition, yPosition, width, height;
 	int windowType;	//WINDOW_DISCRETE or WINDOW_SCALING
 	char *windowTitle;
-	int colour[4]; //R, G, B, A
-	int screenWidth, screenHeight;
-
+	int screenWidth, screenHeight, childCount;
 public:
 	Window(int x, int y, int width, int height, window_t);
 	Window(float x, float y, float width, float height, window_t);

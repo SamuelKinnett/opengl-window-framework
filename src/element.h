@@ -8,9 +8,10 @@
 class Element {
 
 public:
-	int _xPosition, _yPosition, childCount;
+	window_t elementInfo;
 	std::vector <Element*> children;
-
+	int colour[4];
+	
 	virtual void Draw(window_t) = 0;	//Called to draw the element to the screen
 	virtual void Resize(int, int) = 0;	//Called to resize the element
 	virtual void AddChild(Element*) = 0;	//Called to add a child element
