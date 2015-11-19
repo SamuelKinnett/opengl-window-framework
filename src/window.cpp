@@ -51,10 +51,16 @@ Window::Window(float x, float y, float width, float height, window_t parentInfo)
 
 	this->screenWidth = viewportData[2];
 	this->screenHeight = viewportData[3];
-	this->elementInfo.x = parentInfo.x + x;
-	this->elementInfo.y = parentInfo.y + y;
-	this->elementInfo.width = width;
-	this->elementInfo.height = height;
+	
+	float relativePosition[2];
+	float relativeSize[2];
+	GetRelativeFloat(x, y, relativePosition, parentInfo);
+	GetRelativeFloat(x + width, y + height, relativeSize, parentInfo);
+
+	this->elementInfo.x = relativePosition[0];
+	this->elementInfo.y = relativePosition[1];
+	this->elementInfo.width = relativeSize[0] - relativePosition[0];
+	this->elementInfo.height = relativeSize[1] - relativePosition[1];
 	this->windowType = WINDOW_SCALING;
 	this->childCount = 0;
 	
@@ -94,11 +100,18 @@ void Window::Draw(window_t parentInfo) {
 
 	} else {
 		//The bottom left corner of the window
-		windowVectors[0][0] = parentInfo.x + this->elementInfo.x;
-		windowVectors[0][1] = parentInfo.y + this->elementInfo.y;
+		float relativePosition[2];
+		float relativeSize[2];
+		GetRelativeFloat(this->elementInfo.x, this->elementInfo.y, relativePosition, parentInfo);
+		GetRelativeFloat(this->elementInfo.x + this->elementInfo.width,
+					this->elementInfo.y + this->elementInfo.height,
+					relativeSize, parentInfo);
+		windowVectors[0][0] = relativePosition[0];
+		//parentInfo.x + this->elementInfo.x;
+		windowVectors[0][1] = relativePosition[1];
 		//The top right corner of the window
-		windowVectors[1][0] = parentInfo.x + this->elementInfo.x + this->elementInfo.width;
-		windowVectors[1][1] = parentInfo.y + this->elementInfo.y + this->elementInfo.height;
+		windowVectors[1][0] = relativeSize[0];
+		windowVectors[1][1] = relativeSize[1];
 	}
 
 	//Set the colour
@@ -166,10 +179,15 @@ int Window::Click(int x, int y, int* clickLocation, window_t parentInfo) {
 	} else {
 		int tempArray[2];
 		int tempSizeArray[2];
-		FloatToPixel(parentInfo.x + this->elementInfo.x, parentInfo.y + this->elementInfo.y, tempArray);
-		FloatToPixel(parentInfo.x + this->elementInfo.x + this->elementInfo.width,
-				parentInfo.y + this->elementInfo.y + this->elementInfo.height,
-				tempSizeArray);
+		float relativePosition[2];
+		float relativeSize[2];
+		
+		GetRelativeFloat(this->elementInfo.x, this->elementInfo.y, relativePosition, parentInfo);
+		GetRelativeFloat(this->elementInfo.x + this->elementInfo.width,
+					this->elementInfo.y + this->elementInfo.height,
+					relativeSize, parentInfo);
+		FloatToPixel(relativePosition[0], relativePosition[1], tempArray);
+		FloatToPixel(relativeSize[0], relativeSize[1], tempSizeArray);
 		if (x < tempSizeArray[0]
 			&& x > tempArray[0]
 			&& y < tempSizeArray[1]
@@ -197,20 +215,30 @@ void Window::Move(int x, int y, window_t parentInfo) {
 		this->elementInfo.y = parentPixel[1] + y;
 	} else {
 		float tempArray[2];
+		float relativePosition[2];
 		PixelToFloat(x, y, tempArray);
-		this->elementInfo.x = parentInfo.x + tempArray[0];
-		this->elementInfo.y = parentInfo.y + tempArray[1];
+		GetRelativeFloat(tempArray[0], tempArray[1], relativePosition, parentInfo);
+		this->elementInfo.x = relativePosition[0];
+		this->elementInfo.y = relativePosition[1];
 	}
 }
 
+//Add a new child element
 void Window::AddChild(Element* newChild) {
 	this->children.push_back(newChild);
 	this->childCount++;
 }
 
+//Remove a child element at the specified index
 void Window::RemoveChild(int childIndex) {
 	if (childIndex < this->childCount) {
 		this->children.erase(this->children.begin() + childIndex);
 		childCount--;
 	}
+}
+
+//Returns a float value relative to the parent element
+void Window::GetRelativeFloat(float x, float y, float* returnArray, window_t parentInfo) {
+	returnArray[0] = (((x + 1)/2) * parentInfo.width) - 1;
+	returnArray[1] = (((y + 1)/2) * parentInfo.height) - 1;
 }

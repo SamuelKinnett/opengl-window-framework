@@ -11,10 +11,10 @@ all: opengl-window-framework
 opengl-window-framework: $(OBJS) 
 	$(CXX) -Wall -g -o ../bin/opengl-window-framework $(OBJS) $(LDLIBS)
 
-window.o: window.cpp window.h element.h
+window.o: window.cpp window.h element.h windowinfo.h
 	g++ -Wall -g -c window.cpp -o window.o
 
-main.o: main.cpp
+main.o: main.cpp windowinfo.h
 	g++ -Wall -g -c main.cpp -o main.o
 
 clean:

@@ -25,6 +25,7 @@ public:
 private:
 	void PixelToFloat(int x, int y, float* returnArray);
 	void FloatToPixel(float x, float y, int* returnArray);
+	void GetRelativeFloat(float x, float y, float* returnArray, window_t parentInfo);
 };
 
 #endif
