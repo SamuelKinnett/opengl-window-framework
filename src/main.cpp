@@ -57,10 +57,10 @@ void Initialise(int argc, char* argv[]) {
 	//TESTING
 	//Add two windows to the beginning of the windows vector
 	//Then add a child window to the scaling window
-	windows.push_back(new Window(0.0f, 0.0f, 0.5f, 0.5f, mScreen));
-	windows.push_back(new Window(400, 300, 50, 50, mScreen));
+	windows.push_back(new Window(0.0f, 0.0f, 0.5f, 0.5f));
+	windows.push_back(new Window(400, 300, 50, 50));
 
-	windows[0]->AddChild(new Window(-0.9f, -0.9f, 1.8f, 1.8f, windows[0]->elementInfo));
+	windows[0]->AddChild(new Window(-0.9f, -0.9f, 1.8f, 1.8f));
 	//Start running GLut's loop
 	glutMainLoop();
 }
