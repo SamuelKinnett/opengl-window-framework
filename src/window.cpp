@@ -52,24 +52,30 @@ Window::Window(float x, float y, float width, float height, window_t parentInfo)
 	this->screenWidth = viewportData[2];
 	this->screenHeight = viewportData[3];
 	
-	float relativePosition[2];
-	float relativeSize[2];
-	GetRelativeFloat(x, y, relativePosition, parentInfo);
-	GetRelativeFloat(x + width, y + height, relativeSize, parentInfo);
+	//float relativePosition[2];
+	//float relativeSize[2];
+	//GetRelativeFloat(x, y, relativePosition, parentInfo);
+	//GetRelativeFloat(x + width, y + height, relativeSize, parentInfo);
 
-	this->elementInfo.x = relativePosition[0];
-	this->elementInfo.y = relativePosition[1];
-	this->elementInfo.width = relativeSize[0] - relativePosition[0];
-	this->elementInfo.height = relativeSize[1] - relativePosition[1];
+	this->elementInfo.x = x;
+	this->elementInfo.y = y;
+	this->elementInfo.width = width;
+	this->elementInfo.height = height;
 	this->windowType = WINDOW_SCALING;
 	this->childCount = 0;
-	
+
 	this->colour[0] = 80;
 	this->colour[1] = 84;
 	this->colour[2] = 248;
 	this->colour[3] = 222;
 
-	cout << "Created New Scaling Window" << endl;
+	cout << "======================================" << endl;
+	cout << "Parent window position: " << parentInfo.x << "," << parentInfo.y << endl;
+	cout << "Parent window width: " << parentInfo.width << "," << parentInfo.height << endl;
+	cout << "Calculated relative position: " << this->elementInfo.x << "," << this->elementInfo.y << endl;
+	cout << "Calculated relative size: " << this->elementInfo.width << "," << this->elementInfo.height << endl;
+	cout << "Created New Scaling Window at " << this->elementInfo.x << "," << this->elementInfo.y << endl;
+	cout << "======================================" << endl;
 }
 
 //Destructor
@@ -173,7 +179,14 @@ int Window::Click(int x, int y, int* clickLocation, window_t parentInfo) {
 
 			clickLocation[0] = x - (parentPixel[0] + this->elementInfo.x);
 			clickLocation[1] = y - (parentPixel[1] + this->elementInfo.y);
-
+			
+			//Check to see if any of the child items have been clicked.
+			//If they have, we return a 0 to prevent the window from
+			//being moved.
+			for (int i = 0; i < childCount; ++i) 
+				if (children[i]->Click(x, y, clickLocation, parentInfo) == 1)
+					return 0;
+			//Otherwise, we return 1 so the window can be dragged
 			return 1;
 		}
 	} else {
@@ -197,6 +210,11 @@ int Window::Click(int x, int y, int* clickLocation, window_t parentInfo) {
 			clickLocation[1] = y - tempArray[1];
 
 			cout << "Collision Detected At: " << tempArray[0] << "," << tempArray[1];
+			
+			//Once again, check to see if any of the child items have been clicked
+			for(int i = 0; i < childCount; ++i)
+				if (children[i]->Click(x, y, clickLocation, parentInfo) == 1)
+					return 0;
 			return 1;
 		}
 	}
@@ -239,6 +257,6 @@ void Window::RemoveChild(int childIndex) {
 
 //Returns a float value relative to the parent element
 void Window::GetRelativeFloat(float x, float y, float* returnArray, window_t parentInfo) {
-	returnArray[0] = (((x + 1)/2) * parentInfo.width) - 1;
-	returnArray[1] = (((y + 1)/2) * parentInfo.height) - 1;
+	returnArray[0] = parentInfo.x + (((x + 1.0)/2.0) * parentInfo.width);
+	returnArray[1] = parentInfo.y + (((y + 1.0)/2.0) * parentInfo.height);
 }

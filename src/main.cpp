@@ -56,10 +56,11 @@ void Initialise(int argc, char* argv[]) {
 	mScreen.height = 2;
 	//TESTING
 	//Add two windows to the beginning of the windows vector
-
+	//Then add a child window to the scaling window
 	windows.push_back(new Window(0.0f, 0.0f, 0.5f, 0.5f, mScreen));
 	windows.push_back(new Window(400, 300, 50, 50, mScreen));
 
+	windows[0]->AddChild(new Window(-0.9f, -0.9f, 1.8f, 1.8f, windows[0]->elementInfo));
 	//Start running GLut's loop
 	glutMainLoop();
 }
@@ -170,6 +171,7 @@ void HandleMouseClick(int button, int state, int x, int y) {
 			activeWindow = windows.size() - 1;
 			draggingWindow = TRUE;
 		} else {
+			activeWindow = -1;
 			draggingWindow = FALSE;
 		}
 	} else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
