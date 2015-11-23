@@ -18,6 +18,8 @@ public:
 	Window(float x, float y, int width, float height);	//WINDOW_FIXED_W
 	~Window();
 
+	virtual void SetColour(int R, int G, int B, int A);
+
 	virtual void Draw(window_t);
 	virtual void Resize(int, int);
 	virtual void Move(int x, int y, window_t);
@@ -25,6 +27,8 @@ public:
 	virtual void AddChild(Element*);
 	virtual void RemoveChild(int);
 private:
+	int defaultColour[4] {26, 35, 34, 202};
+	int borderColour[4] {157, 242, 201, 255};
 	void PixelToFloat(int x, int y, float* returnArray);
 	float PixelToFloat1D(int value, int axisSize);
 	void FloatToPixel(float x, float y, int* returnArray);

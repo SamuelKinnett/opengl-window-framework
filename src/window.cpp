@@ -34,11 +34,12 @@ Window::Window(int x, int y, int width, int height) {
 	this->childCount = 0; 	//Storing the childcount rather than checking it
 				//every time a child needs to be removed.
 
-	//Set the colour to a nice, slightly transparent blue
-	this->colour[0] = 80;
-	this->colour[1] = 84;
-	this->colour[2] = 248;
-	this->colour[3] = 222;
+	//Set the default background colour
+	this->colour[0] = defaultColour[0];
+	this->colour[1] = defaultColour[1];
+	this->colour[2] = defaultColour[2];
+	this->colour[3] = defaultColour[3];
+
 }
 
 /* Float constructor taking arguments as values between 0 and 1
@@ -61,10 +62,10 @@ Window::Window(float x, float y, float width, float height) {
 	this->windowType = WINDOW_SCALING;
 	this->childCount = 0;
 
-	this->colour[0] = 80;
-	this->colour[1] = 84;
-	this->colour[2] = 248;
-	this->colour[3] = 222;
+	this->colour[0] = defaultColour[0];
+	this->colour[1] = defaultColour[1];
+	this->colour[2] = defaultColour[2];
+	this->colour[3] = defaultColour[3];
 }
 
 //Composite constructor accepting both float and iteger values.
@@ -86,11 +87,10 @@ Window::Window(float x, float y, float width, int height) {
 	this->windowType = WINDOW_FIXED_H;
 	this->childCount = 0;
 
-	this->colour[0] = 80;
-	this->colour[1] = 84;
-	this->colour[2] = 248;
-	this->colour[3] = 222;
-
+	this->colour[0] = defaultColour[0];
+	this->colour[1] = defaultColour[1];
+	this->colour[2] = defaultColour[2];
+	this->colour[3] = defaultColour[3];
 }
 
 //Composite constructor accepting both float and iteger values.
@@ -111,12 +111,11 @@ Window::Window(float x, float y, int width, float height) {
 	this->elementInfo.height = height;
 	this->windowType = WINDOW_FIXED_W;
 	this->childCount = 0;
-
-	this->colour[0] = 80;
-	this->colour[1] = 84;
-	this->colour[2] = 248;
-	this->colour[3] = 222;
-
+	
+	this->colour[0] = defaultColour[0];
+	this->colour[1] = defaultColour[1];
+	this->colour[2] = defaultColour[2];
+	this->colour[3] = defaultColour[3];
 }
 
 //Destructor
@@ -126,88 +125,121 @@ Window::~Window() {
 
 //Called whenever the window needs to be drawn
 void Window::Draw(window_t parentInfo) {
-	float windowVectors[2][2];	//2D array containing the vector of each point of the window
-	float tempArray[2];		//Stores the return value until it is inserted into the 2D array
-	float relativeSize[2];		//The x and y position of the element added to its parent
-	float relativePosition[2];	//The top right co-ordinates of the element added to its parent
 	
-	//Initialise variables here to prevent scope issues in the switch statement
+	float windowVectors[2][2];	
+	//2D array containing the vector of each point of the window
+	
+	float tempArray[2];	
+	//Stores the bottom left co-ordinates until they are inserted into
+	//the 2D array
+	
+	float tempSecondArray[2];
+	//Stores the top right co-ordinates until they are inserted into the
+	//2D array
+	
+	//Initialise variables here to prevent scope issues in the 
+	//switch statement
 	float floatWidth = 0;
 	float floatHeight = 0;
 
 	switch (windowType) {
 		case WINDOW_DISCRETE:
-			//We need to convert the pixel co-ordinates to world co-ordinates
+			//We need to convert the pixel co-ordinates to 
+			//world co-ordinates
 			int parentPixel[2];
-			FloatToPixel(parentInfo.x, parentInfo.y, parentPixel);
-			PixelToFloat(parentPixel[0] + this->elementInfo.x, parentPixel[1] + this->elementInfo.y, tempArray);
+			FloatToPixel(parentInfo.x, 
+					parentInfo.y, 
+					parentPixel);
+			
 			//The bottom left corner of the window
-			windowVectors[0][0] = tempArray[0];
-			windowVectors[0][1] = tempArray[1];
+			PixelToFloat(parentPixel[0] + this->elementInfo.x, 
+					parentPixel[1] + this->elementInfo.y,
+				       	tempArray);	
 	
-			PixelToFloat(parentPixel[0] + this->elementInfo.x + this->elementInfo.width, 
-					parentPixel[1] +  this->elementInfo.y + this->elementInfo.height, 
-					tempArray);
 			//The top right corner of the window
-			windowVectors[1][0] = tempArray[0];
-			windowVectors[1][1] = tempArray[1];
+			PixelToFloat(parentPixel[0] + this->elementInfo.x + 
+						this->elementInfo.width, 
+					parentPixel[1] + 
+						this->elementInfo.y + 
+						this->elementInfo.height, 
+					tempSecondArray);
 			break;
 
 		case WINDOW_SCALING:
 			//The bottom left corner of the window
-			GetRelativeFloat(this->elementInfo.x, this->elementInfo.y, relativePosition, parentInfo);
-			GetRelativeFloat(this->elementInfo.x + this->elementInfo.width,
-						this->elementInfo.y + this->elementInfo.height,
-						relativeSize, parentInfo);
-			windowVectors[0][0] = relativePosition[0];
-			//parentInfo.x + this->elementInfo.x;
-			windowVectors[0][1] = relativePosition[1];
+			GetRelativeFloat(this->elementInfo.x, 
+					this->elementInfo.y, 
+					tempArray, 
+					parentInfo);
+
 			//The top right corner of the window
-			windowVectors[1][0] = relativeSize[0];
-			windowVectors[1][1] = relativeSize[1];
+			GetRelativeFloat(this->elementInfo.x + 
+						this->elementInfo.width,
+					this->elementInfo.y + 
+						this->elementInfo.height,
+					tempSecondArray, 
+					parentInfo);
 			break;
 
 		case WINDOW_FIXED_H:
-			//The bottom left corner of the window
 			
 			//Convert the height into a float value
-			floatHeight = PixelToFloat1D(FloatToPixel1D(this->elementInfo.y, this->screenHeight)
-				       				+ this->elementInfo.height,
-			      					this->screenHeight);
-			GetRelativeFloat(this->elementInfo.x, this->elementInfo.y, relativePosition, parentInfo);
-			GetRelativeFloat(this->elementInfo.x + this->elementInfo.width,
-						floatHeight,
-						relativeSize, parentInfo);
-			windowVectors[0][0] = relativePosition[0];
-			//parentInfo.x + this->elementInfo.x;
-			windowVectors[0][1] = relativePosition[1];
+			floatHeight = PixelToFloat1D(
+					FloatToPixel1D(this->elementInfo.y, 
+						this->screenHeight) +
+				      		this->elementInfo.height,
+						this->screenHeight);
+			
+			//The bottom left corner of the window
+			GetRelativeFloat(this->elementInfo.x, 
+					this->elementInfo.y, 
+					tempArray, 
+					parentInfo);
+
 			//The top right corner of the window
-			windowVectors[1][0] = relativeSize[0];
-			windowVectors[1][1] = relativeSize[1];
+			GetRelativeFloat(this->elementInfo.x +
+				    	this->elementInfo.width,
+					floatHeight,
+					tempSecondArray, 
+					parentInfo);
 			break;
 		
 		case WINDOW_FIXED_W:
-			//The bottom left corner of the window
 			
 			//Convert the width into a float value
-			floatWidth = PixelToFloat1D(FloatToPixel1D(this->elementInfo.x, this->screenWidth)
-				       				+ this->elementInfo.width,
-			      					this->screenWidth);
-			GetRelativeFloat(this->elementInfo.x, this->elementInfo.y, relativePosition, parentInfo);
-			GetRelativeFloat(floatWidth,
-						this->elementInfo.y + this->elementInfo.height,
-						relativeSize, parentInfo);
-			windowVectors[0][0] = relativePosition[0];
-			//parentInfo.x + this->elementInfo.x;
-			windowVectors[0][1] = relativePosition[1];
+			floatWidth = PixelToFloat1D(
+					FloatToPixel1D(this->elementInfo.x,
+						this->screenWidth) + 
+						this->elementInfo.width,
+			      			this->screenWidth);
+
+			//The bottom left corner of the window	
+			GetRelativeFloat(this->elementInfo.x,
+					this->elementInfo.y,
+					tempArray,
+					parentInfo);
+
 			//The top right corner of the window
-			windowVectors[1][0] = relativeSize[0];
-			windowVectors[1][1] = relativeSize[1];
+			GetRelativeFloat(floatWidth,
+					this->elementInfo.y + 
+					this->elementInfo.height,
+					tempSecondArray, 
+					parentInfo);
 			break;	
 	}
 
+	//Store the point values in the 2D array
+	windowVectors[0][0] = tempArray[0];
+	windowVectors[0][1] = tempArray[1];
+	windowVectors[1][0] = tempSecondArray[0];
+	windowVectors[1][1] = tempSecondArray[1];
+	
+	
 	//Set the colour
-	glColor4ub(this->colour[0], this->colour[1], this->colour[2], this->colour[3]);
+	glColor4ub(this->colour[0], 
+			this->colour[1], 
+			this->colour[2], 
+			this->colour[3]);
 	
 	glBegin(GL_QUADS);
 	glVertex2f(windowVectors[0][0], windowVectors[0][1]);
@@ -215,7 +247,22 @@ void Window::Draw(window_t parentInfo) {
 	glVertex2f(windowVectors[1][0], windowVectors[1][1]);
 	glVertex2f(windowVectors[0][0], windowVectors[1][1]);
 	glEnd();
+	
+	//Draw the border
+	
+	glColor4ub(this->borderColour[0],
+			this->borderColour[1],
+			this->borderColour[2],
+			this->borderColour[3]);
 
+	glBegin(GL_LINE_LOOP);
+	glVertex2f(windowVectors[0][0], windowVectors[0][1]);
+	glVertex2f(windowVectors[1][0], windowVectors[0][1]);
+	glVertex2f(windowVectors[1][0], windowVectors[1][1]);
+	glVertex2f(windowVectors[0][0], windowVectors[1][1]);
+	glEnd();
+
+	//Draw each of the child elements
 	for (int i = 0; i < childCount; ++i){
 		this->children[i]->Draw(this->elementInfo);
 	}
@@ -419,4 +466,12 @@ void Window::RemoveChild(int childIndex) {
 void Window::GetRelativeFloat(float x, float y, float* returnArray, window_t parentInfo) {
 	returnArray[0] = parentInfo.x + (((x + 1.0)/2.0) * parentInfo.width);
 	returnArray[1] = parentInfo.y + (((y + 1.0)/2.0) * parentInfo.height);
+}
+
+//Sets the colour of the window
+void Window::SetColour(int r, int g, int b, int a) {	
+	this->colour[0] = r;
+	this->colour[1] = g;
+	this->colour[2] = b;
+	this->colour[3] = a;
 }

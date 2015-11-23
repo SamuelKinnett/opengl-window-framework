@@ -61,8 +61,7 @@ void Initialise(int argc, char* argv[]) {
 	windows.push_back(new Window(0.0f, 0.0f, 0.5f, 0.5f));
 	windows.push_back(new Window(400, 300, 50, 50));
 	windows.push_back(new Window(-0.2f, -0.2f, 1.0f, 30));
-
-	windows[0]->AddChild(new Window(-0.9f, -0.9f, 1.8f, 1.8f));
+	
 	//Start running GLut's loop
 	glutMainLoop();
 }
