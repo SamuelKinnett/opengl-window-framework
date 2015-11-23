@@ -26,6 +26,10 @@ public:
 	virtual void Move(int, int, window_t) = 0;		 
 	//Called to set the colour of the element
 	virtual void SetColour(int, int, int, int) = 0;
+	//Used to pass data to the element, e.g. sending a text box a string
+	//It is up to the method of the class inheriting from this interface
+	//to determine what type of data has been passed!
+	virtual void PassData(void *);
 };
 
 #endif
