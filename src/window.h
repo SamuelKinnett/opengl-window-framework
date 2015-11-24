@@ -5,21 +5,25 @@
 #include <GL/gl.h>
 #include "element.h"
 #include "windowinfo.h"
+#include "rendering.h"
 //A class describing a window
 class Window : public Element {
 
 public:
 	//WINDOW_DISCRETE
-	Window(int x, int y, int width, int height);		
+	Window(int x, int y, int width, int height, Rendering* rendering);		
 	
 	//WINDOW_SCALING
-	Window(float x, float y, float width, float height);
+	Window(float x, float y, float width, float height, 
+			Rendering* rendering);
 
 	//WINDOW_FIXED_H
-	Window(float x, float y, float width, int height);
+	Window(float x, float y, float width, int height, 
+			Rendering* rendering);
 
 	//WINDOW_FIXED_W
-	Window(float x, float y, int width, float height);
+	Window(float x, float y, int width, float height, 
+			Rendering* rendering);
 	
 	~Window();
 
@@ -42,8 +46,9 @@ private:
 	int screenWidth, screenHeight, childCount;
 	int defaultColour[4] {26, 35, 34, 202};
 	int borderColour[4] {157, 242, 201, 255};
-	
-	void Initialise(float x, float y, float width, float height);
+
+	void Initialise(float x, float y, float width, float height,
+			Rendering* rendering);
 };
 
 #endif

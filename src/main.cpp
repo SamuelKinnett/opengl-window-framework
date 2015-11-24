@@ -9,6 +9,7 @@
 //Custom classes
 #include "window.h"
 #include "windowinfo.h"
+#include "rendering.h"
 using namespace std;
 
 #define FPS 60
@@ -26,6 +27,7 @@ int mouseRelativePosition[2];	//The position of the mouse relative to the window
 int screenSize[2] = {DEFAULT_WIDTH, DEFAULT_HEIGHT};
 
 struct window_t mScreen;	//Information about the main screen
+Rendering* rendering;		//Rendering class, used for world to screenspace conversion
 
 void Initialise(int, char*[]);
 void InitWindow(int, char*[]);
@@ -54,13 +56,17 @@ void Initialise(int argc, char* argv[]) {
 	mScreen.y = -1;
 	mScreen.width = 2;
 	mScreen.height = 2;
+	
+	//Create a new rendering class that will be used by all child elements
+	rendering = new Rendering(screenSize[0], screenSize[1]);
+	
 	//TESTING
 	//Add two windows to the beginning of the windows vector
 	//Then add a child window to the scaling window
 	//...And a "task bar" along the bottom of the screen
-	windows.push_back(new Window(0.0f, 0.0f, 0.5f, 0.5f));
-	windows.push_back(new Window(400, 300, 50, 50));
-	windows.push_back(new Window(-0.2f, -0.2f, 1.0f, 30));
+	windows.push_back(new Window(0.0f, 0.0f, 0.5f, 0.5f, rendering));
+	windows.push_back(new Window(400, 300, 50, 50, rendering));
+	windows.push_back(new Window(-0.2f, -0.2f, 1.0f, 30, rendering));
 	
 	//Start running GLut's loop
 	glutMainLoop();
@@ -194,6 +200,9 @@ void HandleMouseMoving(int x, int y) {
 
 //Handles the freeglut window being resized
 void Resize(int width, int height) {
+	//Resize the rendering class
+	rendering->Resize(width, height);
+	
 	for (uint i = 0; i < windows.size(); ++i)
 		windows[i]->Resize(width, height);
 	screenSize[0] = width;

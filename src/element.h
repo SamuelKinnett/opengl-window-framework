@@ -1,6 +1,7 @@
 //A base abstract class that all interface elements must inherit from
 #include <vector>
 #include "windowinfo.h"
+#include "rendering.h"
 
 #ifndef ELEMENT_H
 #define ELEMENT_H
@@ -10,6 +11,8 @@ class Element {
 public:
 	window_t elementInfo;
 	std::vector <Element*> children;
+	Rendering* rendering;
+	
 	int colour[4];
 	int borderColour[4];
 	bool border;
