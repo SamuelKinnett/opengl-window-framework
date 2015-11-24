@@ -37,12 +37,12 @@ public:
 	
 	//Enable or disable borders for the element. Passing in an RGBA
 	//array will also allow you to cange the colour
-	virtual void SetBorder(bool, int* = 0);
+	virtual void SetBorder(bool, int* = 0) = 0;
 
 	//Used to pass data to the element, e.g. sending a text box a string
 	//It is up to the method of the class inheriting from this interface
 	//to determine what type of data has been passed!
-	virtual void PassData(void *);
+	virtual void PassData(void *) = 0;
 };
 
 #endif

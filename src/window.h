@@ -43,12 +43,6 @@ private:
 	int defaultColour[4] {26, 35, 34, 202};
 	int borderColour[4] {157, 242, 201, 255};
 	
-	void PixelToFloat(int x, int y, float* returnArray);
-	float PixelToFloat1D(int value, int axisSize);
-	void FloatToPixel(float x, float y, int* returnArray);
-	int FloatToPixel1D(float value, int axisSize);
-	void GetRelativeFloat(float x, float y, float* returnArray, 
-				window_t parentInfo);
 	void Initialise(float x, float y, float width, float height);
 };
 

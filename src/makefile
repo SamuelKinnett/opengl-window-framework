@@ -3,7 +3,7 @@ CXX=g++
 RM=rm -f
 
 SRCS=window.cpp main.cpp
-OBJS=window.o main.o
+OBJS=window.o main.o textbox.o
 LDLIBS=-lGL -LGLU  -lglut
 
 all: opengl-window-framework
@@ -16,6 +16,9 @@ window.o: window.cpp window.h element.h windowinfo.h
 
 main.o: main.cpp windowinfo.h
 	g++ -Wall -g -c main.cpp -o main.o
+
+textbox.o: textbox.cpp textbox.h element.h windowinfo.h
+	g++ -Wall -g -c textbox.cpp -o textbox.o
 
 clean:
 	$(RM) $(OBJS)
