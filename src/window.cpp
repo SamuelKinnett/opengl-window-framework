@@ -12,91 +12,43 @@ using namespace std;
 #define AXIS_X 0
 #define AXIS_Y 1
 
-/* Standard constructor, taking arguments in terms of pixels
-A window instantiated with this constructor will remain the same size and in the same
-position regardless of the main window resizing.  */
+//Standard constructor, taking arguments in terms of pixels A window
+//instantiated with this constructor will remain the same size and in the same
+//position regardless of the main window resizing.
 Window::Window(int x, int y, int width, int height) {
-	float viewportData[4];
-
-	//Get information about the size of the viewport
-	glGetFloatv(GL_VIEWPORT, viewportData);
-
-	this->screenWidth = viewportData[2];
-	this->screenHeight = viewportData[3];
-	
-	this->elementInfo.x = x;
-	//cout << "Relative X: " << this->xPosition << endl;
-	this->elementInfo.y = y;
-	//cout << "Relative Y:" << this->yPosition << endl;
-	this->elementInfo.width = width;
-	this->elementInfo.height = height;
 	this->windowType = WINDOW_DISCRETE;
-	this->childCount = 0; 	//Storing the childcount rather than checking it
-				//every time a child needs to be removed.
-
-	//Set the default background colour
-	this->colour[0] = defaultColour[0];
-	this->colour[1] = defaultColour[1];
-	this->colour[2] = defaultColour[2];
-	this->colour[3] = defaultColour[3];
-
+	this->Initialise((float)x, (float)y, (float)width, (float)height);
 }
 
-/* Float constructor taking arguments as values between 0 and 1
-A window instantiated with this constructor will remain at a relative size and position
-to the main window, according to the float values.
-*/
+//Float constructor taking arguments as values between 0 and 1 A window 
+//instantiated with this constructor will remain at a relative size and
+//position to the main window, according to the float values.
 Window::Window(float x, float y, float width, float height) {
-	float viewportData[4];
-
-	//Get information about the size of the viewport
-	glGetFloatv(GL_VIEWPORT, viewportData);
-
-	this->screenWidth = viewportData[2];
-	this->screenHeight = viewportData[3];
-
-	this->elementInfo.x = x;
-	this->elementInfo.y = y;
-	this->elementInfo.width = width;
-	this->elementInfo.height = height;
 	this->windowType = WINDOW_SCALING;
-	this->childCount = 0;
-
-	this->colour[0] = defaultColour[0];
-	this->colour[1] = defaultColour[1];
-	this->colour[2] = defaultColour[2];
-	this->colour[3] = defaultColour[3];
+	this->Initialise(x, y, width, height);
 }
 
-//Composite constructor accepting both float and iteger values.
-//This constructor creates a window that remains at the same relative space when
-//its parent window is resized, however only the width will scale with the window.
+//Composite constructor accepting both float and iteger values. This
+//constructor creates a window that remains at the same relative space when
+//its parent window is resized, however only the width will scale with the
+//window.
 Window::Window(float x, float y, float width, int height) {
-	float viewportData[4];
-
-	//Get information about the size of the viewport
-	glGetFloatv(GL_VIEWPORT, viewportData);
-
-	this->screenWidth = viewportData[2];
-	this->screenHeight = viewportData[3];	
-
-	this->elementInfo.x = x;
-	this->elementInfo.y = y;
-	this->elementInfo.width = width;
-	this->elementInfo.height = height;
 	this->windowType = WINDOW_FIXED_H;
-	this->childCount = 0;
-
-	this->colour[0] = defaultColour[0];
-	this->colour[1] = defaultColour[1];
-	this->colour[2] = defaultColour[2];
-	this->colour[3] = defaultColour[3];
+	this->Initialise(x, y, width, (float)height);
 }
 
-//Composite constructor accepting both float and iteger values.
-//This constructor creates a window that remains at the same relative space when
-//its parent window is resized, however only the height will scale with the window.
+//Composite constructor accepting both float and iteger values. This 
+//constructor creates a window that remains at the same relative space when
+//its parent window is resized, however only the height will scale with the
+//window.
 Window::Window(float x, float y, int width, float height) {
+	this->windowType = WINDOW_FIXED_W;
+	this->Initialise(x, y, (float)width, height);
+}
+
+//The initialise function is used for instantiation that is common accross
+//all window types.
+void Window::Initialise(float x, float y, float width, float height) {
 	float viewportData[4];
 
 	//Get information about the size of the viewport
@@ -104,14 +56,13 @@ Window::Window(float x, float y, int width, float height) {
 
 	this->screenWidth = viewportData[2];
 	this->screenHeight = viewportData[3];
-	
+
 	this->elementInfo.x = x;
 	this->elementInfo.y = y;
 	this->elementInfo.width = width;
 	this->elementInfo.height = height;
-	this->windowType = WINDOW_FIXED_W;
 	this->childCount = 0;
-	
+
 	this->colour[0] = defaultColour[0];
 	this->colour[1] = defaultColour[1];
 	this->colour[2] = defaultColour[2];
@@ -249,18 +200,19 @@ void Window::Draw(window_t parentInfo) {
 	glEnd();
 	
 	//Draw the border
-	
-	glColor4ub(this->borderColour[0],
-			this->borderColour[1],
-			this->borderColour[2],
-			this->borderColour[3]);
+	if (this->border == true) {	
+		glColor4ub(this->borderColour[0],
+				this->borderColour[1],
+				this->borderColour[2],
+				this->borderColour[3]);
 
-	glBegin(GL_LINE_LOOP);
-	glVertex2f(windowVectors[0][0], windowVectors[0][1]);
-	glVertex2f(windowVectors[1][0], windowVectors[0][1]);
-	glVertex2f(windowVectors[1][0], windowVectors[1][1]);
-	glVertex2f(windowVectors[0][0], windowVectors[1][1]);
-	glEnd();
+		glBegin(GL_LINE_LOOP);
+		glVertex2f(windowVectors[0][0], windowVectors[0][1]);
+		glVertex2f(windowVectors[1][0], windowVectors[0][1]);
+		glVertex2f(windowVectors[1][0], windowVectors[1][1]);
+		glVertex2f(windowVectors[0][0], windowVectors[1][1]);
+		glEnd();
+	}
 
 	//Draw each of the child elements
 	for (int i = 0; i < childCount; ++i){
