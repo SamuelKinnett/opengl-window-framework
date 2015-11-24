@@ -2,26 +2,29 @@
 
 #ifndef TEXTBOX_H
 #define TEXTBOX_H
+#include <GL/freeglut.h>
+#include <GL/gl.h>
 #include "element.h"
-#include "GLFont.h"
+#include "windowinfo.h"
 #include "rendering.h"
+#include "GLFont.h"
 #include <string>
 
-class Textbox : Element {
+class Textbox : public Element {
 
 public:
-	Textbox(float, float, float, float, std::string, Rendering* rendering);
+	Textbox(float, float, float, float, std::string, Rendering*);
+	~Textbox();
 
-	virtual void Draw(window_t parentInfo);
-	virtual void Resize(int width, int height);
+	virtual void Draw(window_t);
+	virtual void Resize(int, int);
 	virtual void AddChild(Element*);
 	virtual void RemoveChild(int);
-	virtual int Click(int x, int y, int* clickLocation, 
-				window_t parentInfo);
-	virtual void Move(int x, int y, window_t parentInfo);
-	virtual void SetColour(int r, int g, int b, int a);
-	virtual void SetBorder(bool enabled, int* colour);
-	virtual void PassData(void * textToWrite);
+	virtual int Click(int, int, int*, window_t);
+	virtual void Move(int, int, window_t);
+	virtual void SetColour(int, int, int, int);
+	virtual void SetBorder(bool, int* = 0);
+	virtual void PassData(void *);
 
 private:
 	std::string text;

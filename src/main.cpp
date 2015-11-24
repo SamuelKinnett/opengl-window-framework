@@ -10,6 +10,7 @@
 #include "window.h"
 #include "windowinfo.h"
 #include "rendering.h"
+#include "textbox.h"
 using namespace std;
 
 #define FPS 60
