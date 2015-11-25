@@ -6,6 +6,8 @@
 #include "element.h"
 #include "windowinfo.h"
 #include "rendering.h"
+#include "animationstate.h"
+
 //A class describing a window
 class Window : public Element {
 
@@ -31,18 +33,25 @@ public:
 	virtual void SetBorder(bool enabled, int* colour = 0);
 
 	virtual void Draw(window_t);
+	virtual bool Create();
+	virtual bool Close();
+
 	virtual void Resize(int, int);
 	virtual void Move(int x, int y, window_t);
 	virtual int Click(int x, int y, int* clickLocation, window_t);
 	virtual void AddChild(Element*);
 	virtual void RemoveChild(int);
 	virtual void PassData(void * input);
-
 private:
 	int windowType;	//WINDOW_DISCRETE, WINDOW_SCALING, WINDOW_FIXED_H
 	//or WINDOW_FIXED_W
 
 	char *windowTitle;
+
+	//animation related variables
+	animationState animState;
+	window_t  targetDimensions;
+
 	int screenWidth, screenHeight, childCount;
 	void Initialise(float x, float y, float width, float height,
 			Rendering* rendering);

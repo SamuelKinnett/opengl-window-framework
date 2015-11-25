@@ -15,11 +15,22 @@ public:
 	
 	int colour[4];
 	bool border;
+	bool inAnimation;	//Is the element currently in an animation?
 	int defaultColour[4] {26, 35, 34, 202};
 	int borderColour[4] {157, 242, 201, 255};
 
 	//Called to draw the element to the screen
 	virtual void Draw(window_t) = 0;	
+	
+	//Allows for opening animations and effects
+	//Returns true when the object and all of its children
+	//are finished.
+	virtual bool Create() = 0;
+
+	//Allows for closing animations and effects
+	//Returns true when the object and all of its children
+	//are finished.
+	virtual bool Close() = 0;
 	
 	//Called to resize the element
 	virtual void Resize(int, int) = 0;		

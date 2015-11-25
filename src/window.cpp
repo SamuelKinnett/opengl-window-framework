@@ -12,6 +12,9 @@ using namespace std;
 #define AXIS_X 0
 #define AXIS_Y 1
 
+//temporary, used to determine animation speed
+#define ANIMATION_SPEED 30
+
 //Standard constructor, taking arguments in terms of pixels A window
 //instantiated with this constructor will remain the same size and in the same
 //position regardless of the main window resizing.
@@ -66,8 +69,12 @@ void Window::Initialise(float x, float y, float width, float height,
 	this->border = true;
 	this->elementInfo.x = x;
 	this->elementInfo.y = y;
-	this->elementInfo.width = width;
-	this->elementInfo.height = height;
+	this->elementInfo.width = 0;
+	this->elementInfo.height= 0;
+	this->targetDimensions.x = x;
+	this->targetDimensions.y = y;
+	this->targetDimensions.width = width;
+	this->targetDimensions.height = height;
 	this->rendering = rendering;
 	this->childCount = 0;
 
@@ -75,6 +82,8 @@ void Window::Initialise(float x, float y, float width, float height,
 	this->colour[1] = defaultColour[1];
 	this->colour[2] = defaultColour[2];
 	this->colour[3] = defaultColour[3];
+
+	this->animState = opening;
 }
 
 //Destructor
@@ -84,6 +93,14 @@ Window::~Window() {
 
 //Called whenever the window needs to be drawn
 void Window::Draw(window_t parentInfo) {
+	
+	//Check to see if we're currently opening or closing the window
+	//If we are, run the animation for a frame
+	if (animState == opening) {
+		this->inAnimation = this->Create();
+	} else if (animState == closing) {
+		this->inAnimation = this->Close();
+	}
 	
 	float windowVectors[2][2];	
 	//2D array containing the vector of each point of the window
@@ -230,6 +247,24 @@ void Window::Draw(window_t parentInfo) {
 	}
 }
 
+//Resizes the window overtime to achieve an animation
+bool Window::Create() {
+	//Firstly, update the x and y co-ordinates. That way, child elements
+	//can be moved whilst still animating.
+	this->targetDimensions.x = this->elementInfo.x;
+	this->targetDimensions.y = this->elementInfo.y;
+	
+	float widthIncrement = (float)this-targetDimensions.width / 
+					ANIMATION_SPEED;
+
+	if (
+	this->elementInfo.width += this->
+}
+
+//Resizes the window overtime to achieve an animation
+bool Window::Close() {
+
+}
 //Called whenever the window needs to be resized
 void Window::Resize(int width, int height) {
 	this->screenWidth = width;
@@ -242,6 +277,11 @@ void Window::Resize(int width, int height) {
 //array to the x and y values of the mouse relative to the top left corner of
 //the window.
 int Window::Click(int x, int y, int* clickLocation, window_t parentInfo) {
+	
+	//If we're in an animation, ignore everything and return false.
+	if (this->inAnimation)
+		return 0;
+	
 	int tempArray[2];
 	int tempSizeArray[2];
 	float relativePosition[2];
@@ -486,4 +526,6 @@ void Window::SetBorder(bool enabled, int* colour) {
 
 //For the window class, this method does not do anything
 void Window::PassData(void * input) {
+	int placeholder = *(int*)input;
+	placeholder++;	//Just to shut up YCM
 }
