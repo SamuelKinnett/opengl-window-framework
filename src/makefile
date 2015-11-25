@@ -17,14 +17,14 @@ window.o: window.cpp window.h element.h windowinfo.h rendering.h
 main.o: main.cpp windowinfo.h rendering.h
 	g++ -Wall -g -c main.cpp -o main.o
 
-textbox.o: textbox.cpp textbox.h element.h windowinfo.h rendering.h GLFont.h
+textbox.o: textbox.cpp textbox.h element.h windowinfo.h rendering.h glfont.h
 	g++ -Wall -g -c textbox.cpp -o textbox.o
 
 rendering.o: rendering.cpp rendering.h element.h
 	g++ -Wall -g -c rendering.cpp -o rendering.o
 
-glfont.o: GLFont.cpp GLFont.h
-	g++ -Wall -g -c GLFont.cpp -o glfont.o
+glfont.o: glfont.cpp glfont.h
+	g++ -Wall -g -c glfont.cpp -o glfont.o
 
 clean:
 	$(RM) $(OBJS)

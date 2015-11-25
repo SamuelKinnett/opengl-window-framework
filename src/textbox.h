@@ -7,7 +7,7 @@
 #include "element.h"
 #include "windowinfo.h"
 #include "rendering.h"
-#include "GLFont.h"
+#include "glfont.h"
 #include <string>
 
 class Textbox : public Element {

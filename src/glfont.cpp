@@ -37,7 +37,7 @@
 #include <GL/gl.h>
 #endif
 
-#include "GLFont.h"
+#include "glfont.h"
 
 //*********************************************************
 //GLFontBase

@@ -14,8 +14,9 @@ public:
 	Rendering* rendering;
 	
 	int colour[4];
-	int borderColour[4];
 	bool border;
+	int defaultColour[4] {26, 35, 34, 202};
+	int borderColour[4] {157, 242, 201, 255};
 
 	//Called to draw the element to the screen
 	virtual void Draw(window_t) = 0;	

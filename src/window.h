@@ -44,9 +44,6 @@ private:
 
 	char *windowTitle;
 	int screenWidth, screenHeight, childCount;
-	int defaultColour[4] {26, 35, 34, 202};
-	int borderColour[4] {157, 242, 201, 255};
-
 	void Initialise(float x, float y, float width, float height,
 			Rendering* rendering);
 };

@@ -1,5 +1,5 @@
 #include "textbox.h"
-#include "GLFont.h"
+#include "glfont.h"
 #include "rendering.h"
 #include "windowinfo.h"
 #include <string>
@@ -62,8 +62,12 @@ void Textbox::Move(int x, int y, window_t parentInfo) {
 }
 
 void Textbox::Draw(window_t parentInfo) {
-	window_t placeHolder;
-	placeHolder = parentInfo;
+	float tempArray[2];
+	
+	rendering->GetRelativeFloat(this->elementInfo.x, this->elementInfo.y, tempArray, parentInfo);
+	glFont->Begin();
+	glFont->RenderText(this->text.c_str(), this->elementInfo.x, this->elementInfo.y, 0, 1);
+	glFont->End();
 }
 
 void Textbox::SetColour(int r, int g, int b, int a) {
