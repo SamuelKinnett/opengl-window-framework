@@ -5,6 +5,7 @@
 #include "button.h"
 #include "rendering.h"
 #include <GL/gl.h>
+#include <functional>
 
 Button::Button(float x, float y, float width, float height,
 		Rendering* rendering, std::function<void()>* function) {
