@@ -13,7 +13,7 @@ using namespace std;
 #define AXIS_Y 1
 
 //temporary, used to determine animation speed
-#define ANIMATION_SPEED 30
+#define ANIMATION_SPEED 10
 
 //Standard constructor, taking arguments in terms of pixels A window
 //instantiated with this constructor will remain the same size and in the same
@@ -254,17 +254,58 @@ bool Window::Create() {
 	this->targetDimensions.x = this->elementInfo.x;
 	this->targetDimensions.y = this->elementInfo.y;
 	
-	float widthIncrement = (float)this-targetDimensions.width / 
+	float widthIncrement = (float)this->targetDimensions.width / 
+					ANIMATION_SPEED;
+	float heightIncrement = (float)this->targetDimensions.height /
 					ANIMATION_SPEED;
 
-	if (
-	this->elementInfo.width += this->
+	if (this->elementInfo.width != this->targetDimensions.width) {
+		if (this->elementInfo.width + widthIncrement > this->targetDimensions.width)
+			this->elementInfo.width = this->targetDimensions.width;
+		else
+			this->elementInfo.width += widthIncrement;
+
+		return true;
+	} else if (this->elementInfo.height != this->targetDimensions.height) {
+		if (this->elementInfo.height + heightIncrement > this->targetDimensions.height)
+			this->elementInfo.height = targetDimensions.height;
+		else
+			this->elementInfo.height += heightIncrement;
+
+		return true;
+	} else {
+		this->inAnimation = false;
+		this->animState = open;
+		return false;
+	}
 }
 
 //Resizes the window overtime to achieve an animation
 bool Window::Close() {
+	float widthDecrement = (float)this->targetDimensions.width /
+					ANIMATION_SPEED;
+	float heightDecrement = (float)this->targetDimensions.height /
+					ANIMATION_SPEED;
 
+	if (this->elementInfo.height != 0) {
+		if (this->elementInfo.height - heightDecrement < 0)
+			this->elementInfo.height = 0;
+		else
+			this->elementInfo.height -= heightDecrement;
+		return true;
+	} else if (this->elementInfo.width != 0) {
+		if (this->elementInfo.width - widthDecrement < 0)
+			this->elementInfo.width = 0;
+		else
+			this->elementInfo.width -= widthDecrement;
+		return true;
+	} else {
+		this->inAnimation = false;
+		this->animState = closed;
+		return false;
+	}
 }
+
 //Called whenever the window needs to be resized
 void Window::Resize(int width, int height) {
 	this->screenWidth = width;
@@ -277,7 +318,8 @@ void Window::Resize(int width, int height) {
 //array to the x and y values of the mouse relative to the top left corner of
 //the window.
 int Window::Click(int x, int y, int* clickLocation, window_t parentInfo) {
-	
+
+	cout << "We reached here at least" << endl;	
 	//If we're in an animation, ignore everything and return false.
 	if (this->inAnimation)
 		return 0;

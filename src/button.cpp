@@ -78,6 +78,16 @@ void Button::Draw(window_t parentInfo) {
 	}
 }
 
+bool Button::Create() {
+	//TODO: Implement
+	return false;
+}
+
+bool Button::Close() {
+	//TODO: Implement
+	return false;
+}
+
 void Button::Resize(int screenWidth, int screenHeight) {
 	//Does nothing for now
 }

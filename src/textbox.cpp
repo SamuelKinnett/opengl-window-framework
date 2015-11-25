@@ -23,6 +23,16 @@ Textbox::~Textbox() {
 
 }
 
+bool Textbox::Create() {
+	//TODO: Implement
+	return false;
+}
+
+bool Textbox::Close() {
+	//TODO: Implement
+	return false;
+}
+
 void Textbox::Resize(int screenWidth, int screenHeight) {
 	//Nothing doing here at the moment. To shut GCC up, I've added a
 	//completely useless body.

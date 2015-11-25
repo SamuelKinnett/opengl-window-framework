@@ -17,6 +17,8 @@ public:
 	~Textbox();
 
 	virtual void Draw(window_t);
+	virtual bool Create(); //TODO: Implement
+	virtual bool Close(); //TODO: Implement
 	virtual void Resize(int, int);
 	virtual void AddChild(Element*);
 	virtual void RemoveChild(int);

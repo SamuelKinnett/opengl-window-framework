@@ -7,18 +7,20 @@ OBJS=rendering.o glfont.o textbox.o window.o main.o button.o
 LDLIBS=-lGL -LGLU  -lglut
 ARGS=-std=c++11 -Wall -g
 
+ELEMENT_DEPENDENCIES=element.h rendering.h animationstate.h windowinfo.h
+
 all: opengl-window-framework
 
 opengl-window-framework: $(OBJS) 
 	$(CXX) $(ARGS) -o ../bin/opengl-window-framework $(OBJS) $(LDLIBS)
 
-window.o: window.cpp window.h element.h windowinfo.h rendering.h
+window.o: window.cpp window.h $(ELEMENT_DEPENDENCIES)
 	g++ $(ARGS) -c window.cpp -o window.o
 
 main.o: main.cpp windowinfo.h rendering.h
 	g++ $(ARGS) -c main.cpp -o main.o
 
-textbox.o: textbox.cpp textbox.h element.h windowinfo.h rendering.h glfont.h
+textbox.o: textbox.cpp textbox.h glfont.h $(ELEMENT_DEPENDENCIES)
 	g++ $(ARGS) -c textbox.cpp -o textbox.o
 
 rendering.o: rendering.cpp rendering.h element.h
@@ -27,7 +29,7 @@ rendering.o: rendering.cpp rendering.h element.h
 glfont.o: glfont.cpp glfont.h
 	g++ $(ARGS) -c glfont.cpp -o glfont.o
 
-button.o: button.cpp button.h rendering.h element.h windowinfo.h
+button.o: button.cpp button.h $(ELEMENT_DEPENDENCIES)
 	g++ $(ARGS) -c button.cpp -o button.o
 
 clean:
