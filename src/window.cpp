@@ -233,7 +233,16 @@ void Window::Draw() {
 	glVertex2f(windowVectors[1][0], windowVectors[1][1]);
 	glVertex2f(windowVectors[0][0], windowVectors[1][1]);
 	glEnd();
-	
+
+	//DEBUG
+	cout << "********************************************" << endl
+	<< "Window: " << this->elementInfo->index << endl
+	<< "Position:" << endl
+	<< windowVectors[0][0] << "," << windowVectors[0][1] << "," << windowVectors[1][0] << "," << windowVectors[1][1] << endl
+	<< "Parent Data: " << endl
+	<< this->elementInfo->parent->elementInfo->x << "," << this->elementInfo->parent->elementInfo->y << endl
+	<< this->elementInfo->parent->elementInfo->width << "," << this->elementInfo->parent->elementInfo->height << endl
+	<< "********************************************" << endl;
 	//Draw the border
 	if (this->border == true) {	
 		glColor4ub(this->borderColour[0],

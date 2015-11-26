@@ -3,7 +3,7 @@ CXX=g++
 RM=rm -f
 
 SRCS=window.cpp main.cpp
-OBJS=rendering.o glfont.o textbox.o window.o main.o button.o
+OBJS=container.o rendering.o glfont.o textbox.o window.o main.o button.o
 LDLIBS=-lGL -LGLU  -lglut
 ARGS=-std=c++11 -Wall -g
 
@@ -17,7 +17,7 @@ opengl-window-framework: $(OBJS)
 window.o: window.cpp window.h $(ELEMENT_DEPENDENCIES)
 	g++ $(ARGS) -c window.cpp -o window.o
 
-main.o: main.cpp windowinfo.h rendering.h
+main.o: main.cpp windowinfo.h rendering.h container.h
 	g++ $(ARGS) -c main.cpp -o main.o
 
 textbox.o: textbox.cpp textbox.h glfont.h $(ELEMENT_DEPENDENCIES)
@@ -31,6 +31,9 @@ glfont.o: glfont.cpp glfont.h
 
 button.o: button.cpp button.h $(ELEMENT_DEPENDENCIES)
 	g++ $(ARGS) -c button.cpp -o button.o
+
+container.o: container.h element.h
+	g++ $(ARGS) -c container.cpp -o container.o
 
 clean:
 	$(RM) $(OBJS)

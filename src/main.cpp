@@ -7,6 +7,7 @@
 #include <iostream>
 
 //Custom classes
+#include "container.h"
 #include "window.h"
 #include "windowinfo.h"
 #include "rendering.h"
@@ -28,7 +29,7 @@ int activeWindow = -1;		//The window currently being interacted with
 int mouseRelativePosition[2];	//The position of the mouse relative to the window being dragged
 int screenSize[2] = {DEFAULT_WIDTH, DEFAULT_HEIGHT};
 
-Window* mScreen;		//Information about the main screen
+Container* GUI;		//The main GUI, holding all of the windows.
 Rendering* rendering;	//Rendering class, used for world to screenspace conversion
 
 void Initialise(int, char*[]);
@@ -43,8 +44,6 @@ void MainLoop(int);
 void HandleMouseClick(int, int, int, int);
 void HandleMouseMoving(int, int);
 
-vector <Element*> windows; //Points to all of the current windows
-
 int main(int argc, char* argv[]) {
 	Initialise(argc, argv);
 }
@@ -54,25 +53,22 @@ void Initialise(int argc, char* argv[]) {
 	InitWindow(argc, argv);
 	InitOpenGL();
 
-	//This window is never drawn, but instead exists to provide a
-	//reference for the sub windows. TODO: replace this with a GUI or
-	//container class in future.
-	mScreen = new Window(-1.0f, -1.0f, 2.0f, 2.0f, 0, rendering, 0); 
-	
 	//Create a new rendering class that will be used by all child elements
-	rendering = new Rendering(screenSize[0], screenSize[1]);
+	rendering = new Rendering(screenSize[0], screenSize[1]); 
 	
+	//Create the GUI
+	GUI = new Container(-1.0f, -1.0f, 2.0f, 2.0f);
+
 	//TESTING
 	//Add two windows to the beginning of the windows vector
 	//Then add a child window to the scaling window
 	//...And a "task bar" along the bottom of the screen
-	windows.push_back(new Window(
-				0.0f, 0.0f, 0.5f, 0.5f, 0, 
-				rendering, mScreen));
-	windows.push_back(new Window(400, 300, 50, 50, 0, 
-				rendering, mScreen));
-	windows.push_back(new Window(-0.2f, -0.2f, 1.0f, 30, 0,
-				rendering, mScreen));
+	GUI->AddChild(new Window(0.0f, 0.0f, 0.5f, 0.5f, 0, 
+				rendering, GUI));
+	GUI->AddChild(new Window(400, 300, 50, 50, 1, 
+				rendering, GUI));
+	GUI->AddChild(new Window(-0.2f, -0.2f, 1.0f, 30, 2,
+				rendering, GUI));
 	
 	//Start running GLut's loop
 	glutMainLoop();
@@ -143,10 +139,12 @@ void Render() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	//Drawing code goes here
-	for(vector<Element*>::iterator it  = windows.begin(); it != windows.end(); ++it) {
+	GUI->Draw();
+
+	/*for(vector<Element*>::iterator it  = windows.begin(); it != windows.end(); ++it) {
 		Element& currentWindow = **it;	//The current window being drawn
 		currentWindow.Draw();
-	}
+	}*/
 
 	//Update the screen by swapping the buffers
 	glutSwapBuffers();
@@ -166,7 +164,8 @@ void MainLoop(int val) {
 //Handles mouse clicks
 void HandleMouseClick(int button, int state, int x, int y) {
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-		activeWindow = -1;	//Reset the active window
+		draggingWindow = GUI->Click(x, screenSize[1] - y, mouseRelativePosition);
+		/* activeWindow = -1;	//Reset the active window
 		for (uint i = 0; i < windows.size(); ++i) {
 			//Loop through every window and see if the mouse collides with them.
 			//If it does, make that the current window being dragged and move it
@@ -186,9 +185,8 @@ void HandleMouseClick(int button, int state, int x, int y) {
 		} else {
 			activeWindow = -1;
 			draggingWindow = FALSE;
-		}
+		}*/
 	} else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
-		activeWindow = -1;
 		draggingWindow = FALSE;
 	}
 
@@ -200,7 +198,8 @@ void HandleMouseClick(int button, int state, int x, int y) {
 //Handles the mouse moving while a mouse button is pressed
 void HandleMouseMoving(int x, int y) {
 	if (draggingWindow) {
-		windows[activeWindow]->Move(x - mouseRelativePosition[0], (screenSize[1] - y) - mouseRelativePosition[1]);
+		GUI->Move(x - mouseRelativePosition[0], (screenSize[1] - y) - mouseRelativePosition[1]);
+		//windows[activeWindow]->Move(x - mouseRelativePosition[0], (screenSize[1] - y) - mouseRelativePosition[1]);
 	}
 }
 
@@ -209,8 +208,10 @@ void Resize(int width, int height) {
 	//Resize the rendering class
 	rendering->Resize(width, height);
 	
-	for (uint i = 0; i < windows.size(); ++i)
-		windows[i]->Resize(width, height);
+	GUI->Resize(width, height);
+	/*for (uint i = 0; i < windows.size(); ++i)
+		windows[i]->Resize(width, height);*/
+
 	screenSize[0] = width;
 	screenSize[1] = height;
 	//Change the viewport size so that discrete/scaling windows work properly
