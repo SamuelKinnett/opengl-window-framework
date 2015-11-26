@@ -3,6 +3,10 @@
 #ifndef RENDERING_H
 #define RENDERING_H
 #include "windowinfo.h"
+
+//forward declaration
+struct window_t;
+
 class Rendering {
 
 public:
@@ -30,7 +34,7 @@ public:
 	//Returns a float co-ordinate within a parent element, given the
 	//position of the element relative to said parent.
 	void GetRelativeFloat(float x, float y, float* returnArray, 
-				window_t parentInfo);
+				window_t* parentInfo);
 
 private:
 	int screenWidth, screenHeight;

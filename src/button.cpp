@@ -7,13 +7,19 @@
 #include <GL/gl.h>
 #include <functional>
 
-Button::Button(float x, float y, float width, float height,
-		Rendering* rendering, std::function<void()>* function) {
+Button::Button(float x, float y, float width, float height, int index,
+		Element* parent, Rendering* rendering,
+		std::function<void(int)>* function) {
 
-	this->elementInfo.x = x;
-	this->elementInfo.y = y;
-	this->elementInfo.width = width;
-	this->elementInfo.height = height;
+	this->elementInfo = new window_t;
+
+	this->elementInfo->x = x;
+	this->elementInfo->y = y;
+	this->elementInfo->width = width;
+	this->elementInfo->height = height;
+	this->elementInfo->index = index;
+	this->elementInfo->parent = parent;
+
 	this->rendering = rendering;
 	this->function = function;
 
@@ -24,7 +30,9 @@ Button::Button(float x, float y, float width, float height,
 }
 
 //Draws the button to the screen
-void Button::Draw(window_t parentInfo) {
+void Button::Draw() {
+	window_t* parentInfo = this->elementInfo->parent->elementInfo;
+	
 	float buttonPositions[2][2];	//Stores the co-ordinates of the
 	//bottom left and top right corners of the button.
 	
@@ -32,18 +40,18 @@ void Button::Draw(window_t parentInfo) {
 	//the buttonPositions array
 	
 	//The bottom left corner of the window
-	this->rendering->GetRelativeFloat(this->elementInfo.x, 
-					this->elementInfo.y, 
+	this->rendering->GetRelativeFloat(this->elementInfo->x, 
+					this->elementInfo->y, 
 					tempArray, 
 					parentInfo);
 	buttonPositions[0][0] = tempArray[0];
 	buttonPositions[0][1] = tempArray[1];
 
 	//The top right corner of the window
-	this->rendering->GetRelativeFloat(this->elementInfo.x + 
-						this->elementInfo.width,
-					this->elementInfo.y + 
-						this->elementInfo.height,
+	this->rendering->GetRelativeFloat(this->elementInfo->x + 
+						this->elementInfo->width,
+					this->elementInfo->y + 
+						this->elementInfo->height,
 					tempArray, 
 					parentInfo);
 	buttonPositions[1][0] = tempArray[0];
@@ -100,8 +108,9 @@ void Button::RemoveChild(int index) {
 	//Does nothing for now
 }
 
-int Button::Click(int x, int y, int* clickLocation, window_t parentInfo) {
-
+int Button::Click(int x, int y, int* clickLocation) {
+	
+	window_t* parentInfo = this->elementInfo->parent->elementInfo;
 	float relativePosition[2];	//float storing the postion of the 
 	//bottom left corner of the button in the world
 	float relativeSize[2];		//float storing the position of the
@@ -111,15 +120,15 @@ int Button::Click(int x, int y, int* clickLocation, window_t parentInfo) {
 	int tempSizeArray[2];	//used to store the position of the top right
 	//corner of the button as a pixel co-ordinate
 
-	this->rendering->GetRelativeFloat(this->elementInfo.x,
-			this->elementInfo.y,
+	this->rendering->GetRelativeFloat(this->elementInfo->x,
+			this->elementInfo->y,
 			relativePosition,
 			parentInfo);
 
-	this->rendering->GetRelativeFloat(this->elementInfo.x +
-				this->elementInfo.width,
-			this->elementInfo.y + 
-				this->elementInfo.height,
+	this->rendering->GetRelativeFloat(this->elementInfo->x +
+				this->elementInfo->width,
+			this->elementInfo->y + 
+				this->elementInfo->height,
 			relativeSize,
 			parentInfo);
 
@@ -139,15 +148,17 @@ int Button::Click(int x, int y, int* clickLocation, window_t parentInfo) {
 		clickLocation[0] = x - tempArray[0];
 		clickLocation[1] = y - tempArray[1];
 	
-		std::function<void()> tempFunction = *function;	
-		tempFunction();
+		std::function<void(int)> tempFunction = *function;	
+		tempFunction(this->elementInfo->index);
 
 		return 1;
 	}
 	return 0;
 }
 
-void Button::Move(int x, int y, window_t parentInfo) {
+void Button::Move(int x, int y) {
+	window_t* parentInfo = this->elementInfo->parent->elementInfo;
+	
 	float tempArray[2];	//Stores the results of converting the move
 	//destination into a float co-ordinate
 	float relativePosition[2];	//Stores the position of the bottom
@@ -156,8 +167,8 @@ void Button::Move(int x, int y, window_t parentInfo) {
 	this->rendering->PixelToFloat(x, y, tempArray);
 	this->rendering->GetRelativeFloat(tempArray[0], tempArray[1],
 				relativePosition, parentInfo);
-	this->elementInfo.x = relativePosition[0];
-	this->elementInfo.y = relativePosition[1];
+	this->elementInfo->x = relativePosition[0];
+	this->elementInfo->y = relativePosition[1];
 }
 
 void Button::SetColour(int r, int g, int b, int a) {
@@ -179,5 +190,5 @@ void Button::SetBorder(bool enabled, int* colour) {
 
 //PassData allows the function called by the button to be changed.
 void Button::PassData(void * newFunction) {
-	this->function = (std::function<void()>*)newFunction;
+	this->function = (std::function<void(int)>*)newFunction;
 }

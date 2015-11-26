@@ -18,46 +18,48 @@ using namespace std;
 //Standard constructor, taking arguments in terms of pixels A window
 //instantiated with this constructor will remain the same size and in the same
 //position regardless of the main window resizing.
-Window::Window(int x, int y, int width, int height,
-		Rendering* rendering) {
+Window::Window(int x, int y, int width, int height, int index,
+		Rendering* rendering, Element* parent) {
 	this->windowType = WINDOW_DISCRETE;
 	this->Initialise((float)x, (float)y, (float)width, (float)height,
-			rendering);
+			index, rendering, parent);
 }
 
 //Float constructor taking arguments as values between 0 and 1 A window 
 //instantiated with this constructor will remain at a relative size and
 //position to the main window, according to the float values.
-Window::Window(float x, float y, float width, float height,
-		Rendering* rendering) {
+Window::Window(float x, float y, float width, float height, int index,
+		Rendering* rendering, Element* parent) {
 	this->windowType = WINDOW_SCALING;
-	this->Initialise(x, y, width, height, rendering);
+	this->Initialise(x, y, width, height, index, rendering, parent);
 }
 
 //Composite constructor accepting both float and iteger values. This
 //constructor creates a window that remains at the same relative space when
 //its parent window is resized, however only the width will scale with the
 //window.
-Window::Window(float x, float y, float width, int height,
-		Rendering* rendering) {
+Window::Window(float x, float y, float width, int height, int index,
+		Rendering* rendering, Element* parent) {
 	this->windowType = WINDOW_FIXED_H;
-	this->Initialise(x, y, width, (float)height, rendering);
+	this->Initialise(x, y, width, (float)height, index, rendering,
+			parent);
 }
 
 //Composite constructor accepting both float and iteger values. This 
 //constructor creates a window that remains at the same relative space when
 //its parent window is resized, however only the height will scale with the
 //window.
-Window::Window(float x, float y, int width, float height,
-		Rendering* rendering) {
+Window::Window(float x, float y, int width, float height, int index,
+		Rendering* rendering, Element* parent) {
 	this->windowType = WINDOW_FIXED_W;
-	this->Initialise(x, y, (float)width, height, rendering);
+	this->Initialise(x, y, (float)width, height, index, rendering,
+			parent);
 }
 
 //The initialise function is used for instantiation that is common accross
 //all window types.
-void Window::Initialise(float x, float y, float width, float height,
-		Rendering* rendering) {
+void Window::Initialise(float x, float y, float width, float height, int index,
+		Rendering* rendering, Element* parent) {
 	float viewportData[4];
 
 	//Get information about the size of the viewport
@@ -67,10 +69,14 @@ void Window::Initialise(float x, float y, float width, float height,
 	this->screenHeight = viewportData[3];
 
 	this->border = true;
-	this->elementInfo.x = x;
-	this->elementInfo.y = y;
-	this->elementInfo.width = 0;
-	this->elementInfo.height= 0;
+	this->elementInfo = new window_t;
+	this->elementInfo->x = x;
+	this->elementInfo->y = y;
+	this->elementInfo->width = 0;
+	this->elementInfo->height= 0;
+	this->elementInfo->index = index;
+	this->elementInfo->parent = parent;
+
 	this->targetDimensions.x = x;
 	this->targetDimensions.y = y;
 	this->targetDimensions.width = width;
@@ -88,11 +94,11 @@ void Window::Initialise(float x, float y, float width, float height,
 
 //Destructor
 Window::~Window() {
-
+	delete this->elementInfo;
 }
 
 //Called whenever the window needs to be drawn
-void Window::Draw(window_t parentInfo) {
+void Window::Draw() {
 	
 	//Check to see if we're currently opening or closing the window
 	//If we are, run the animation for a frame
@@ -118,43 +124,45 @@ void Window::Draw(window_t parentInfo) {
 	float floatWidth = 0;
 	float floatHeight = 0;
 
+	window_t* parentInfo = this->elementInfo->parent->elementInfo;
+
 	switch (windowType) {
 		case WINDOW_DISCRETE:
 			//We need to convert the pixel co-ordinates to 
 			//world co-ordinates
 			int parentPixel[2];
-			this->rendering->FloatToPixel(parentInfo.x, 
-					parentInfo.y, 
+			this->rendering->FloatToPixel(parentInfo->x, 
+					parentInfo->y, 
 					parentPixel);
 			
 			//The bottom left corner of the window
 			this->rendering->PixelToFloat(parentPixel[0] + 
-					this->elementInfo.x, 
-					parentPixel[1] + this->elementInfo.y,
+					this->elementInfo->x, 
+					parentPixel[1] + this->elementInfo->y,
 				       	tempArray);	
 	
 			//The top right corner of the window
 			this->rendering->PixelToFloat(parentPixel[0] + 
-					this->elementInfo.x + 
-						this->elementInfo.width, 
+					this->elementInfo->x + 
+						this->elementInfo->width, 
 					parentPixel[1] + 
-						this->elementInfo.y + 
-						this->elementInfo.height, 
+						this->elementInfo->y + 
+						this->elementInfo->height, 
 					tempSecondArray);
 			break;
 
 		case WINDOW_SCALING:
 			//The bottom left corner of the window
-			this->rendering->GetRelativeFloat(this->elementInfo.x, 
-					this->elementInfo.y, 
+			this->rendering->GetRelativeFloat(this->elementInfo->x, 
+					this->elementInfo->y, 
 					tempArray, 
 					parentInfo);
 
 			//The top right corner of the window
-			this->rendering->GetRelativeFloat(this->elementInfo.x + 
-						this->elementInfo.width,
-					this->elementInfo.y + 
-						this->elementInfo.height,
+			this->rendering->GetRelativeFloat(this->elementInfo->x + 
+						this->elementInfo->width,
+					this->elementInfo->y + 
+						this->elementInfo->height,
 					tempSecondArray, 
 					parentInfo);
 			break;
@@ -163,20 +171,20 @@ void Window::Draw(window_t parentInfo) {
 			
 			//Convert the height into a float value
 			floatHeight = this->rendering->PixelToFloat1D(
-					this->rendering->FloatToPixel1D(this->elementInfo.y, 
+					this->rendering->FloatToPixel1D(this->elementInfo->y, 
 						this->screenHeight) +
-				      		this->elementInfo.height,
+				      		this->elementInfo->height,
 						this->screenHeight);
 			
 			//The bottom left corner of the window
-			this->rendering->GetRelativeFloat(this->elementInfo.x, 
-					this->elementInfo.y, 
+			this->rendering->GetRelativeFloat(this->elementInfo->x, 
+					this->elementInfo->y, 
 					tempArray, 
 					parentInfo);
 
 			//The top right corner of the window
-			this->rendering->GetRelativeFloat(this->elementInfo.x +
-				    	this->elementInfo.width,
+			this->rendering->GetRelativeFloat(this->elementInfo->x +
+				    	this->elementInfo->width,
 					floatHeight,
 					tempSecondArray, 
 					parentInfo);
@@ -186,21 +194,21 @@ void Window::Draw(window_t parentInfo) {
 			
 			//Convert the width into a float value
 			floatWidth = this->rendering->PixelToFloat1D(
-					this->rendering->FloatToPixel1D(this->elementInfo.x,
+					this->rendering->FloatToPixel1D(this->elementInfo->x,
 						this->screenWidth) + 
-						this->elementInfo.width,
+						this->elementInfo->width,
 			      			this->screenWidth);
 
 			//The bottom left corner of the window	
-			this->rendering->GetRelativeFloat(this->elementInfo.x,
-					this->elementInfo.y,
+			this->rendering->GetRelativeFloat(this->elementInfo->x,
+					this->elementInfo->y,
 					tempArray,
 					parentInfo);
 
 			//The top right corner of the window
 			this->rendering->GetRelativeFloat(floatWidth,
-					this->elementInfo.y + 
-					this->elementInfo.height,
+					this->elementInfo->y + 
+					this->elementInfo->height,
 					tempSecondArray, 
 					parentInfo);
 			break;	
@@ -243,7 +251,7 @@ void Window::Draw(window_t parentInfo) {
 
 	//Draw each of the child elements
 	for (int i = 0; i < childCount; ++i){
-		this->children[i]->Draw(this->elementInfo);
+		this->children[i]->Draw();
 	}
 }
 
@@ -251,26 +259,26 @@ void Window::Draw(window_t parentInfo) {
 bool Window::Create() {
 	//Firstly, update the x and y co-ordinates. That way, child elements
 	//can be moved whilst still animating.
-	this->targetDimensions.x = this->elementInfo.x;
-	this->targetDimensions.y = this->elementInfo.y;
+	this->targetDimensions.x = this->elementInfo->x;
+	this->targetDimensions.y = this->elementInfo->y;
 	
 	float widthIncrement = (float)this->targetDimensions.width / 
 					ANIMATION_SPEED;
 	float heightIncrement = (float)this->targetDimensions.height /
 					ANIMATION_SPEED;
 
-	if (this->elementInfo.width != this->targetDimensions.width) {
-		if (this->elementInfo.width + widthIncrement > this->targetDimensions.width)
-			this->elementInfo.width = this->targetDimensions.width;
+	if (this->elementInfo->width != this->targetDimensions.width) {
+		if (this->elementInfo->width + widthIncrement > this->targetDimensions.width)
+			this->elementInfo->width = this->targetDimensions.width;
 		else
-			this->elementInfo.width += widthIncrement;
+			this->elementInfo->width += widthIncrement;
 
 		return true;
-	} else if (this->elementInfo.height != this->targetDimensions.height) {
-		if (this->elementInfo.height + heightIncrement > this->targetDimensions.height)
-			this->elementInfo.height = targetDimensions.height;
+	} else if (this->elementInfo->height != this->targetDimensions.height) {
+		if (this->elementInfo->height + heightIncrement > this->targetDimensions.height)
+			this->elementInfo->height = targetDimensions.height;
 		else
-			this->elementInfo.height += heightIncrement;
+			this->elementInfo->height += heightIncrement;
 
 		return true;
 	} else {
@@ -287,17 +295,17 @@ bool Window::Close() {
 	float heightDecrement = (float)this->targetDimensions.height /
 					ANIMATION_SPEED;
 
-	if (this->elementInfo.height != 0) {
-		if (this->elementInfo.height - heightDecrement < 0)
-			this->elementInfo.height = 0;
+	if (this->elementInfo->height != 0) {
+		if (this->elementInfo->height - heightDecrement < 0)
+			this->elementInfo->height = 0;
 		else
-			this->elementInfo.height -= heightDecrement;
+			this->elementInfo->height -= heightDecrement;
 		return true;
-	} else if (this->elementInfo.width != 0) {
-		if (this->elementInfo.width - widthDecrement < 0)
-			this->elementInfo.width = 0;
+	} else if (this->elementInfo->width != 0) {
+		if (this->elementInfo->width - widthDecrement < 0)
+			this->elementInfo->width = 0;
 		else
-			this->elementInfo.width -= widthDecrement;
+			this->elementInfo->width -= widthDecrement;
 		return true;
 	} else {
 		this->inAnimation = false;
@@ -317,7 +325,7 @@ void Window::Resize(int width, int height) {
 //the function will return true. In addition, it will set the clickLocation
 //array to the x and y values of the mouse relative to the top left corner of
 //the window.
-int Window::Click(int x, int y, int* clickLocation, window_t parentInfo) {
+int Window::Click(int x, int y, int* clickLocation) {
 
 	cout << "We reached here at least" << endl;	
 	//If we're in an animation, ignore everything and return false.
@@ -330,23 +338,24 @@ int Window::Click(int x, int y, int* clickLocation, window_t parentInfo) {
 	float relativeSize[2];
 	float floatHeight = 0;
 	float floatWidth = 0;
+	window_t* parentInfo = this->elementInfo->parent->elementInfo;
 
 	switch (windowType) {
 		
 		case WINDOW_DISCRETE:
 			int parentPixel[2];
-			this->rendering->FloatToPixel(parentInfo.x, parentInfo.y, parentPixel);
-			if (x < parentPixel[0] + this->elementInfo.x + 
-					this->elementInfo.width
-				&& x > parentPixel[0] + this->elementInfo.x
-				&& y < parentPixel[1] + this->elementInfo.y +
-					this->elementInfo.height
-				&& y > parentPixel[1] + this->elementInfo.y) {
+			this->rendering->FloatToPixel(parentInfo->x, parentInfo->y, parentPixel);
+			if (x < parentPixel[0] + this->elementInfo->x + 
+					this->elementInfo->width
+				&& x > parentPixel[0] + this->elementInfo->x
+				&& y < parentPixel[1] + this->elementInfo->y +
+					this->elementInfo->height
+				&& y > parentPixel[1] + this->elementInfo->y) {
 
 				clickLocation[0] = x - (parentPixel[0] +
-						this->elementInfo.x);
+						this->elementInfo->x);
 				clickLocation[1] = y - (parentPixel[1] +
-						this->elementInfo.y);
+						this->elementInfo->y);
 				
 				//Check to see if any of the child items have
 				//been clicked. If they have, we return a 0 to
@@ -355,8 +364,7 @@ int Window::Click(int x, int y, int* clickLocation, window_t parentInfo) {
 					if (children[i]->Click(
 							x, 
 							y, 
-							clickLocation,
-							this->elementInfo
+							clickLocation
 							) == 1)
 						return 0;
 				//Otherwise, we return 1 so the window can be
@@ -366,15 +374,15 @@ int Window::Click(int x, int y, int* clickLocation, window_t parentInfo) {
 			break;
 
 	 	case WINDOW_SCALING:
-			this->rendering->GetRelativeFloat(this->elementInfo.x,
-					this->elementInfo.y,
+			this->rendering->GetRelativeFloat(this->elementInfo->x,
+					this->elementInfo->y,
 					relativePosition,
 					parentInfo);
 
-			this->rendering->GetRelativeFloat(this->elementInfo.x +
-						this->elementInfo.width,
-					this->elementInfo.y + 
-						this->elementInfo.height,
+			this->rendering->GetRelativeFloat(this->elementInfo->x +
+						this->elementInfo->width,
+					this->elementInfo->y + 
+						this->elementInfo->height,
 					relativeSize,
 					parentInfo);
 
@@ -400,8 +408,7 @@ int Window::Click(int x, int y, int* clickLocation, window_t parentInfo) {
 					if (children[i]->Click(
 							x,
 							y,
-							clickLocation,
-							this->elementInfo
+							clickLocation
 							) == 1)
 						return 0;
 				return 1;
@@ -411,18 +418,18 @@ int Window::Click(int x, int y, int* clickLocation, window_t parentInfo) {
 	 	case WINDOW_FIXED_H:
 			floatHeight = this->rendering->PixelToFloat1D(
 					this->rendering->FloatToPixel1D(
-						this->elementInfo.y,
+						this->elementInfo->y,
 						this->screenHeight) + 
-						this->elementInfo.height,
+						this->elementInfo->height,
 					this->screenHeight);
 
-			this->rendering->GetRelativeFloat(this->elementInfo.x,
-					this->elementInfo.y,
+			this->rendering->GetRelativeFloat(this->elementInfo->x,
+					this->elementInfo->y,
 					relativePosition,
 					parentInfo);
 
-			this->rendering->GetRelativeFloat(this->elementInfo.x +
-					this->elementInfo.width,
+			this->rendering->GetRelativeFloat(this->elementInfo->x +
+					this->elementInfo->width,
 					floatHeight,
 					relativeSize,
 					parentInfo);
@@ -449,8 +456,7 @@ int Window::Click(int x, int y, int* clickLocation, window_t parentInfo) {
 					if (children[i]->Click(
 							x,
 							y,
-							clickLocation,
-							this->elementInfo
+							clickLocation
 							) == 1)
 						return 0;
 				return 1;
@@ -460,19 +466,19 @@ int Window::Click(int x, int y, int* clickLocation, window_t parentInfo) {
 	 	case WINDOW_FIXED_W:
 			floatWidth = this->rendering->PixelToFloat1D(
 					this->rendering->FloatToPixel1D(
-						this->elementInfo.x,
+						this->elementInfo->x,
 						this->screenWidth) + 
-						this->elementInfo.width,
+						this->elementInfo->width,
 					this->screenWidth);
 
-			this->rendering->GetRelativeFloat(this->elementInfo.x,
-					this->elementInfo.y,
+			this->rendering->GetRelativeFloat(this->elementInfo->x,
+					this->elementInfo->y,
 					relativePosition,
 					parentInfo);
 
 			this->rendering->GetRelativeFloat(floatWidth,
-					this->elementInfo.y +
-					this->elementInfo.height,
+					this->elementInfo->y +
+					this->elementInfo->height,
 					relativeSize,
 					parentInfo);
 			
@@ -498,8 +504,7 @@ int Window::Click(int x, int y, int* clickLocation, window_t parentInfo) {
 					if (children[i]->Click(
 							x,
 							y,
-							clickLocation,
-							elementInfo
+							clickLocation
 							) == 1)
 						return 0;
 				return 1;
@@ -514,12 +519,14 @@ int Window::Click(int x, int y, int* clickLocation, window_t parentInfo) {
 //extended to allow for moving animations and the like. X and Y are screen
 //position values given in pixels and so need to be converted if the window
 //is a scaling type.
-void Window::Move(int x, int y, window_t parentInfo) {
+void Window::Move(int x, int y) {
+	window_t* parentInfo = this->elementInfo->parent->elementInfo;
+	
 	if (windowType == WINDOW_DISCRETE) {
 		int parentPixel[2];
-		this->rendering->FloatToPixel(parentInfo.x, parentInfo.y, parentPixel);
-		this->elementInfo.x = parentPixel[0] + x;
-		this->elementInfo.y = parentPixel[1] + y;
+		this->rendering->FloatToPixel(parentInfo->x, parentInfo->y, parentPixel);
+		this->elementInfo->x = parentPixel[0] + x;
+		this->elementInfo->y = parentPixel[1] + y;
 	} else {
 		//All other window types use float values to store their
 		//position.
@@ -528,8 +535,8 @@ void Window::Move(int x, int y, window_t parentInfo) {
 		this->rendering->PixelToFloat(x, y, tempArray);
 		this->rendering->GetRelativeFloat(tempArray[0], tempArray[1],
 					relativePosition, parentInfo);
-		this->elementInfo.x = relativePosition[0];
-		this->elementInfo.y = relativePosition[1];
+		this->elementInfo->x = relativePosition[0];
+		this->elementInfo->y = relativePosition[1];
 	}
 }
 
@@ -544,6 +551,9 @@ void Window::RemoveChild(int childIndex) {
 	if (childIndex < this->childCount) {
 		this->children.erase(this->children.begin() + childIndex);
 		childCount--;
+		//update the child element's indices
+		for (int i = 0; i < childCount; ++i)
+			this->children[i]->elementInfo->index = i;
 	}
 }
 

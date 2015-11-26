@@ -13,17 +13,18 @@
 class Textbox : public Element {
 
 public:
-	Textbox(float, float, float, float, std::string, Rendering*);
+	Textbox(float, float, float, float, int, Element*,
+			std::string, Rendering*);
 	~Textbox();
 
-	virtual void Draw(window_t);
+	virtual void Draw();
 	virtual bool Create(); //TODO: Implement
 	virtual bool Close(); //TODO: Implement
 	virtual void Resize(int, int);
 	virtual void AddChild(Element*);
 	virtual void RemoveChild(int);
-	virtual int Click(int, int, int*, window_t);
-	virtual void Move(int, int, window_t);
+	virtual int Click(int, int, int*);
+	virtual void Move(int, int);
 	virtual void SetColour(int, int, int, int);
 	virtual void SetBorder(bool, int* = 0);
 	virtual void PassData(void *);

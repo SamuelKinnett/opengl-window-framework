@@ -28,8 +28,8 @@ int activeWindow = -1;		//The window currently being interacted with
 int mouseRelativePosition[2];	//The position of the mouse relative to the window being dragged
 int screenSize[2] = {DEFAULT_WIDTH, DEFAULT_HEIGHT};
 
-struct window_t mScreen;	//Information about the main screen
-Rendering* rendering;		//Rendering class, used for world to screenspace conversion
+Window* mScreen;		//Information about the main screen
+Rendering* rendering;	//Rendering class, used for world to screenspace conversion
 
 void Initialise(int, char*[]);
 void InitWindow(int, char*[]);
@@ -54,10 +54,10 @@ void Initialise(int argc, char* argv[]) {
 	InitWindow(argc, argv);
 	InitOpenGL();
 
-	mScreen.x = -1;
-	mScreen.y = -1;
-	mScreen.width = 2;
-	mScreen.height = 2;
+	//This window is never drawn, but instead exists to provide a
+	//reference for the sub windows. TODO: replace this with a GUI or
+	//container class in future.
+	mScreen = new Window(-1.0f, -1.0f, 2.0f, 2.0f, 0, rendering, 0); 
 	
 	//Create a new rendering class that will be used by all child elements
 	rendering = new Rendering(screenSize[0], screenSize[1]);
@@ -66,9 +66,13 @@ void Initialise(int argc, char* argv[]) {
 	//Add two windows to the beginning of the windows vector
 	//Then add a child window to the scaling window
 	//...And a "task bar" along the bottom of the screen
-	windows.push_back(new Window(0.0f, 0.0f, 0.5f, 0.5f, rendering));
-	windows.push_back(new Window(400, 300, 50, 50, rendering));
-	windows.push_back(new Window(-0.2f, -0.2f, 1.0f, 30, rendering));
+	windows.push_back(new Window(
+				0.0f, 0.0f, 0.5f, 0.5f, 0, 
+				rendering, mScreen));
+	windows.push_back(new Window(400, 300, 50, 50, 0, 
+				rendering, mScreen));
+	windows.push_back(new Window(-0.2f, -0.2f, 1.0f, 30, 0,
+				rendering, mScreen));
 	
 	//Start running GLut's loop
 	glutMainLoop();
@@ -141,7 +145,7 @@ void Render() {
 	//Drawing code goes here
 	for(vector<Element*>::iterator it  = windows.begin(); it != windows.end(); ++it) {
 		Element& currentWindow = **it;	//The current window being drawn
-		currentWindow.Draw(mScreen);
+		currentWindow.Draw();
 	}
 
 	//Update the screen by swapping the buffers
@@ -166,7 +170,7 @@ void HandleMouseClick(int button, int state, int x, int y) {
 		for (uint i = 0; i < windows.size(); ++i) {
 			//Loop through every window and see if the mouse collides with them.
 			//If it does, make that the current window being dragged and move it
-			if (windows[i]->Click(x, screenSize[1] - y, mouseRelativePosition, mScreen))
+			if (windows[i]->Click(x, screenSize[1] - y, mouseRelativePosition))
 				activeWindow = i;
 		}
 		if (activeWindow > -1) {
@@ -196,7 +200,7 @@ void HandleMouseClick(int button, int state, int x, int y) {
 //Handles the mouse moving while a mouse button is pressed
 void HandleMouseMoving(int x, int y) {
 	if (draggingWindow) {
-		windows[activeWindow]->Move(x - mouseRelativePosition[0], (screenSize[1] - y) - mouseRelativePosition[1], mScreen);
+		windows[activeWindow]->Move(x - mouseRelativePosition[0], (screenSize[1] - y) - mouseRelativePosition[1]);
 	}
 }
 

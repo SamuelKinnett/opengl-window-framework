@@ -1,4 +1,5 @@
 #include "rendering.h"
+#include "windowinfo.h"
 
 Rendering::Rendering(int screenWidth, int screenHeight) {
 	this->screenWidth = screenWidth;
@@ -45,7 +46,8 @@ int Rendering::FloatToPixel1D(float value, int axisSize) {
 }
 
 //Returns a float value relative to the parent element
-void Rendering::GetRelativeFloat(float x, float y, float* returnArray, window_t parentInfo) {
-	returnArray[0] = parentInfo.x + (((x + 1.0)/2.0) * parentInfo.width);
-	returnArray[1] = parentInfo.y + (((y + 1.0)/2.0) * parentInfo.height);
+void Rendering::GetRelativeFloat(float x, float y, float* returnArray,
+		window_t* parentInfo) {
+	returnArray[0] = parentInfo->x + (((x + 1.0)/2.0) * parentInfo->width);
+	returnArray[1] = parentInfo->y + (((y + 1.0)/2.0) * parentInfo->height);
 }

@@ -6,10 +6,14 @@
 #ifndef ELEMENT_H
 #define ELEMENT_H
 
+//forward declaration
+struct window_t;
+class Rendering;
+
 class Element {
 
 public:
-	window_t elementInfo;
+	window_t* elementInfo;
 	std::vector <Element*> children;
 	Rendering* rendering;
 	
@@ -20,7 +24,7 @@ public:
 	int borderColour[4] {157, 242, 201, 255};
 
 	//Called to draw the element to the screen
-	virtual void Draw(window_t) = 0;	
+	virtual void Draw() = 0;	
 	
 	//Allows for opening animations and effects
 	//Returns true when the object and all of its children
@@ -42,10 +46,10 @@ public:
 	virtual void RemoveChild(int) = 0;	
 	
 	//Called to check if the element has been clicked
-	virtual int Click(int, int, int*, window_t) = 0;
+	virtual int Click(int, int, int*) = 0;
 	
 	//Called to move the element	
-	virtual void Move(int, int, window_t) = 0;		 
+	virtual void Move(int, int) = 0;		 
 	
 	//Set the colour of the element
 	virtual void SetColour(int, int, int, int) = 0;

@@ -7,11 +7,17 @@ using namespace std;
 
 //Floating point constructor. Places the textbox at a position and with a 
 //size always relative to the parent window.
-Textbox::Textbox(float x, float y, float width, float height, string text, Rendering* rendering) {
-	this->elementInfo.x = x;
-	this->elementInfo.y = y;
-	this->elementInfo.width = width;
-	this->elementInfo.height = height;
+Textbox::Textbox(float x, float y, float width, float height, int index, Element* parent,
+	       string text, Rendering* rendering) {
+	this->elementInfo = new window_t;
+	
+	this->elementInfo->x = x;
+	this->elementInfo->y = y;
+	this->elementInfo->width = width;
+	this->elementInfo->height = height;
+	this->elementInfo->index = index;
+	this->elementInfo->parent = parent;
+
 	this->text = text;
 	this->rendering = rendering;
 
@@ -51,32 +57,32 @@ void Textbox::RemoveChild(int index) {
 	this->children.erase(this->children.begin() + index);
 }
 
-int Textbox::Click(int x, int y, int* clickLocation, window_t parentInfo) {
+int Textbox::Click(int x, int y, int* clickLocation) {
 	int placeHolder[3];
-	window_t placeHolder2;
+	window_t* placeHolder2;
 
 	placeHolder[0] = x;
 	placeHolder[1] = y;
 	placeHolder[2] = *clickLocation;
-	placeHolder2 = parentInfo;
+	placeHolder2 = this->elementInfo->parent->elementInfo;
 	return 0;
 }
 
-void Textbox::Move(int x, int y, window_t parentInfo) {
+void Textbox::Move(int x, int y) {
 	int placeHolder[2];
-	window_t placeHolder2;
+	window_t* placeHolder2;
 
 	placeHolder[0] = x;
 	placeHolder[1] = y;
-	placeHolder2 = parentInfo;
+	placeHolder2 = this->elementInfo->parent->elementInfo;
 }
 
-void Textbox::Draw(window_t parentInfo) {
+void Textbox::Draw() {
 	float tempArray[2];
-	
-	rendering->GetRelativeFloat(this->elementInfo.x, this->elementInfo.y, tempArray, parentInfo);
+	window_t* parentInfo = this->elementInfo->parent->elementInfo;	
+	rendering->GetRelativeFloat(this->elementInfo->x, this->elementInfo->y, tempArray, parentInfo);
 	glFont->Begin();
-	glFont->RenderText(this->text.c_str(), this->elementInfo.x, this->elementInfo.y, 0, 1);
+	glFont->RenderText(this->text.c_str(), this->elementInfo->x, this->elementInfo->y, 0, 1);
 	glFont->End();
 }
 
