@@ -17,7 +17,7 @@ opengl-window-framework: $(OBJS)
 window.o: window.cpp window.h $(ELEMENT_DEPENDENCIES)
 	g++ $(ARGS) -c window.cpp -o window.o
 
-main.o: main.cpp windowinfo.h rendering.h container.h
+main.o: main.cpp main.h windowinfo.h rendering.h container.h
 	g++ $(ARGS) -c main.cpp -o main.o
 
 textbox.o: textbox.cpp textbox.h glfont.h $(ELEMENT_DEPENDENCIES)

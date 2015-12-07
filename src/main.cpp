@@ -1,48 +1,22 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <GL/freeglut.h>
-#include <GL/gl.h>
-#include <vector>
-#include <iostream>
-
-//Custom classes
-#include "container.h"
-#include "window.h"
-#include "windowinfo.h"
-#include "rendering.h"
-#include "textbox.h"
-#include "button.h"
+#include "main.h"
 using namespace std;
 
 #define FPS 60
 #define DEFAULT_WIDTH 800
 #define DEFAULT_HEIGHT 600
-#define TRUE 1
-#define FALSE 0
 #define SCREEN_ORIGIN_X -1
 #define SCREEN_ORIGIN_Y -1
 
 int windowHandle = 0;
-int draggingWindow = FALSE;	//Is the user currently dragging a window?
+bool draggingWindow = false;	//Is the user currently dragging a window?
 int activeWindow = -1;		//The window currently being interacted with
-int mouseRelativePosition[2];	//The position of the mouse relative to the window being dragged
+int mouseRelativePosition[2];	//The position of the mouse relative to the
+				// window being dragged
 int screenSize[2] = {DEFAULT_WIDTH, DEFAULT_HEIGHT};
 
 Container* GUI;		//The main GUI, holding all of the windows.
-Rendering* rendering;	//Rendering class, used for world to screenspace conversion
-
-void Initialise(int, char*[]);
-void InitWindow(int, char*[]);
-bool InitOpenGL();
-void Update();
-void Render();
-void Resize(int, int);
-void MainLoop(int);
-
-//Input handling
-void HandleMouseClick(int, int, int, int);
-void HandleMouseMoving(int, int);
+Rendering* rendering;	//Rendering class, used for world to screenspace
+			// conversion
 
 int main(int argc, char* argv[]) {
 	Initialise(argc, argv);
@@ -69,7 +43,8 @@ void Initialise(int argc, char* argv[]) {
 				rendering, GUI));
 	GUI->AddChild(new Window(-0.2f, -0.2f, 1.0f, 30, 2,
 				rendering, GUI));
-	
+	GUI->AddChild(new Textbox(-1.0f, 0.5f, 1.0f, 1.0f, 3, GUI, "Hello World", rendering)); 
+	GUI[0].AddChild(new Button(0.8f, 0.8f, 0.19f, 0.19f, 0, GUI->children[0], rendering, 1));	
 	//Start running GLut's loop
 	glutMainLoop();
 }
@@ -141,11 +116,6 @@ void Render() {
 	//Drawing code goes here
 	GUI->Draw();
 
-	/*for(vector<Element*>::iterator it  = windows.begin(); it != windows.end(); ++it) {
-		Element& currentWindow = **it;	//The current window being drawn
-		currentWindow.Draw();
-	}*/
-
 	//Update the screen by swapping the buffers
 	glutSwapBuffers();
 }
@@ -164,30 +134,9 @@ void MainLoop(int val) {
 //Handles mouse clicks
 void HandleMouseClick(int button, int state, int x, int y) {
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-		draggingWindow = GUI->Click(x, screenSize[1] - y, mouseRelativePosition);
-		/* activeWindow = -1;	//Reset the active window
-		for (uint i = 0; i < windows.size(); ++i) {
-			//Loop through every window and see if the mouse collides with them.
-			//If it does, make that the current window being dragged and move it
-			if (windows[i]->Click(x, screenSize[1] - y, mouseRelativePosition))
-				activeWindow = i;
-		}
-		if (activeWindow > -1) {
-			//If the user has clicked on a window, move that window to the back of
-			//the vector, meaning it will be rendered last and therefore "at the
-			//front"
-			windows.push_back(windows[activeWindow]);
-			windows.erase(windows.begin() + activeWindow);
-
-			//The active window will now be incorrect, so let's update it
-			activeWindow = windows.size() - 1;
-			draggingWindow = TRUE;
-		} else {
-			activeWindow = -1;
-			draggingWindow = FALSE;
-		}*/
-	} else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
-		draggingWindow = FALSE;
+		draggingWindow = GUI->Click(x,
+					screenSize[1] - y,
+					mouseRelativePosition);
 	}
 
 	cout << "Mouse X: " << x << endl;
@@ -198,8 +147,10 @@ void HandleMouseClick(int button, int state, int x, int y) {
 //Handles the mouse moving while a mouse button is pressed
 void HandleMouseMoving(int x, int y) {
 	if (draggingWindow) {
-		GUI->Move(x - mouseRelativePosition[0], (screenSize[1] - y) - mouseRelativePosition[1]);
-		//windows[activeWindow]->Move(x - mouseRelativePosition[0], (screenSize[1] - y) - mouseRelativePosition[1]);
+		GUI->Move(x - mouseRelativePosition[0],
+			(screenSize[1] - y) - mouseRelativePosition[1]);
+		//windows[activeWindow]->Move(x - mouseRelativePosition[0], 
+		//	(screenSize[1] - y) - mouseRelativePosition[1]);
 	}
 }
 
@@ -214,6 +165,28 @@ void Resize(int width, int height) {
 
 	screenSize[0] = width;
 	screenSize[1] = height;
-	//Change the viewport size so that discrete/scaling windows work properly
+	//Change the viewport size so that discrete/scaling windows work
+	//properly
 	glViewport(0, 0, width, height);
+}
+
+
+//Called by a button when it is clicked. The user can then use the 
+//buttonType property, along with a switch statement, to determine
+//what to do.
+void HandleButtonClick(Button* clickedButton) {
+	int buttonType = clickedButton->buttonType;
+	
+	//In this case, I've elected to use a value of 1 to indicate a close
+	//button
+	switch (buttonType) {
+	
+	case 1:
+		//Close the parent window
+		clickedButton->elementInfo->
+			parent->elementInfo->
+			parent->RemoveChild(clickedButton->elementInfo
+						->parent->elementInfo->index);
+		break;
+	}
 }

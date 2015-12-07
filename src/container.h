@@ -28,7 +28,6 @@ public:
 	virtual void PassData(void *);
 
 private:
-	int childCount;
 	int activeWindow;
 	bool movingWindow;
 };

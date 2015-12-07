@@ -3,13 +3,14 @@
 //*****************************************************************************
 
 #include "button.h"
+#include "main.h"
 #include "rendering.h"
 #include <GL/gl.h>
 #include <functional>
 
 Button::Button(float x, float y, float width, float height, int index,
 		Element* parent, Rendering* rendering,
-		std::function<void(int)>* function) {
+		int buttonType) {
 
 	this->elementInfo = new window_t;
 
@@ -21,7 +22,8 @@ Button::Button(float x, float y, float width, float height, int index,
 	this->elementInfo->parent = parent;
 
 	this->rendering = rendering;
-	this->function = function;
+	this->buttonType = buttonType;
+	this->border = true;
 
 	this->colour[0] = this->defaultColour[0];
 	this->colour[1] = this->defaultColour[1];
@@ -148,8 +150,7 @@ int Button::Click(int x, int y, int* clickLocation) {
 		clickLocation[0] = x - tempArray[0];
 		clickLocation[1] = y - tempArray[1];
 	
-		std::function<void(int)> tempFunction = *function;	
-		tempFunction(this->elementInfo->index);
+		HandleButtonClick(this);	
 
 		return 1;
 	}
@@ -189,6 +190,6 @@ void Button::SetBorder(bool enabled, int* colour) {
 }
 
 //PassData allows the function called by the button to be changed.
-void Button::PassData(void * newFunction) {
-	this->function = (std::function<void(int)>*)newFunction;
+void Button::PassData(void * newButtonType) {
+	this->buttonType = *(int*)newButtonType;
 }

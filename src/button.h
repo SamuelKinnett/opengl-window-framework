@@ -13,11 +13,11 @@
 class Button : public Element {
 	
 public:
-	//The constructor takes standard float arguments but also a pointer
-	//to a function to be executed when the button is clicked.
+	//The constructor takes standard float arguments for the size and an
+	//integer value that allows for user defined button callbacks.
 	Button(float x, float y, float width, float height, int index,
 			Element* parent, Rendering* rendering,
-			std::function<void(int)>* function);
+			int buttonType);
 	~Button();
 	
 	virtual void Draw();	
@@ -32,10 +32,10 @@ public:
 	virtual void SetBorder(bool, int* = 0);
 	virtual void PassData(void *);
 
+	int buttonType;	//An integer value that allows the user to determine
+	// what action should be taken in the HandleButtonClicked function. 
+
 private:
-	std::function<void(int)>* function; //A pointer to a function with
-	//return type void and taking one integer argument, the ID of the
-	//button that was clicked.
 	Rendering* rendering;
 };
 
