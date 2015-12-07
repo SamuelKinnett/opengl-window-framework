@@ -21,8 +21,8 @@ Textbox::Textbox(float x, float y, float width, float height, int index, Element
 	this->text = text;
 	this->rendering = rendering;
 
-	this->glFont = new GLFont();
-	glFont->Create("franklin_gothic.glf");
+	//this->glFont = new GLFont();
+	//glFont->Create("franklin_gothic.glf");
 }
 
 Textbox::~Textbox() {
@@ -81,9 +81,9 @@ void Textbox::Draw() {
 	float tempArray[2];
 	window_t* parentInfo = this->elementInfo->parent->elementInfo;	
 	rendering->GetRelativeFloat(this->elementInfo->x, this->elementInfo->y, tempArray, parentInfo);
-	glFont->Begin();
-	glFont->RenderText(this->text.c_str(), this->elementInfo->x, this->elementInfo->y, 0, 1);
-	glFont->End();
+	//glFont->Begin();
+	//glFont->RenderText(this->text.c_str(), this->elementInfo->x, this->elementInfo->y, 0, 1);
+	//glFont->End();
 }
 
 void Textbox::SetColour(int r, int g, int b, int a) {

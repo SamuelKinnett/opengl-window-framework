@@ -3,10 +3,6 @@
 //*****************************************************************************
 
 #include "button.h"
-#include "main.h"
-#include "rendering.h"
-#include <GL/gl.h>
-#include <functional>
 
 Button::Button(float x, float y, float width, float height, int index,
 		Element* parent, Rendering* rendering,
@@ -150,7 +146,7 @@ int Button::Click(int x, int y, int* clickLocation) {
 		clickLocation[0] = x - tempArray[0];
 		clickLocation[1] = y - tempArray[1];
 	
-		HandleButtonClick(this);	
+		//HandleButtonClick(this);	
 
 		return 1;
 	}

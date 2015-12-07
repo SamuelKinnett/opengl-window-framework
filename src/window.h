@@ -2,6 +2,10 @@
 #define WINDOW_H
 
 #include <GL/freeglut.h>
+#ifdef _WIN32
+//We're on winblows, include windows.h
+#include <Windows.h>
+#endif
 #include <GL/gl.h>
 #include "element.h"
 #include "windowinfo.h"

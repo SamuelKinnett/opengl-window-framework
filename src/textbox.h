@@ -2,12 +2,18 @@
 
 #ifndef TEXTBOX_H
 #define TEXTBOX_H
+
+//#ifdef _WIN32
+//We're on winblows, include windows.h
+#include <Windows.h>
+//#endif
+
 #include <GL/freeglut.h>
 #include <GL/gl.h>
 #include "element.h"
 #include "windowinfo.h"
 #include "rendering.h"
-#include "glfont.h"
+//#include "glfont.h"
 #include <string>
 
 class Textbox : public Element {
@@ -31,7 +37,7 @@ public:
 
 private:
 	std::string text;
-	GLFont* glFont;
+	//GLFont* glFont;
 };
 
 #endif

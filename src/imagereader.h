@@ -4,6 +4,11 @@
 #ifndef __IMAGEIO_H__
 #define __IMAGEIO_H__
 
+#ifdef _WIN32
+//We're on winblows, include windows.h. God, I hate this OS so much.
+#include <Windows.h>
+#endif
+
 #include <stdio.h>
 
 enum EImageReaderStatus

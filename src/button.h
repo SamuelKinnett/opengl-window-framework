@@ -6,8 +6,16 @@
 
 #ifndef BUTTON_H
 #define BUTTON_H
+
 #include "element.h"
 #include "rendering.h"
+#include "main.h"
+
+#ifdef _WIN32
+//We're on winblows, include windows.h
+#include <Windows.h>
+#endif
+#include <GL/gl.h>
 #include <functional>
 
 class Button : public Element {

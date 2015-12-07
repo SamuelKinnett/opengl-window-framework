@@ -23,13 +23,13 @@
 //Samuel Kinnett, 2015
 //*********************************************************
 
-#if WIN32
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
 #include <stdio.h>
 #include <string.h>
-#if WIN32
+#ifdef _WIN32
 #include <gl/gl.h>
 #elif __APPLE__
 #include <OpenGL/gl.h>

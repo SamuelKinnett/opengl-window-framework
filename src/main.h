@@ -1,6 +1,13 @@
+#ifndef MAIN_H
+#define MAIN_H
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef _WIN32
+//We're on winblows, include windows.h. God, I hate this OS so much.
+#include <Windows.h>
+#endif
 #include <GL/freeglut.h>
 #include <GL/gl.h>
 #include <vector>
@@ -25,5 +32,6 @@ void MainLoop(int);
 //Input handling
 void HandleMouseClick(int, int, int, int);
 void HandleMouseMoving(int, int);
-void HandleButtonClick(Button*);
+//void HandleButtonClick(Button*);
 
+#endif
