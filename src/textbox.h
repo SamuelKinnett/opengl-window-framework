@@ -3,10 +3,10 @@
 #ifndef TEXTBOX_H
 #define TEXTBOX_H
 
-//#ifdef _WIN32
+#ifdef _WIN32
 //We're on winblows, include windows.h
 #include <Windows.h>
-//#endif
+#endif
 
 #include <GL/freeglut.h>
 #include <GL/gl.h>

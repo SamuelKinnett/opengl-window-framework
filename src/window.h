@@ -17,19 +17,19 @@ class Window : public Element {
 
 public:
 	//WINDOW_DISCRETE
-	Window(int x, int y, int width, int height, int index,
-			Rendering* rendering, Element* parent);		
+	Window(int x, int y, int width, int height, Rendering* rendering,
+			Element* parent);		
 	
 	//WINDOW_SCALING
-	Window(float x, float y, float width, float height, int index,
+	Window(float x, float y, float width, float height,
 			Rendering* rendering, Element* parent);
 
 	//WINDOW_FIXED_H
-	Window(float x, float y, float width, int height, int index,
+	Window(float x, float y, float width, int height,
 			Rendering* rendering, Element* parent);
 
 	//WINDOW_FIXED_W
-	Window(float x, float y, int width, float height, int index,
+	Window(float x, float y, int width, float height,
 			Rendering* rendering, Element* parent);
 	
 	~Window();

@@ -18,8 +18,9 @@ using namespace std;
 //Standard constructor, taking arguments in terms of pixels A window
 //instantiated with this constructor will remain the same size and in the same
 //position regardless of the main window resizing.
-Window::Window(int x, int y, int width, int height, int index,
+Window::Window(int x, int y, int width, int height,
 		Rendering* rendering, Element* parent) {
+	int index = parent->childCount;
 	this->windowType = WINDOW_DISCRETE;
 	this->Initialise((float)x, (float)y, (float)width, (float)height,
 			index, rendering, parent);
@@ -28,8 +29,9 @@ Window::Window(int x, int y, int width, int height, int index,
 //Float constructor taking arguments as values between 0 and 1 A window 
 //instantiated with this constructor will remain at a relative size and
 //position to the main window, according to the float values.
-Window::Window(float x, float y, float width, float height, int index,
+Window::Window(float x, float y, float width, float height,
 		Rendering* rendering, Element* parent) {
+	int index = parent->childCount;
 	this->windowType = WINDOW_SCALING;
 	this->Initialise(x, y, width, height, index, rendering, parent);
 }
@@ -38,8 +40,9 @@ Window::Window(float x, float y, float width, float height, int index,
 //constructor creates a window that remains at the same relative space when
 //its parent window is resized, however only the width will scale with the
 //window.
-Window::Window(float x, float y, float width, int height, int index,
+Window::Window(float x, float y, float width, int height,
 		Rendering* rendering, Element* parent) {
+	int index = parent->childCount;
 	this->windowType = WINDOW_FIXED_H;
 	this->Initialise(x, y, width, (float)height, index, rendering,
 			parent);
@@ -49,8 +52,9 @@ Window::Window(float x, float y, float width, int height, int index,
 //constructor creates a window that remains at the same relative space when
 //its parent window is resized, however only the height will scale with the
 //window.
-Window::Window(float x, float y, int width, float height, int index,
+Window::Window(float x, float y, int width, float height,
 		Rendering* rendering, Element* parent) {
+	int index = parent->childCount;
 	this->windowType = WINDOW_FIXED_W;
 	this->Initialise(x, y, (float)width, height, index, rendering,
 			parent);
@@ -94,6 +98,9 @@ void Window::Initialise(float x, float y, float width, float height, int index,
 
 //Destructor
 Window::~Window() {
+	for (int currentChild = 0; currentChild < childCount; ++currentChild) {
+		this->RemoveChild(currentChild);
+	}
 	delete this->elementInfo;
 }
 
@@ -235,14 +242,14 @@ void Window::Draw() {
 	glEnd();
 
 	//DEBUG
-	cout << "********************************************" << endl
+	/* cout << "********************************************" << endl
 	<< "Window: " << this->elementInfo->index << endl
 	<< "Position:" << endl
 	<< windowVectors[0][0] << "," << windowVectors[0][1] << "," << windowVectors[1][0] << "," << windowVectors[1][1] << endl
 	<< "Parent Data: " << endl
 	<< this->elementInfo->parent->elementInfo->x << "," << this->elementInfo->parent->elementInfo->y << endl
 	<< this->elementInfo->parent->elementInfo->width << "," << this->elementInfo->parent->elementInfo->height << endl
-	<< "********************************************" << endl;
+	<< "********************************************" << endl; */
 	//Draw the border
 	if (this->border == true) {	
 		glColor4ub(this->borderColour[0],
@@ -572,6 +579,9 @@ void Window::SetColour(int r, int g, int b, int a) {
 	this->colour[1] = g;
 	this->colour[2] = b;
 	this->colour[3] = a;
+
+	for (int curChild = 0; curChild < childCount; ++curChild)
+		this->children[curChild]->SetColour(r, g, b, a);
 }
 
 //Enables/Disables the border and optionally sets its colour
@@ -583,6 +593,9 @@ void Window::SetBorder(bool enabled, int* colour) {
 		this->borderColour[2] = colour[2];
 		this->borderColour[3] = colour[3];
 	}
+
+	for (int curChild = 0; curChild < childCount; ++curChild)
+		this->children[curChild]->SetBorder(enabled, colour);
 }
 
 //For the window class, this method does not do anything

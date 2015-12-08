@@ -1,6 +1,8 @@
 #include "container.h"
+#include <iostream>
 
-Container::Container(float x, float y, float width, float height) {
+Container::Container(float x, float y, float width, float height,
+		Rendering* rendering) {
 
 	this->elementInfo = new window_t;
 
@@ -8,6 +10,8 @@ Container::Container(float x, float y, float width, float height) {
 	this->elementInfo->y = y;
 	this->elementInfo->width = width;
 	this->elementInfo->height = height;
+	
+	this->rendering = rendering;
 
 	childCount = 0;
 	activeWindow = -1;
@@ -99,4 +103,38 @@ void Container::PassData(void * newData) {
 	//Doesn't do anything at the moment
 	int toShutUpYCM = *(int*)newData;
 	++toShutUpYCM;
+}
+
+void Container::ButtonCallback(Button*) {
+	std::cout << "A button was clicked!" << std::endl;
+}
+
+//This method allows the user to quickly and easily create new windows. It
+// returns a pointer to the newly added window, to allow for easy manipulation.
+Window* Container::CreateWindow(float x, float y, float width, float height) {
+	//Create the base window
+	std::cout << "What hte fug" << std::endl;
+	this->AddChild(new Window(x, y, width, height, rendering, this));
+	Element* currentWindow = this->children[childCount - 1];
+	
+	currentWindow->draggable = false;
+
+	//Add a title bar (currently a window until I can fix the textbox class
+	//TODO: Fix the textbox class and add it here
+	std::cout << "Wew" << std::endl;
+	std::cout << "currentWindow info: " << currentWindow->elementInfo->x
+		<< " ," << currentWindow->elementInfo->y
+		<< " ," << currentWindow->elementInfo->width
+		<< " ," << currentWindow->elementInfo->height
+		<< std::endl;
+	currentWindow->AddChild(new Window(-1.0f, 0.9f, 1.9f, 0.1f, rendering,
+						currentWindow));
+	//Add a close button
+	std::cout << "wew2" << std::endl;
+	currentWindow->AddChild(new Button(0.9f, 0.9f, 0.1f, 0.1f,
+						currentWindow,
+						rendering, 1, this));
+
+	std::cout << "wew3" << std::endl;
+	return (Window*)currentWindow;
 }

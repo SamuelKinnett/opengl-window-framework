@@ -32,6 +32,5 @@ void MainLoop(int);
 //Input handling
 void HandleMouseClick(int, int, int, int);
 void HandleMouseMoving(int, int);
-//void HandleButtonClick(Button*);
 
 #endif

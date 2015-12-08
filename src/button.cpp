@@ -3,10 +3,11 @@
 //*****************************************************************************
 
 #include "button.h"
+#include <iostream>
 
-Button::Button(float x, float y, float width, float height, int index,
+Button::Button(float x, float y, float width, float height,
 		Element* parent, Rendering* rendering,
-		int buttonType) {
+		int buttonType, Container* GUI) {
 
 	this->elementInfo = new window_t;
 
@@ -14,7 +15,7 @@ Button::Button(float x, float y, float width, float height, int index,
 	this->elementInfo->y = y;
 	this->elementInfo->width = width;
 	this->elementInfo->height = height;
-	this->elementInfo->index = index;
+	this->elementInfo->index = parent->childCount;
 	this->elementInfo->parent = parent;
 
 	this->rendering = rendering;
@@ -25,6 +26,15 @@ Button::Button(float x, float y, float width, float height, int index,
 	this->colour[1] = this->defaultColour[1];
 	this->colour[2] = this->defaultColour[2];
 	this->colour[3] = this->defaultColour[3];
+
+	//In order to use the button callback function, we need to bind it
+	//so that the compiler knows the location of the object as well as
+	//its method. Using std::bind also allows us to remove the need to
+	//provide 'this' as an argument every time we want to call the 
+	//callback.
+	this->buttonCallback = std::bind(&Container::ButtonCallback, 
+					GUI, 
+					this);
 }
 
 //Draws the button to the screen
@@ -145,8 +155,8 @@ int Button::Click(int x, int y, int* clickLocation) {
 
 		clickLocation[0] = x - tempArray[0];
 		clickLocation[1] = y - tempArray[1];
-	
-		//HandleButtonClick(this);	
+		std::cout << "I was clicked!" << std::endl;	
+		buttonCallback();	
 
 		return 1;
 	}

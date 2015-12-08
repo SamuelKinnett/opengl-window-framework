@@ -9,7 +9,7 @@
 
 #include "element.h"
 #include "rendering.h"
-#include "main.h"
+#include "container.h"
 
 #ifdef _WIN32
 //We're on winblows, include windows.h
@@ -18,14 +18,19 @@
 #include <GL/gl.h>
 #include <functional>
 
+//forward declaration
+class Container;
+
 class Button : public Element {
 	
 public:
 	//The constructor takes standard float arguments for the size and an
-	//integer value that allows for user defined button callbacks.
-	Button(float x, float y, float width, float height, int index,
+	//integer value that allows for user defined button callbacks. It also
+	//takes a pointer to the buttonclick callback in the main function.
+	Button(float x, float y, float width, float height,
 			Element* parent, Rendering* rendering,
-			int buttonType);
+			int buttonType, Container* GUI);
+	//TODO: Add other constructors, similar to the window class.	
 	~Button();
 	
 	virtual void Draw();	
@@ -45,6 +50,7 @@ public:
 
 private:
 	Rendering* rendering;
+	std::function<void()> buttonCallback;
 };
 
 #endif

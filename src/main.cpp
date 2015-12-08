@@ -17,6 +17,7 @@ int screenSize[2] = {DEFAULT_WIDTH, DEFAULT_HEIGHT};
 Container* GUI;		//The main GUI, holding all of the windows.
 Rendering* rendering;	//Rendering class, used for world to screenspace
 			// conversion
+std::function<void(Button*)> buttonCallback;
 
 int main(int argc, char* argv[]) {
 	Initialise(argc, argv);
@@ -29,22 +30,17 @@ void Initialise(int argc, char* argv[]) {
 
 	//Create a new rendering class that will be used by all child elements
 	rendering = new Rendering(screenSize[0], screenSize[1]); 
-	
+
 	//Create the GUI
-	GUI = new Container(-1.0f, -1.0f, 2.0f, 2.0f);
+	GUI = new Container(-1.0f, -1.0f, 2.0f, 2.0f, rendering);
 
 	//TESTING
 	//Add two windows to the beginning of the windows vector
 	//Then add a child window to the scaling window
 	//...And a "task bar" along the bottom of the screen
-	GUI->AddChild(new Window(0.0f, 0.0f, 0.5f, 0.5f, 0, 
-				rendering, GUI));
-	GUI->AddChild(new Window(400, 300, 50, 50, 1, 
-				rendering, GUI));
-	GUI->AddChild(new Window(-0.2f, -0.2f, 1.0f, 30, 2,
-				rendering, GUI));
-	GUI->AddChild(new Textbox(-1.0f, 0.5f, 1.0f, 1.0f, 3, GUI, "Hello World", rendering)); 
-	GUI[0].AddChild(new Button(0.8f, 0.8f, 0.19f, 0.19f, 0, GUI->children[0], rendering, 1));	
+	
+	Window* window1 = GUI->CreateWindow(0.0f, 0.0f, 0.5f, 0.5f);
+	
 	//Start running GLut's loop
 	glutMainLoop();
 }
@@ -139,9 +135,9 @@ void HandleMouseClick(int button, int state, int x, int y) {
 					mouseRelativePosition);
 	}
 
-	cout << "Mouse X: " << x << endl;
-	cout << "Mouse Y: " << y << endl;
-	cout << "Active Window: " << activeWindow << endl;
+	//cout << "Mouse X: " << x << endl;
+	//cout << "Mouse Y: " << y << endl;
+	//cout << "Active Window: " << activeWindow << endl;
 }
 
 //Handles the mouse moving while a mouse button is pressed
@@ -168,25 +164,4 @@ void Resize(int width, int height) {
 	//Change the viewport size so that discrete/scaling windows work
 	//properly
 	glViewport(0, 0, width, height);
-}
-
-
-//Called by a button when it is clicked. The user can then use the 
-//buttonType property, along with a switch statement, to determine
-//what to do.
-void HandleButtonClick(Button* clickedButton) {
-	int buttonType = clickedButton->buttonType;
-	
-	//In this case, I've elected to use a value of 1 to indicate a close
-	//button
-	switch (buttonType) {
-	
-	case 1:
-		//Close the parent window
-		clickedButton->elementInfo->
-			parent->elementInfo->
-			parent->RemoveChild(clickedButton->elementInfo
-						->parent->elementInfo->index);
-		break;
-	}
 }

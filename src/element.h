@@ -19,6 +19,7 @@ public:
 	
 	int colour[4];
 	bool border;
+	bool draggable;
 	bool inAnimation;	//Is the element currently in an animation?
 	int defaultColour[4]{ 26, 35, 34, 202 };
 	int borderColour[4]{ 157, 242, 201, 255 };
