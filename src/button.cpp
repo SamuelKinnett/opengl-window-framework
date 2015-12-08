@@ -157,8 +157,11 @@ int Button::Click(int x, int y, int* clickLocation) {
 		clickLocation[1] = y - tempArray[1];
 		std::cout << "I was clicked!" << std::endl;	
 		buttonCallback();	
-
-		return 1;
+		
+		if (this->draggable)
+			return 1;
+		else
+			return 0;
 	}
 	return 0;
 }

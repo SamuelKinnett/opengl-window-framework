@@ -343,7 +343,6 @@ void Window::Resize(int width, int height) {
 //the window.
 int Window::Click(int x, int y, int* clickLocation) {
 
-	cout << "We reached here at least" << endl;	
 	//If we're in an animation, ignore everything and return false.
 	if (this->inAnimation)
 		return 0;
@@ -374,18 +373,24 @@ int Window::Click(int x, int y, int* clickLocation) {
 						this->elementInfo->y);
 				
 				//Check to see if any of the child items have
-				//been clicked. If they have, we return a 0 to
-				//prevent the window from being moved.
+				//been clicked and are draggable.
 				for (int i = 0; i < childCount; ++i) 
 					if (children[i]->Click(
 							x, 
 							y, 
 							clickLocation
-							) == 1)
-						return 0;
-				//Otherwise, we return 1 so the window can be
-				//dragged
-				return 1;
+							) == 1) {
+						clickLocation[0] = x - (parentPixel[0] +
+								this->elementInfo->x);
+						clickLocation[1] = y - (parentPixel[1] +
+								this->elementInfo->y);
+						return 1;	
+					}
+				//Otherwise, If this window can be dragged, we return 1
+				if (this->draggable)
+					return 1;
+				else 
+					return 0;
 			}
 			break;
 
@@ -418,16 +423,24 @@ int Window::Click(int x, int y, int* clickLocation) {
 				clickLocation[0] = x - tempArray[0];
 				clickLocation[1] = y - tempArray[1];
 			
-				//Once again, check to see if any of the child
-				//items have been clicked
-				for(int i = 0; i < childCount; ++i)
+				//Check to see if any of the child items have
+				//been clicked and are draggable.
+				for (int i = 0; i < childCount; ++i) 
 					if (children[i]->Click(
-							x,
-							y,
+							x, 
+							y, 
 							clickLocation
-							) == 1)
-						return 0;
-				return 1;
+							) == 1) {
+						clickLocation[0] = x - tempArray[0];
+						clickLocation[1] = y - tempArray[1];
+						return 1;	
+					}
+				//Otherwise, If this window can be dragged, we return 1
+				if (this->draggable)
+					return 1;
+				else 
+					return 0;
+				
 			}
 			break;
 
@@ -466,16 +479,24 @@ int Window::Click(int x, int y, int* clickLocation) {
 				clickLocation[0] = x - tempArray[0];
 				clickLocation[1] = y - tempArray[1];
 			
-				//Once again, check to see if any of the child
-				//items have been clicked
-				for(int i = 0; i < childCount; ++i)
+				//Check to see if any of the child items have
+				//been clicked and are draggable.
+				for (int i = 0; i < childCount; ++i) 
 					if (children[i]->Click(
-							x,
-							y,
+							x, 
+							y, 
 							clickLocation
-							) == 1)
-						return 0;
-				return 1;
+							) == 1) {
+						clickLocation[0] = x - tempArray[0];
+						clickLocation[1] = y - tempArray[1];
+						return 1;	
+					}
+				//Otherwise, If this window can be dragged, we return 1
+				if (this->draggable)
+					return 1;
+				else 
+					return 0;
+				
 			}
 			break;
 
@@ -514,16 +535,24 @@ int Window::Click(int x, int y, int* clickLocation) {
 				clickLocation[0] = x - tempArray[0];
 				clickLocation[1] = y - tempArray[1];
 			
-				//Once again, check to see if any of the child
-				//items have been clicked
-				for(int i = 0; i < childCount; ++i)
+				//Check to see if any of the child items have
+				//been clicked and are draggable.
+				for (int i = 0; i < childCount; ++i) 
 					if (children[i]->Click(
-							x,
-							y,
+							x, 
+							y, 
 							clickLocation
-							) == 1)
-						return 0;
-				return 1;
+							) == 1) {
+						clickLocation[0] = x - tempArray[0];
+						clickLocation[1] = y - tempArray[1];
+						return 1;	
+					}
+				//Otherwise, If this window can be dragged, we return 1
+				if (this->draggable)
+					return 1;
+				else 
+					return 0;
+				
 			}
 			break;
 	}

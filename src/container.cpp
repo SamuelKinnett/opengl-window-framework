@@ -113,7 +113,6 @@ void Container::ButtonCallback(Button*) {
 // returns a pointer to the newly added window, to allow for easy manipulation.
 Window* Container::CreateWindow(float x, float y, float width, float height) {
 	//Create the base window
-	std::cout << "What hte fug" << std::endl;
 	this->AddChild(new Window(x, y, width, height, rendering, this));
 	Element* currentWindow = this->children[childCount - 1];
 	
@@ -121,20 +120,14 @@ Window* Container::CreateWindow(float x, float y, float width, float height) {
 
 	//Add a title bar (currently a window until I can fix the textbox class
 	//TODO: Fix the textbox class and add it here
-	std::cout << "Wew" << std::endl;
-	std::cout << "currentWindow info: " << currentWindow->elementInfo->x
-		<< " ," << currentWindow->elementInfo->y
-		<< " ," << currentWindow->elementInfo->width
-		<< " ," << currentWindow->elementInfo->height
-		<< std::endl;
 	currentWindow->AddChild(new Window(-1.0f, 0.9f, 1.9f, 0.1f, rendering,
 						currentWindow));
+	currentWindow->children[0]->draggable = true;
 	//Add a close button
-	std::cout << "wew2" << std::endl;
 	currentWindow->AddChild(new Button(0.9f, 0.9f, 0.1f, 0.1f,
 						currentWindow,
 						rendering, 1, this));
-
-	std::cout << "wew3" << std::endl;
+	currentWindow->children[1]->draggable = false;
+	
 	return (Window*)currentWindow;
 }
