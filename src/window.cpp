@@ -93,6 +93,34 @@ void Window::Initialise(float x, float y, float width, float height, int index,
 	this->colour[2] = defaultColour[2];
 	this->colour[3] = defaultColour[3];
 
+	//Calculate the origin point and modifiers
+	switch(origin) {
+
+		case bottomLeft:	
+			rendering->GetRelativeFloat(-1.0f, -1.0f, originPosition, parent->elementInfo);
+			xModifier = 1;
+			yModifier = 1;
+			break;
+
+		case bottomRight:
+			rendering->GetRelativeFloat(1.0f, -1.0f, originPosition, parent->elementInfo);
+			xModifier = -1;
+			yModifier = 1;
+			break;
+
+		case topLeft:
+			rendering->GetRelativeFloat(-1.0f, 1.0f, originPosition, parent->elementInfo);
+			xModifier = 1;
+			yModifier = -1;
+			break;
+
+		case topRight:
+			rendering->GetRelativeFloat(1.0f, 1.0f, originPosition, parent->elementInfo);
+			xModifier = -1;
+			yModifier = -1;
+			break;
+	}
+
 	this->animState = opening;
 }
 
@@ -138,14 +166,20 @@ void Window::Draw() {
 			//We need to convert the pixel co-ordinates to 
 			//world co-ordinates
 			int parentPixel[2];
-			this->rendering->FloatToPixel(parentInfo->x, 
+			/*this->rendering->FloatToPixel(parentInfo->x, 
 					parentInfo->y, 
+					parentPixel);*/
+			this->rendering->FloatToPixel(
+					this->originPosition[0],
+					this->originPosition[1],
 					parentPixel);
-			
+
 			//The bottom left corner of the window
-			this->rendering->PixelToFloat(parentPixel[0] + 
-					this->elementInfo->x, 
-					parentPixel[1] + this->elementInfo->y,
+			this->rendering->PixelToFloat(
+					parentPixel[0] + 
+					this->elementInfo->x * xModifier, 
+					parentPixel[1] + 
+					this->elementInfo->y * yModifier,
 				       	tempArray);	
 	
 			//The top right corner of the window
