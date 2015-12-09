@@ -31,7 +31,7 @@ void Rendering::PixelToFloat(int x, int y, float* returnArray) {
 
 //Converts an integer into a fraction of an axis
 float Rendering::PixelToFloat1D(int value, int axisSize) {
-	return (2 * ((float)value / axisSize) - 1);
+	return ((float)value / axisSize);
 }
 
 //Converts a float co-ordinate into a pixel co-ordinate
@@ -45,11 +45,11 @@ int Rendering::FloatToPixel1D(float value, int axisSize) {
 	return (((value + 1) / 2.0) * axisSize);
 }
 
-//Returns a float value relative to the parent element
+//Returns a float value relative to the size of the parent element
 void Rendering::GetRelativeFloat(float x, float y, float* returnArray,
 		window_t* parentInfo) {
-	returnArray[0] = parentInfo->x + (((x + 1.0f) / 2.0f) * parentInfo->width);
-	returnArray[1] = parentInfo->y + (((y + 1.0f) / 2.0f) * parentInfo->height);
+	returnArray[0] = GetRelativeFloat1D(x, parentInfo->width);
+	returnArray[1] = GetRelativeFloat1D(y, parentInfo->height);
 }
 
 float Rendering::GetRelativeFloat1D(float value, float axisSize) {

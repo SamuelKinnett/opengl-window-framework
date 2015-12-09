@@ -144,35 +144,31 @@ void Window::Draw() {
 
 			//The first corner of the window
 			tempArray[0] = this->originPosition[0] +
-				rendering->GetRelativeFloat1D(
-					rendering->PixelToFloat1D(window->x, this->screenWidth),
-					parentInfo->width);
+				rendering->PixelToFloat1D(window->x, this->screenWidth)
+					* this->xModifier;
 			tempArray[1] = this->originPosition[1] +
-				rendering->GetRelativeFloat1D(
-					rendering->PixelToFloat1D(window->y, this->screenHeight),
-					parentInfo->height);	
+				rendering->PixelToFloat1D(window->y, this->screenHeight)
+					* this->yModifier;	
 	
 			//The second corner of the window
 			tempSecondArray[0] = this->originPosition[0] +
-				rendering->GetRelativeFloat1D(
-					rendering->PixelToFloat1D(window->x + window->width, 
-								this->screenWidth),
-					parentInfo->width)
+				rendering->PixelToFloat1D(window->x + window->width, 
+								this->screenWidth)
 					* this->xModifier;
 			tempSecondArray[1] = this->originPosition[1] +
-				rendering->GetRelativeFloat1D(
-					rendering->PixelToFloat1D(window->y + window->height,
-								this->screenHeight),
-					parentInfo->height)
+				rendering->PixelToFloat1D(window->y + window->height,
+								this->screenHeight)
 					* this->yModifier;
 			break;
 
 		case WINDOW_SCALING:
 			//The first corner of the window
 			tempArray[0] = this->originPosition[0] + 
-					rendering->GetRelativeFloat1D(window->x, parentInfo->width);
+					rendering->GetRelativeFloat1D(window->x, parentInfo->width)
+					* this->xModifier;
 		       	tempArray[1] = this->originPosition[1] +
-					rendering->GetRelativeFloat1D(window->y, parentInfo->height);
+					rendering->GetRelativeFloat1D(window->y, parentInfo->height)
+					* this->yModifier;
 
 			//The second corner of the window
 			tempSecondArray[0] = this->originPosition[0] +
@@ -189,30 +185,32 @@ void Window::Draw() {
 			//Convert the height into a float value
 			floatHeight = rendering->PixelToFloat1D(window->height,
 					this->screenHeight);
-			floatHeight += window->y;
-			
+			std::cout << "Screen Height: " << this->screenHeight;
+			std::cout << "Pixel Height: " << window->height << std::endl;
+			std::cout << "Float Height: " << floatHeight << std::endl;
+			std::cout << "yModifier: " << yModifier << std::endl;	
 			//The first corner of the window
 			tempArray[0] = this->originPosition[0] + 
-				rendering->GetRelativeFloat1D(window->x, parentInfo->width);
+				rendering->GetRelativeFloat1D(window->x, parentInfo->width)
+				* this->xModifier;
 		       	tempArray[1] = this->originPosition[1] +
-				rendering->GetRelativeFloat1D(window->y, parentInfo->height);
+				rendering->GetRelativeFloat1D(window->y, parentInfo->height)
+				* this->yModifier;
 
 			//The second corner of the window
 			tempSecondArray[0] = this->originPosition[0] +
 				rendering->GetRelativeFloat1D(window->x + window->width, parentInfo->width)
 				* this->xModifier;
-			tempSecondArray[1] = this->originPosition[1] + 
-				rendering->GetRelativeFloat1D(floatHeight, parentInfo->height)
+			tempSecondArray[1] = tempArray[1] + floatHeight
 					* this->yModifier;
-
 			break;
 		
 		case WINDOW_FIXED_W:
 			
 			//Convert the width into a float value
 			floatWidth = rendering->PixelToFloat1D(window->width,
-					this->screenWidth);
-			floatWidth += window->x;
+					this->screenWidth)
+					* this->xModifier;
 
 			//The first corner of the window
 			tempArray[0] = this->originPosition[0] +
@@ -223,8 +221,7 @@ void Window::Draw() {
 					this->screenHeight);
 
 			//The second corner of the window
-			tempSecondArray[0] = this->originPosition[0] +
-				rendering->GetRelativeFloat1D(floatWidth, parentInfo->width)
+			tempSecondArray[0] = this->originPosition[0] + floatWidth
 					* this->xModifier;
 			tempSecondArray[1] = this->originPosition[1] +
 				rendering->GetRelativeFloat1D(window->y + window->height, parentInfo->height)
@@ -420,6 +417,9 @@ bool Window::Close() {
 void Window::Resize(int width, int height) {
 	this->screenWidth = width;
 	this->screenHeight = height;
+
+	for (int curChild = 0; curChild < childCount; ++curChild)
+		this->children[curChild]->Resize(width, height);
 }
 
 
@@ -735,6 +735,10 @@ void Window::UpdateOriginPoint() {
 				this->originPosition, 
 				this->elementInfo->
 					parent->elementInfo);
+			this->originPosition[0] += this->elementInfo->
+							parent->elementInfo->x;
+			this->originPosition[1] += this->elementInfo->
+							parent->elementInfo->y;
 			this->xModifier = 1;
 			this->yModifier = 1;
 			break;
@@ -746,6 +750,11 @@ void Window::UpdateOriginPoint() {
 				this->originPosition, 
 				this->elementInfo->
 					parent->elementInfo);
+
+			this->originPosition[0] += this->elementInfo->
+							parent->elementInfo->x;
+			this->originPosition[1] += this->elementInfo->
+							parent->elementInfo->y;
 			this->xModifier = -1;
 			this->yModifier = 1;
 			break;
@@ -757,6 +766,10 @@ void Window::UpdateOriginPoint() {
 				this->originPosition, 
 				this->elementInfo->
 				parent->elementInfo);
+			this->originPosition[0] += this->elementInfo->
+							parent->elementInfo->x;
+			this->originPosition[1] += this->elementInfo->
+							parent->elementInfo->y;
 			this->xModifier = 1;
 			this->yModifier = -1;
 			break;
@@ -768,6 +781,10 @@ void Window::UpdateOriginPoint() {
 				this->originPosition, 
 				this->elementInfo->
 					parent->elementInfo);
+			this->originPosition[0] += this->elementInfo->
+							parent->elementInfo->x;
+			this->originPosition[1] += this->elementInfo->
+							parent->elementInfo->y;
 			this->xModifier = -1;
 			this->yModifier = -1;
 			break;

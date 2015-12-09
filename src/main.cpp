@@ -33,14 +33,16 @@ void Initialise(int argc, char* argv[]) {
 
 	//Create the GUI
 	GUI = new Container(-1.0f, -1.0f, 2.0f, 2.0f, rendering);
-
+	
 	//TESTING
 	//Add two windows to the beginning of the windows vector
 	//Then add a child window to the scaling window
 	//...And a "task bar" along the bottom of the screen
 	
 	Window* window1 = GUI->CreateWindow(0.0f, 0.0f, 0.5f, 0.5f);
-	
+	GUI->AddChild(new Window(-1.0f, -1.0f, 0.5f, 0.5f, rendering, GUI));
+	GUI[0].origin = bottomLeft;
+
 	//Start running GLut's loop
 	glutMainLoop();
 }
