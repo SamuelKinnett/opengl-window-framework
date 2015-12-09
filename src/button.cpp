@@ -49,6 +49,8 @@ Button::Button(float x, float y, float width, int height, Element * parent, Rend
 void Button::Initialise(float x, float y, float width, float height, Element *parent, Rendering * rendering, int buttonType, Container * GUI, originPoints origin) {
 	this->elementInfo = new window_t;
 
+	this->origin = origin;
+
 	//Based on the new origin, we may need to convert the user's input
 	//to make things easier for them. 
 	switch (this->origin) {
