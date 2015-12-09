@@ -141,124 +141,94 @@ void Window::Draw() {
 
 	switch (windowType) {
 		case WINDOW_DISCRETE:
-			//We need to convert the pixel co-ordinates to 
-			//world co-ordinates
-			int parentPixel[2];
-			rendering->FloatToPixel(
-					this->originPosition[0],
-					this->originPosition[1],
-					parentPixel);
 
 			//The first corner of the window
-			rendering->PixelToFloat(
-					parentPixel[0] + window->x * 
-						this->xModifier, 
-					parentPixel[1] + window->y * 
-						this->yModifier,
-				       	tempArray);	
+			tempArray[0] = this->originPosition[0] +
+				rendering->GetRelativeFloat1D(
+					rendering->PixelToFloat1D(window->x, this->screenWidth),
+					parentInfo->width);
+			tempArray[1] = this->originPosition[1] +
+				rendering->GetRelativeFloat1D(
+					rendering->PixelToFloat1D(window->y, this->screenHeight),
+					parentInfo->height);	
 	
 			//The second corner of the window
-			rendering->PixelToFloat(
-					parentPixel[0] + window->x * 
-							this->xModifier
-						+ window->width,
-					parentPixel[1] + window->y * 
-							this->yModifier
-						+ window->height,
-					tempSecondArray);
+			tempSecondArray[0] = this->originPosition[0] +
+				rendering->GetRelativeFloat1D(
+					rendering->PixelToFloat1D(window->x + window->width, 
+								this->screenWidth),
+					parentInfo->width)
+					* this->xModifier;
+			tempSecondArray[1] = this->originPosition[1] +
+				rendering->GetRelativeFloat1D(
+					rendering->PixelToFloat1D(window->y + window->height,
+								this->screenHeight),
+					parentInfo->height)
+					* this->yModifier;
 			break;
 
 		case WINDOW_SCALING:
 			//The first corner of the window
-			//tempArray[0] = this->originPosition[0] + 
-			//			window->x * this->xModifier;
-		       	//tempArray[1] = this->originPosition[1] +
-			//			window->y * this->yModifier;
-
-			rendering->GetRelativeFloat(
-					this->originPosition[0] + 
-						(window->x * this->xModifier),	
-					this->originPosition[1] + 
-						(window->y * this->yModifier),	
-					tempArray, 
-					parentInfo);
+			tempArray[0] = this->originPosition[0] + 
+					rendering->GetRelativeFloat1D(window->x, parentInfo->width);
+		       	tempArray[1] = this->originPosition[1] +
+					rendering->GetRelativeFloat1D(window->y, parentInfo->height);
 
 			//The second corner of the window
-			//tempSecondArray[0] = this->originPosition[0] +
-			//	(window->x * this->xModifier) + window->width;
-			//tempSecondArray[1] = this->originPosition[1] +
-			//	(window->y * this->yModifier) + window->height;
+			tempSecondArray[0] = this->originPosition[0] +
+				rendering->GetRelativeFloat1D(window->x + window->width, parentInfo->width) 
+							* this->xModifier;
+			tempSecondArray[1] = this->originPosition[1] +
+				rendering->GetRelativeFloat1D(window->y + window->height, parentInfo->height) 
+							* this->yModifier;
 			
-			rendering->GetRelativeFloat(
-					this->originPosition[0] +
-						( window->x * this->xModifier )
-						+ (window->width * this->xModifier),
-					this->originPosition[1] +
-						( window->y * this->yModifier )
-						+ (window->height * this->yModifier),
-					tempSecondArray,
-					parentInfo);
 			break;
 
 		case WINDOW_FIXED_H:
 			
 			//Convert the height into a float value
-			floatHeight = rendering->PixelToFloat1D(
-					this->originPosition[1] + 
-						(window->y * this->yModifier) 
-				      		+ (window->height * this->yModifier),
+			floatHeight = rendering->PixelToFloat1D(window->height,
 					this->screenHeight);
+			floatHeight += window->y;
 			
-			//The first left corner of the window
+			//The first corner of the window
 			tempArray[0] = this->originPosition[0] + 
-						(window->x * this->xModifier);
+				rendering->GetRelativeFloat1D(window->x, parentInfo->width);
 		       	tempArray[1] = this->originPosition[1] +
-						(window->y * this->yModifier);
+				rendering->GetRelativeFloat1D(window->y, parentInfo->height);
 
 			//The second corner of the window
 			tempSecondArray[0] = this->originPosition[0] +
-				(window->x * this->xModifier) + 
-					(window->width * this->xModifier);
-			tempSecondArray[1] = floatHeight;
+				rendering->GetRelativeFloat1D(window->x + window->width, parentInfo->width)
+				* this->xModifier;
+			tempSecondArray[1] = this->originPosition[1] + 
+				rendering->GetRelativeFloat1D(floatHeight, parentInfo->height)
+					* this->yModifier;
 
-			/*this->rendering->GetRelativeFloat(
-					this->originPosition[0] +
-						(window->x * this->xModifier) +
-				    		window->width,
-					floatHeight,
-					tempSecondArray, 
-					parentInfo);*/
 			break;
 		
 		case WINDOW_FIXED_W:
 			
 			//Convert the width into a float value
-			floatWidth = rendering->PixelToFloat1D(
-					rendering->FloatToPixel1D(
-						this->originPosition[0] +
-							window->x * 
-							this->xModifier,
-						this->screenWidth) + 
-						window->width * 
-						this->xModifier,
-			      		this->screenWidth);
+			floatWidth = rendering->PixelToFloat1D(window->width,
+					this->screenWidth);
+			floatWidth += window->x;
 
-			//The first corner of the window	
-			this->rendering->GetRelativeFloat(
-					this->originPosition[0] +
-						window->x * this->xModifier,
-					this->originPosition[1] +
-						window->y * this->yModifier,
-					tempArray,
-					parentInfo);
+			//The first corner of the window
+			tempArray[0] = this->originPosition[0] +
+				rendering->GetRelativeFloat1D(window->x + parentInfo->width,
+					this->screenWidth);
+			tempArray[1] = this->originPosition[1] +
+				rendering->GetRelativeFloat1D(window->y + parentInfo->height,
+					this->screenHeight);
 
-			//The top right corner of the window
-			this->rendering->GetRelativeFloat(floatWidth,
-					this->originPosition[1] + 
-						(window->y * this->yModifier) +
-						window->height,
-					tempSecondArray, 
-					parentInfo);
+			//The second corner of the window
+			tempSecondArray[0] = this->originPosition[0] +
+				rendering->GetRelativeFloat1D(floatWidth, parentInfo->width)
+					* this->xModifier;
+			tempSecondArray[1] = this->originPosition[1] +
+				rendering->GetRelativeFloat1D(window->y + window->height, parentInfo->height)
+				* this->yModifier;
 			break;	
 	}
 
