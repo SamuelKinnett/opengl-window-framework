@@ -39,8 +39,7 @@ void Initialise(int argc, char* argv[]) {
 	//Then add a child window to the scaling window
 	//...And a "task bar" along the bottom of the screen
 	
-	Window* window1 = GUI->InstantiateWindow(0.0f, 0.0f, 0.5f, 0.5f);
-
+	Window* window1 = GUI->InstantiateWindow(-1.0f, -1.0f, 0.5f, 0.5f);
 	//Start running GLut's loop
 	glutMainLoop();
 }

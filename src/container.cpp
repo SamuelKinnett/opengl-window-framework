@@ -30,11 +30,6 @@ Container::~Container() {
 void Container::Draw() {
 	for (int curChild = 0; curChild < childCount; ++curChild) {
 		this->children[curChild]->Draw();
-		std::cout << "Current child position:" << std::endl;
-		std::cout << "X1:" << children[curChild]->elementInfo->x << std::endl;
-		std::cout << "Y1:" << children[curChild]->elementInfo->y << std::endl;
-		std::cout << "Width:" << children[curChild]->elementInfo->width << std::endl;
-		std::cout << "Height:" << children[curChild]->elementInfo->height << std::endl;
 	}
 }
 
@@ -139,11 +134,10 @@ Window* Container::InstantiateWindow(float x, float y, float width, float height
 						currentWindow, topLeft));
 	currentWindow->children[0]->draggable = true;
 	//Add a close button
-	currentWindow->AddChild(new Button(1.0f, 1.0f, 0.5f, 0.5f,
+	currentWindow->AddChild(new Button(0, 0, 100, 100,
 						currentWindow,
-						rendering, 1, this));
+						rendering, 1, this, bottomLeft));
 	currentWindow->children[1]->draggable = false;
-	currentWindow->children[1]->origin = topRight; 
 	
 	return (Window*)currentWindow;
 }

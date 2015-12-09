@@ -13,36 +13,40 @@
 //Constructor creating a scaling button
 Button::Button(float x, float y, float width, float height,
 		Element* parent, Rendering* rendering,
-		int buttonType, Container* GUI) {
+		int buttonType, Container* GUI,
+		originPoints origin) {
 
 	this->windowType = BUTTON_SCALING;
-	this->Initialise(x, y, width, height, parent, rendering, buttonType, GUI);
+	this->Initialise(x, y, width, height, parent, rendering, buttonType, GUI, origin);
 }
 
 //Discrete constuctor
 Button::Button(int x, int y, int width, int height, 
 		Element * parent, Rendering * rendering, 
-		int buttonType, Container * GUI) {
+		int buttonType, Container * GUI,
+		originPoints origin) {
 
 	this->windowType = BUTTON_DISCRETE;
-	this->Initialise(x, y, width, height, parent, rendering, buttonType, GUI);
+	this->Initialise(x, y, width, height, parent, rendering, buttonType, GUI, origin);
 }
 
 //Fixed width constructor
-Button::Button(float x, float y, int width, float height, Element * parent, Rendering * rendering, int buttonType, Container * GUI) {
+Button::Button(float x, float y, int width, float height, Element * parent, Rendering * rendering, int buttonType, Container * GUI,
+				originPoints origin) {
 
 	this->windowType = BUTTON_FIXED_W;
-	this->Initialise(x, y, (float)width, height, parent, rendering, buttonType, GUI);
+	this->Initialise(x, y, (float)width, height, parent, rendering, buttonType, GUI, origin);
 }
 
 //Fixed height constructor
-Button::Button(float x, float y, float width, int height, Element * parent, Rendering * rendering, int buttonType, Container * GUI) {
+Button::Button(float x, float y, float width, int height, Element * parent, Rendering * rendering, int buttonType, Container * GUI,
+				originPoints origin) {
 
 	this->windowType = BUTTON_FIXED_H;
-	this->Initialise(x, y, width, (float)height, parent, rendering, buttonType, GUI);
+	this->Initialise(x, y, width, (float)height, parent, rendering, buttonType, GUI, origin);
 }
 
-void Button::Initialise(float x, float y, float width, float height, Element *parent, Rendering * rendering, int buttonType, Container * GUI) {
+void Button::Initialise(float x, float y, float width, float height, Element *parent, Rendering * rendering, int buttonType, Container * GUI, originPoints origin) {
 	this->elementInfo = new window_t;
 
 	//Based on the new origin, we may need to convert the user's input
@@ -50,20 +54,25 @@ void Button::Initialise(float x, float y, float width, float height, Element *pa
 	switch (this->origin) {
 
 	case bottomRight:
-		x *= -1;
+		this->elementInfo->x = x * -1.0f;
+		this->elementInfo->y = y;
 		break;
 
 	case topLeft:
-		y *= -1;
+		this->elementInfo->x = x;
+		this->elementInfo->y = y * -1.0f;
 		break;
 
 	case topRight:
-		x *= -1;
-		y *= -1;
+		this->elementInfo->x = x * -1.0f;
+		this->elementInfo->y = y * -1.0f;
+
+	default:
+		this->elementInfo->x = x;
+		this->elementInfo->y = y;
+		break;
 	}
 
-	this->elementInfo->x = x;
-	this->elementInfo->y = y;
 	this->elementInfo->width = width;
 	this->elementInfo->height = height;
 	this->elementInfo->index = parent->childCount;
@@ -110,7 +119,8 @@ bool Button::Close() {
 }
 
 void Button::Resize(int screenWidth, int screenHeight) {
-	//Does nothing for now
+	this->screenWidth = screenWidth;
+	this->screenHeight = screenHeight;
 }
 
 void Button::AddChild(Element* newChild) {

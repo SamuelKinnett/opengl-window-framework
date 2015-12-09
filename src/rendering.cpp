@@ -144,10 +144,10 @@ void Rendering::DrawWindow(Element* element) {
 
 		//The first corner of the window
 		tempArray[0] = element->originPosition[0] +
-			rendering->PixelToFloat1D(window->x, this->screenWidth)
+			rendering->PixelToFloat1D(window->x, element->screenWidth)
 			* element->xModifier;
 		tempArray[1] = element->originPosition[1] +
-			rendering->PixelToFloat1D(window->y, this->screenHeight)
+			rendering->PixelToFloat1D(window->y, element->screenHeight)
 			* element->yModifier;
 
 		//The second corner of the window
@@ -157,7 +157,7 @@ void Rendering::DrawWindow(Element* element) {
 			* element->xModifier;
 		tempSecondArray[1] = element->originPosition[1] +
 			rendering->PixelToFloat1D(window->y + window->height,
-				this->screenHeight)
+				element->screenHeight)
 			* element->yModifier;
 		break;
 

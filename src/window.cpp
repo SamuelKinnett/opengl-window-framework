@@ -76,6 +76,9 @@ void Window::Initialise(float x, float y, float width, float height, int index,
 	this->screenWidth = viewportData[2];
 	this->screenHeight = viewportData[3];
 
+	this->origin = origin;
+
+
 	//Based on the new origin, we may need to convert the user's input
 	//to make things easier for them. For example, if the new origin is
 	//the top right (useful for close buttons), the user's x and y values
@@ -104,6 +107,8 @@ void Window::Initialise(float x, float y, float width, float height, int index,
 
 	this->border = true;
 	this->elementInfo = new window_t;
+	this->elementInfo->x = x;
+	this->elementInfo->y = y;
 	this->elementInfo->width = 0;
 	this->elementInfo->height= 0;
 	this->elementInfo->index = index;
