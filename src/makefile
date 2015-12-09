@@ -32,7 +32,7 @@ glfont.o: glfont.cpp glfont.h
 button.o: button.cpp button.h container.h $(ELEMENT_DEPENDENCIES)
 	g++ $(ARGS) -c button.cpp -o button.o
 
-container.o: container.h element.h button.h window.h
+container.o: container.cpp container.h element.h button.h window.h
 	g++ $(ARGS) -c container.cpp -o container.o
 
 clean:

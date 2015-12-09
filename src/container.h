@@ -12,6 +12,7 @@
 #include "button.h"
 #include "window.h"
 #include "rendering.h"
+#include "originpoints.h"
 
 //foward declaration
 class Button;

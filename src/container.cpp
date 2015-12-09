@@ -117,17 +117,19 @@ Window* Container::CreateWindow(float x, float y, float width, float height) {
 	Element* currentWindow = this->children[childCount - 1];
 	
 	currentWindow->draggable = false;
-
+	currentWindow->origin = bottomLeft;
 	//Add a title bar (currently a window until I can fix the textbox class
 	//TODO: Fix the textbox class and add it here
 	currentWindow->AddChild(new Window(-1.0f, 0.9f, 1.9f, 0.1f, rendering,
 						currentWindow));
 	currentWindow->children[0]->draggable = true;
+	currentWindow->children[0]->origin = bottomLeft;
 	//Add a close button
-	currentWindow->AddChild(new Button(0.9f, 0.9f, 0.1f, 0.1f,
+	currentWindow->AddChild(new Button(0, 0, 10, 10,
 						currentWindow,
 						rendering, 1, this));
 	currentWindow->children[1]->draggable = false;
+	currentWindow->children[1]->origin = bottomLeft; 
 	
 	return (Window*)currentWindow;
 }

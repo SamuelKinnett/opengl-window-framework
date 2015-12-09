@@ -36,6 +36,10 @@ public:
 	void GetRelativeFloat(float x, float y, float* returnArray, 
 				window_t* parentInfo);
 
+	//Returns a float value representing the relative value of the passed
+	// float to the axis size.
+	float GetRelativeFloat1D(float value, float axisSize);
+
 private:
 	int screenWidth, screenHeight;
 

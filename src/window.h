@@ -60,6 +60,7 @@ private:
 	int screenWidth, screenHeight, childCount;
 	void Initialise(float x, float y, float width, float height,
 			int index, Rendering* rendering, Element* parent);
+	void UpdateOriginPoint();
 };
 
 #endif

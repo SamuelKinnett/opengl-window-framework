@@ -93,34 +93,6 @@ void Window::Initialise(float x, float y, float width, float height, int index,
 	this->colour[2] = defaultColour[2];
 	this->colour[3] = defaultColour[3];
 
-	//Calculate the origin point and modifiers
-	switch(origin) {
-
-		case bottomLeft:	
-			rendering->GetRelativeFloat(-1.0f, -1.0f, originPosition, parent->elementInfo);
-			xModifier = 1;
-			yModifier = 1;
-			break;
-
-		case bottomRight:
-			rendering->GetRelativeFloat(1.0f, -1.0f, originPosition, parent->elementInfo);
-			xModifier = -1;
-			yModifier = 1;
-			break;
-
-		case topLeft:
-			rendering->GetRelativeFloat(-1.0f, 1.0f, originPosition, parent->elementInfo);
-			xModifier = 1;
-			yModifier = -1;
-			break;
-
-		case topRight:
-			rendering->GetRelativeFloat(1.0f, 1.0f, originPosition, parent->elementInfo);
-			xModifier = -1;
-			yModifier = -1;
-			break;
-	}
-
 	this->animState = opening;
 }
 
@@ -142,7 +114,10 @@ void Window::Draw() {
 	} else if (animState == closing) {
 		this->inAnimation = this->Close();
 	}
-	
+
+	//Update the origin point
+	UpdateOriginPoint();
+
 	float windowVectors[2][2];	
 	//2D array containing the vector of each point of the window
 	
@@ -159,97 +134,129 @@ void Window::Draw() {
 	float floatWidth = 0;
 	float floatHeight = 0;
 
+	//Some pointers to make the code a little more compact!
 	window_t* parentInfo = this->elementInfo->parent->elementInfo;
+	window_t* window = this->elementInfo;
+	Rendering* rendering = this->rendering;
 
 	switch (windowType) {
 		case WINDOW_DISCRETE:
 			//We need to convert the pixel co-ordinates to 
 			//world co-ordinates
 			int parentPixel[2];
-			/*this->rendering->FloatToPixel(parentInfo->x, 
-					parentInfo->y, 
-					parentPixel);*/
-			this->rendering->FloatToPixel(
+			rendering->FloatToPixel(
 					this->originPosition[0],
 					this->originPosition[1],
 					parentPixel);
 
-			//The bottom left corner of the window
-			this->rendering->PixelToFloat(
-					parentPixel[0] + 
-					this->elementInfo->x * xModifier, 
-					parentPixel[1] + 
-					this->elementInfo->y * yModifier,
+			//The first corner of the window
+			rendering->PixelToFloat(
+					parentPixel[0] + window->x * 
+						this->xModifier, 
+					parentPixel[1] + window->y * 
+						this->yModifier,
 				       	tempArray);	
 	
-			//The top right corner of the window
-			this->rendering->PixelToFloat(parentPixel[0] + 
-					this->elementInfo->x + 
-						this->elementInfo->width, 
-					parentPixel[1] + 
-						this->elementInfo->y + 
-						this->elementInfo->height, 
+			//The second corner of the window
+			rendering->PixelToFloat(
+					parentPixel[0] + window->x * 
+							this->xModifier
+						+ window->width,
+					parentPixel[1] + window->y * 
+							this->yModifier
+						+ window->height,
 					tempSecondArray);
 			break;
 
 		case WINDOW_SCALING:
-			//The bottom left corner of the window
-			this->rendering->GetRelativeFloat(this->elementInfo->x, 
-					this->elementInfo->y, 
+			//The first corner of the window
+			//tempArray[0] = this->originPosition[0] + 
+			//			window->x * this->xModifier;
+		       	//tempArray[1] = this->originPosition[1] +
+			//			window->y * this->yModifier;
+
+			rendering->GetRelativeFloat(
+					this->originPosition[0] + 
+						(window->x * this->xModifier),	
+					this->originPosition[1] + 
+						(window->y * this->yModifier),	
 					tempArray, 
 					parentInfo);
 
-			//The top right corner of the window
-			this->rendering->GetRelativeFloat(this->elementInfo->x + 
-						this->elementInfo->width,
-					this->elementInfo->y + 
-						this->elementInfo->height,
-					tempSecondArray, 
+			//The second corner of the window
+			//tempSecondArray[0] = this->originPosition[0] +
+			//	(window->x * this->xModifier) + window->width;
+			//tempSecondArray[1] = this->originPosition[1] +
+			//	(window->y * this->yModifier) + window->height;
+			
+			rendering->GetRelativeFloat(
+					this->originPosition[0] +
+						( window->x * this->xModifier )
+						+ (window->width * this->xModifier),
+					this->originPosition[1] +
+						( window->y * this->yModifier )
+						+ (window->height * this->yModifier),
+					tempSecondArray,
 					parentInfo);
 			break;
 
 		case WINDOW_FIXED_H:
 			
 			//Convert the height into a float value
-			floatHeight = this->rendering->PixelToFloat1D(
-					this->rendering->FloatToPixel1D(this->elementInfo->y, 
-						this->screenHeight) +
-				      		this->elementInfo->height,
-						this->screenHeight);
+			floatHeight = rendering->PixelToFloat1D(
+					this->originPosition[1] + 
+						(window->y * this->yModifier) 
+				      		+ (window->height * this->yModifier),
+					this->screenHeight);
 			
-			//The bottom left corner of the window
-			this->rendering->GetRelativeFloat(this->elementInfo->x, 
-					this->elementInfo->y, 
-					tempArray, 
-					parentInfo);
+			//The first left corner of the window
+			tempArray[0] = this->originPosition[0] + 
+						(window->x * this->xModifier);
+		       	tempArray[1] = this->originPosition[1] +
+						(window->y * this->yModifier);
 
-			//The top right corner of the window
-			this->rendering->GetRelativeFloat(this->elementInfo->x +
-				    	this->elementInfo->width,
+			//The second corner of the window
+			tempSecondArray[0] = this->originPosition[0] +
+				(window->x * this->xModifier) + 
+					(window->width * this->xModifier);
+			tempSecondArray[1] = floatHeight;
+
+			/*this->rendering->GetRelativeFloat(
+					this->originPosition[0] +
+						(window->x * this->xModifier) +
+				    		window->width,
 					floatHeight,
 					tempSecondArray, 
-					parentInfo);
+					parentInfo);*/
 			break;
 		
 		case WINDOW_FIXED_W:
 			
 			//Convert the width into a float value
-			floatWidth = this->rendering->PixelToFloat1D(
-					this->rendering->FloatToPixel1D(this->elementInfo->x,
+			floatWidth = rendering->PixelToFloat1D(
+					rendering->FloatToPixel1D(
+						this->originPosition[0] +
+							window->x * 
+							this->xModifier,
 						this->screenWidth) + 
-						this->elementInfo->width,
-			      			this->screenWidth);
+						window->width * 
+						this->xModifier,
+			      		this->screenWidth);
 
-			//The bottom left corner of the window	
-			this->rendering->GetRelativeFloat(this->elementInfo->x,
-					this->elementInfo->y,
+			//The first corner of the window	
+			this->rendering->GetRelativeFloat(
+					this->originPosition[0] +
+						window->x * this->xModifier,
+					this->originPosition[1] +
+						window->y * this->yModifier,
 					tempArray,
 					parentInfo);
 
 			//The top right corner of the window
 			this->rendering->GetRelativeFloat(floatWidth,
-					this->elementInfo->y + 
-					this->elementInfo->height,
+					this->originPosition[1] + 
+						(window->y * this->yModifier) +
+						window->height,
 					tempSecondArray, 
 					parentInfo);
 			break;	
@@ -268,13 +275,51 @@ void Window::Draw() {
 			this->colour[2], 
 			this->colour[3]);
 	
-	glBegin(GL_QUADS);
-	glVertex2f(windowVectors[0][0], windowVectors[0][1]);
-	glVertex2f(windowVectors[1][0], windowVectors[0][1]);
-	glVertex2f(windowVectors[1][0], windowVectors[1][1]);
-	glVertex2f(windowVectors[0][0], windowVectors[1][1]);
-	glEnd();
+	//Draw the window. Based on the origin point we may need to adjust the order
+	
+	switch (this->origin) {
 
+	case bottomLeft:
+		//The default origin. Here, out two points are the bottom left and
+		// top right respectively.
+		glBegin(GL_QUADS);
+		glVertex2f(windowVectors[0][0], windowVectors[0][1]);
+		glVertex2f(windowVectors[1][0], windowVectors[0][1]);
+		glVertex2f(windowVectors[1][0], windowVectors[1][1]);
+		glVertex2f(windowVectors[0][0], windowVectors[1][1]);
+		glEnd();
+		break;
+
+	case bottomRight:
+		//In this case, our two points are the bottom right and the top left
+		glBegin(GL_QUADS);
+		glVertex2f(windowVectors[1][0], windowVectors[0][1]);
+		glVertex2f(windowVectors[0][0], windowVectors[0][1]);
+		glVertex2f(windowVectors[0][0], windowVectors[1][1]);
+		glVertex2f(windowVectors[1][0], windowVectors[1][1]);
+		glEnd();
+		break;
+
+	case topLeft:
+		//Here, the points are the top left and the bottom right
+		glBegin(GL_QUADS);
+		glVertex2f(windowVectors[0][0], windowVectors[1][1]);
+		glVertex2f(windowVectors[1][0], windowVectors[1][1]);
+		glVertex2f(windowVectors[1][0], windowVectors[0][1]);
+		glVertex2f(windowVectors[0][0], windowVectors[0][1]);
+		glEnd();
+		break;
+
+	case topRight:
+		//And finally, the points here are the top right and the bottom left.
+		glBegin(GL_QUADS);
+		glVertex2f(windowVectors[1][0], windowVectors[1][1]);
+		glVertex2f(windowVectors[0][0], windowVectors[1][1]);
+		glVertex2f(windowVectors[0][0], windowVectors[0][1]);
+		glVertex2f(windowVectors[1][0], windowVectors[0][1]);
+		glEnd();
+		break;	
+	}
 	//DEBUG
 	/* cout << "********************************************" << endl
 	<< "Window: " << this->elementInfo->index << endl
@@ -291,12 +336,49 @@ void Window::Draw() {
 				this->borderColour[2],
 				this->borderColour[3]);
 
-		glBegin(GL_LINE_LOOP);
-		glVertex2f(windowVectors[0][0], windowVectors[0][1]);
-		glVertex2f(windowVectors[1][0], windowVectors[0][1]);
-		glVertex2f(windowVectors[1][0], windowVectors[1][1]);
-		glVertex2f(windowVectors[0][0], windowVectors[1][1]);
-		glEnd();
+		switch (this->origin) {
+
+		case bottomLeft:
+			//The default origin. Here, out two points are the bottom left and
+			// top right respectively.
+			glBegin(GL_LINE_LOOP);
+			glVertex2f(windowVectors[0][0], windowVectors[0][1]);
+			glVertex2f(windowVectors[1][0], windowVectors[0][1]);
+			glVertex2f(windowVectors[1][0], windowVectors[1][1]);
+			glVertex2f(windowVectors[0][0], windowVectors[1][1]);
+			glEnd();
+			break;
+	
+		case bottomRight:
+			//In this case, our two points are the bottom right and the top left
+			glBegin(GL_LINE_LOOP);
+			glVertex2f(windowVectors[1][0], windowVectors[0][1]);
+			glVertex2f(windowVectors[0][0], windowVectors[0][1]);
+			glVertex2f(windowVectors[0][0], windowVectors[1][1]);
+			glVertex2f(windowVectors[1][0], windowVectors[1][1]);
+			glEnd();
+			break;
+
+		case topLeft:
+			//Here, the points are the top left and the bottom right
+			glBegin(GL_LINE_LOOP);
+			glVertex2f(windowVectors[0][0], windowVectors[1][1]);
+			glVertex2f(windowVectors[1][0], windowVectors[1][1]);
+			glVertex2f(windowVectors[1][0], windowVectors[0][1]);
+			glVertex2f(windowVectors[0][0], windowVectors[0][1]);
+			glEnd();
+			break;
+
+		case topRight:
+			//And finally, the points here are the top right and the bottom left.
+			glBegin(GL_LINE_LOOP);
+			glVertex2f(windowVectors[1][0], windowVectors[1][1]);
+			glVertex2f(windowVectors[0][0], windowVectors[1][1]);
+			glVertex2f(windowVectors[0][0], windowVectors[0][1]);
+			glVertex2f(windowVectors[1][0], windowVectors[0][1]);
+			glEnd();
+			break;	
+		}
 	}
 
 	//Draw each of the child elements
@@ -595,15 +677,17 @@ int Window::Click(int x, int y, int* clickLocation) {
 }
 
 //Moves the window to the specified position. Eventually, this could be
-//extended to allow for moving animations and the like. X and Y are screen
-//position values given in pixels and so need to be converted if the window
-//is a scaling type.
+// extended to allow for moving animations and the like. X and Y are screen
+// position values given in pixels and so need to be converted if the window
+// is a scaling type.
 void Window::Move(int x, int y) {
 	window_t* parentInfo = this->elementInfo->parent->elementInfo;
 	
 	if (windowType == WINDOW_DISCRETE) {
 		int parentPixel[2];
-		this->rendering->FloatToPixel(parentInfo->x, parentInfo->y, parentPixel);
+		this->rendering->FloatToPixel(parentInfo->x, 
+						parentInfo->y, 
+						parentPixel);
 		this->elementInfo->x = parentPixel[0] + x;
 		this->elementInfo->y = parentPixel[1] + y;
 	} else {
@@ -665,4 +749,58 @@ void Window::SetBorder(bool enabled, int* colour) {
 void Window::PassData(void * input) {
 	int placeholder = *(int*)input;
 	placeholder++;	//Just to shut up YCM
+}
+
+
+//This function is called as needed to update the origin point of
+// the element.
+void Window::UpdateOriginPoint() {
+	//Calculate the origin point and modifiers
+	switch(origin) {
+
+		case bottomLeft:	
+			rendering->GetRelativeFloat(
+				-1.0f, 
+				-1.0f, 
+				this->originPosition, 
+				this->elementInfo->
+					parent->elementInfo);
+			this->xModifier = 1;
+			this->yModifier = 1;
+			break;
+
+		case bottomRight:
+			rendering->GetRelativeFloat(
+				1.0f, 
+				-1.0f,
+				this->originPosition, 
+				this->elementInfo->
+					parent->elementInfo);
+			this->xModifier = -1;
+			this->yModifier = 1;
+			break;
+
+		case topLeft:
+			rendering->GetRelativeFloat(
+				-1.0f,
+				1.0f, 
+				this->originPosition, 
+				this->elementInfo->
+				parent->elementInfo);
+			this->xModifier = 1;
+			this->yModifier = -1;
+			break;
+
+		case topRight:
+			rendering->GetRelativeFloat(
+				1.0f,
+				1.0f,
+				this->originPosition, 
+				this->elementInfo->
+					parent->elementInfo);
+			this->xModifier = -1;
+			this->yModifier = -1;
+			break;
+	}
+
 }

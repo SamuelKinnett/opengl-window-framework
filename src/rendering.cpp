@@ -51,3 +51,7 @@ void Rendering::GetRelativeFloat(float x, float y, float* returnArray,
 	returnArray[0] = parentInfo->x + (((x + 1.0f) / 2.0f) * parentInfo->width);
 	returnArray[1] = parentInfo->y + (((y + 1.0f) / 2.0f) * parentInfo->height);
 }
+
+float Rendering::GetRelativeFloat1D(float value, float axisSize) {
+	return ((value + 1.0f) / 2.0f) * axisSize;  
+}
