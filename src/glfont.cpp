@@ -15,29 +15,19 @@
 //Minsi Chen
 //*********************************************************
 
-//*********************************************************
-//Modifications made to enable use on GNU/Linux systems
-//1 - Use of fopen instead of fopen_s
-//2 - Changed preprocessor deirectives to include the correct
-//	libraries in the case of compilation on GNU/Linux
-//Samuel Kinnett, 2015
-//*********************************************************
-
-#ifdef _WIN32
+#if _WIN32
 #include <windows.h>
 #endif
 
 #include <stdio.h>
 #include <string.h>
-#ifdef _WIN32
-#include <gl/gl.h>
+#if _WIN32
+#include <GL/gl.h>
 #elif __APPLE__
 #include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
 #endif
 
-#include "glfont.h"
+#include "GLFont.h"
 
 //*********************************************************
 //GLFontBase
@@ -52,11 +42,10 @@ void GLFontBase::CreateImpl(const char *Filename, bool PixelPerfect)
 	Font.Char = NULL;
 	FreeResources();
 
-	FILE *Input = NULL;
+	FILE *Input;
 
 	//Open font file
-	Input = fopen(Filename, "rb");
-	if (Input == 0)
+	if (fopen_s(&Input, Filename, "rb") != 0)
 		throw GLFontError::InvalidFile();
 
 	//Read glFont structure

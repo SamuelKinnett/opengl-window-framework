@@ -5,11 +5,62 @@
 #include "button.h"
 #include <iostream>
 
+#define BUTTON_DISCRETE 0
+#define BUTTON_SCALING 1
+#define BUTTON_FIXED_H 2
+#define BUTTON_FIXED_W 3
+
+//Constructor creating a scaling button
 Button::Button(float x, float y, float width, float height,
 		Element* parent, Rendering* rendering,
 		int buttonType, Container* GUI) {
 
+	this->windowType = BUTTON_SCALING;
+	this->Initialise(x, y, width, height, parent, rendering, buttonType, GUI);
+}
+
+//Discrete constuctor
+Button::Button(int x, int y, int width, int height, 
+		Element * parent, Rendering * rendering, 
+		int buttonType, Container * GUI) {
+
+	this->windowType = BUTTON_DISCRETE;
+	this->Initialise(x, y, width, height, parent, rendering, buttonType, GUI);
+}
+
+//Fixed width constructor
+Button::Button(float x, float y, int width, float height, Element * parent, Rendering * rendering, int buttonType, Container * GUI) {
+
+	this->windowType = BUTTON_FIXED_W;
+	this->Initialise(x, y, (float)width, height, parent, rendering, buttonType, GUI);
+}
+
+//Fixed height constructor
+Button::Button(float x, float y, float width, int height, Element * parent, Rendering * rendering, int buttonType, Container * GUI) {
+
+	this->windowType = BUTTON_FIXED_H;
+	this->Initialise(x, y, width, (float)height, parent, rendering, buttonType, GUI);
+}
+
+void Button::Initialise(float x, float y, float width, float height, Element *parent, Rendering * rendering, int buttonType, Container * GUI) {
 	this->elementInfo = new window_t;
+
+	//Based on the new origin, we may need to convert the user's input
+	//to make things easier for them. 
+	switch (this->origin) {
+
+	case bottomRight:
+		x *= -1;
+		break;
+
+	case topLeft:
+		y *= -1;
+		break;
+
+	case topRight:
+		x *= -1;
+		y *= -1;
+	}
 
 	this->elementInfo->x = x;
 	this->elementInfo->y = y;
@@ -32,66 +83,20 @@ Button::Button(float x, float y, float width, float height,
 	//its method. Using std::bind also allows us to remove the need to
 	//provide 'this' as an argument every time we want to call the 
 	//callback.
-	this->buttonCallback = std::bind(&Container::ButtonCallback, 
-					GUI, 
-					this);
+	this->buttonCallback = std::bind(&Container::ButtonCallback,
+		GUI,
+		this);
+}
+
+Button::~Button() {
+	delete this->elementInfo;
 }
 
 //Draws the button to the screen
 void Button::Draw() {
-	window_t* parentInfo = this->elementInfo->parent->elementInfo;
-	
-	float buttonPositions[2][2];	//Stores the co-ordinates of the
-	//bottom left and top right corners of the button.
-	
-	float tempArray[2];	//Stores values before they are inserted into
-	//the buttonPositions array
-	
-	//The bottom left corner of the window
-	this->rendering->GetRelativeFloat(this->elementInfo->x, 
-					this->elementInfo->y, 
-					tempArray, 
-					parentInfo);
-	buttonPositions[0][0] = tempArray[0];
-	buttonPositions[0][1] = tempArray[1];
-
-	//The top right corner of the window
-	this->rendering->GetRelativeFloat(this->elementInfo->x + 
-						this->elementInfo->width,
-					this->elementInfo->y + 
-						this->elementInfo->height,
-					tempArray, 
-					parentInfo);
-	buttonPositions[1][0] = tempArray[0];
-	buttonPositions[1][1] = tempArray[1];
-	
-	//Set the colour
-	glColor4ub(this->colour[0], 
-			this->colour[1], 
-			this->colour[2], 
-			this->colour[3]);
-	
-	glBegin(GL_QUADS);
-	glVertex2f(buttonPositions[0][0], buttonPositions[0][1]);
-	glVertex2f(buttonPositions[1][0], buttonPositions[0][1]);
-	glVertex2f(buttonPositions[1][0], buttonPositions[1][1]);
-	glVertex2f(buttonPositions[0][0], buttonPositions[1][1]);
-	glEnd();
-	
-	//Draw the border
-	if (this->border == true) {	
-		glColor4ub(this->borderColour[0],
-				this->borderColour[1],
-				this->borderColour[2],
-				this->borderColour[3]);
-
-		glBegin(GL_LINE_LOOP);
-		glVertex2f(buttonPositions[0][0], buttonPositions[0][1]);
-		glVertex2f(buttonPositions[1][0], buttonPositions[0][1]);
-		glVertex2f(buttonPositions[1][0], buttonPositions[1][1]);
-		glVertex2f(buttonPositions[0][0], buttonPositions[1][1]);
-		glEnd();
-	}
+	rendering->DrawWindow(this);
+	std::cout << "Button X: " << this->elementInfo->x << std::endl;
+	std::cout << "Button Y: " << this->elementInfo->y << std::endl;
 }
 
 bool Button::Create() {

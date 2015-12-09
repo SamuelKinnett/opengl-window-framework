@@ -30,7 +30,22 @@ public:
 	Button(float x, float y, float width, float height,
 			Element* parent, Rendering* rendering,
 			int buttonType, Container* GUI);
-	//TODO: Add other constructors, similar to the window class.	
+
+	//Discrete constructor taking pixel arguments
+	Button(int x, int y, int width, int height,
+		Element* parent, Rendering* rendering,
+		int buttonType, Container* GUI);
+
+	//Fixed width constructor taking float and pixel arguments
+	Button(float x, float y, int width, float height,
+		Element* parent, Rendering* rendering,
+		int buttonType, Container* GUI);
+
+	//Fixed width constructor taking float and pixel arguments
+	Button(float x, float y, float width, int height,
+		Element* parent, Rendering* rendering,
+		int buttonType, Container* GUI);
+
 	~Button();
 	
 	virtual void Draw();	
@@ -49,6 +64,9 @@ public:
 	// what action should be taken in the HandleButtonClicked function. 
 
 private:
+
+	void Initialise(float x, float y, float width, float height, Element* parent,
+		Rendering* rendering, int buttonType, Container* GUI);
 	Rendering* rendering;
 	std::function<void()> buttonCallback;
 };

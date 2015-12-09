@@ -19,7 +19,9 @@ public:
 	Rendering* rendering;
 	
 	int colour[4];
+	int screenWidth, screenHeight;	//Used to locally store the dimensions of the screen for resizing and suchlike
 	bool border;
+	int windowType;	//The type of window (e.g. scaling, discrete etc.)
 	bool draggable;
 	bool inAnimation;	//Is the element currently in an animation?
 	int defaultColour[4]{ 26, 35, 34, 202 };

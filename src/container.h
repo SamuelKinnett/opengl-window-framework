@@ -21,6 +21,7 @@ class Container : public Element {
 public:
 	Container(float x, float y, float width, float height,
 		       	Rendering* rendering);
+	~Container();
 
 	virtual void Draw();	
 	virtual bool Create();
@@ -35,7 +36,7 @@ public:
 	virtual void PassData(void *);
 
 	void ButtonCallback(Button*);
-	Window* CreateWindow(float x, float y, float width, float height); 
+	Window* InstantiateWindow(float x, float y, float width, float height); 
 private:
 	int activeWindow;
 	bool movingWindow;

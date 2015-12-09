@@ -18,9 +18,24 @@ Container::Container(float x, float y, float width, float height,
 	movingWindow = false;
 }
 
+Container::~Container() {
+
+	delete this->elementInfo;
+
+	for (int curChild = 0; curChild < childCount; ++curChild) {
+		delete this->children[curChild];
+	}
+}
+
 void Container::Draw() {
-	for (int curChild = 0; curChild < childCount; ++curChild)
-	       this->children[curChild]->Draw();	
+	for (int curChild = 0; curChild < childCount; ++curChild) {
+		this->children[curChild]->Draw();
+		std::cout << "Current child position:" << std::endl;
+		std::cout << "X1:" << children[curChild]->elementInfo->x << std::endl;
+		std::cout << "Y1:" << children[curChild]->elementInfo->y << std::endl;
+		std::cout << "Width:" << children[curChild]->elementInfo->width << std::endl;
+		std::cout << "Height:" << children[curChild]->elementInfo->height << std::endl;
+	}
 }
 
 bool Container::Create() {
@@ -111,22 +126,20 @@ void Container::ButtonCallback(Button*) {
 
 //This method allows the user to quickly and easily create new windows. It
 // returns a pointer to the newly added window, to allow for easy manipulation.
-Window* Container::CreateWindow(float x, float y, float width, float height) {
-	//Create the base window
-	this->AddChild(new Window(x, y, width, height, rendering, this));
-	Element* currentWindow = this->children[childCount - 1];
+Window* Container::InstantiateWindow(float x, float y, float width, float height) {
 	
+	//Create the base window
+	this->AddChild(new Window(x, y, width, height, rendering, this, bottomLeft));
+	Element* currentWindow = this->children[childCount - 1];
 	currentWindow->draggable = false;
-	currentWindow->origin = bottomLeft;	
 
 	//Add a title bar (currently a window until I can fix the textbox class
 	//TODO: Fix the textbox class and add it here
-	currentWindow->AddChild(new Window(0.0f, 0.0f, 2.0f, 20, rendering,
-						currentWindow));
+	currentWindow->AddChild(new Window(-1.0f, 1.0f, 2.0f, 20, rendering,
+						currentWindow, topLeft));
 	currentWindow->children[0]->draggable = true;
-	currentWindow->children[0]->origin = topLeft;
 	//Add a close button
-	currentWindow->AddChild(new Button(0, 0, 20, 20,
+	currentWindow->AddChild(new Button(1.0f, 1.0f, 0.5f, 0.5f,
 						currentWindow,
 						rendering, 1, this));
 	currentWindow->children[1]->draggable = false;

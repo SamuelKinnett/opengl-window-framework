@@ -19,21 +19,23 @@ using namespace std;
 //instantiated with this constructor will remain the same size and in the same
 //position regardless of the main window resizing.
 Window::Window(int x, int y, int width, int height,
-		Rendering* rendering, Element* parent) {
+		Rendering* rendering, Element* parent,
+		originPoints origin) {
 	int index = parent->childCount;
 	this->windowType = WINDOW_DISCRETE;
 	this->Initialise((float)x, (float)y, (float)width, (float)height,
-			index, rendering, parent);
+			index, rendering, parent, origin);
 }
 
 //Float constructor taking arguments as values between 0 and 1 A window 
 //instantiated with this constructor will remain at a relative size and
 //position to the main window, according to the float values.
 Window::Window(float x, float y, float width, float height,
-		Rendering* rendering, Element* parent) {
+		Rendering* rendering, Element* parent,
+		originPoints origin) {
 	int index = parent->childCount;
 	this->windowType = WINDOW_SCALING;
-	this->Initialise(x, y, width, height, index, rendering, parent);
+	this->Initialise(x, y, width, height, index, rendering, parent, origin);
 }
 
 //Composite constructor accepting both float and iteger values. This
@@ -41,11 +43,12 @@ Window::Window(float x, float y, float width, float height,
 //its parent window is resized, however only the width will scale with the
 //window.
 Window::Window(float x, float y, float width, int height,
-		Rendering* rendering, Element* parent) {
+		Rendering* rendering, Element* parent,
+		originPoints origin) {
 	int index = parent->childCount;
 	this->windowType = WINDOW_FIXED_H;
 	this->Initialise(x, y, width, (float)height, index, rendering,
-			parent);
+			parent, origin);
 }
 
 //Composite constructor accepting both float and iteger values. This 
@@ -53,17 +56,18 @@ Window::Window(float x, float y, float width, int height,
 //its parent window is resized, however only the height will scale with the
 //window.
 Window::Window(float x, float y, int width, float height,
-		Rendering* rendering, Element* parent) {
+		Rendering* rendering, Element* parent,
+		originPoints origin) {
 	int index = parent->childCount;
 	this->windowType = WINDOW_FIXED_W;
 	this->Initialise(x, y, (float)width, height, index, rendering,
-			parent);
+			parent, origin);
 }
 
 //The initialise function is used for instantiation that is common accross
 //all window types.
 void Window::Initialise(float x, float y, float width, float height, int index,
-		Rendering* rendering, Element* parent) {
+		Rendering* rendering, Element* parent, originPoints origin) {
 	float viewportData[4];
 
 	//Get information about the size of the viewport
@@ -72,10 +76,34 @@ void Window::Initialise(float x, float y, float width, float height, int index,
 	this->screenWidth = viewportData[2];
 	this->screenHeight = viewportData[3];
 
+	//Based on the new origin, we may need to convert the user's input
+	//to make things easier for them. For example, if the new origin is
+	//the top right (useful for close buttons), the user's x and y values
+	//will be inverted!
+	switch (this->origin) {
+
+	case bottomRight:
+		x = x * -1.0f;
+		y = y;
+		break;
+
+	case topLeft:
+		x = x;
+		y = y * -1.0f;
+		break;
+
+	case topRight:
+		x = x * -1.0f;
+		y = y * -1.0f;
+
+	default:
+		x = x;
+		y = y;
+		break;
+	}
+
 	this->border = true;
 	this->elementInfo = new window_t;
-	this->elementInfo->x = x;
-	this->elementInfo->y = y;
 	this->elementInfo->width = 0;
 	this->elementInfo->height= 0;
 	this->elementInfo->index = index;
@@ -115,238 +143,7 @@ void Window::Draw() {
 		this->inAnimation = this->Close();
 	}
 
-	//Update the origin point
-	UpdateOriginPoint();
-
-	float windowVectors[2][2];	
-	//2D array containing the vector of each point of the window
-	
-	float tempArray[2];	
-	//Stores the bottom left co-ordinates until they are inserted into
-	//the 2D array
-	
-	float tempSecondArray[2];
-	//Stores the top right co-ordinates until they are inserted into the
-	//2D array
-	
-	//Initialise variables here to prevent scope issues in the 
-	//switch statement
-	float floatWidth = 0;
-	float floatHeight = 0;
-
-	//Some pointers to make the code a little more compact!
-	window_t* parentInfo = this->elementInfo->parent->elementInfo;
-	window_t* window = this->elementInfo;
-	Rendering* rendering = this->rendering;
-
-	switch (windowType) {
-		case WINDOW_DISCRETE:
-
-			//The first corner of the window
-			tempArray[0] = this->originPosition[0] +
-				rendering->PixelToFloat1D(window->x, this->screenWidth)
-					* this->xModifier;
-			tempArray[1] = this->originPosition[1] +
-				rendering->PixelToFloat1D(window->y, this->screenHeight)
-					* this->yModifier;	
-	
-			//The second corner of the window
-			tempSecondArray[0] = this->originPosition[0] +
-				rendering->PixelToFloat1D(window->x + window->width, 
-								this->screenWidth)
-					* this->xModifier;
-			tempSecondArray[1] = this->originPosition[1] +
-				rendering->PixelToFloat1D(window->y + window->height,
-								this->screenHeight)
-					* this->yModifier;
-			break;
-
-		case WINDOW_SCALING:
-			//The first corner of the window
-			tempArray[0] = this->originPosition[0] + 
-					rendering->GetRelativeFloat1D(window->x, parentInfo->width)
-					* this->xModifier;
-		       	tempArray[1] = this->originPosition[1] +
-					rendering->GetRelativeFloat1D(window->y, parentInfo->height)
-					* this->yModifier;
-
-			//The second corner of the window
-			tempSecondArray[0] = this->originPosition[0] +
-				rendering->GetRelativeFloat1D(window->x + window->width, parentInfo->width) 
-							* this->xModifier;
-			tempSecondArray[1] = this->originPosition[1] +
-				rendering->GetRelativeFloat1D(window->y + window->height, parentInfo->height) 
-							* this->yModifier;
-			
-			break;
-
-		case WINDOW_FIXED_H:
-			
-			//Convert the height into a float value
-			floatHeight = rendering->PixelToFloat1D(window->height,
-					this->screenHeight);
-			std::cout << "Screen Height: " << this->screenHeight;
-			std::cout << "Pixel Height: " << window->height << std::endl;
-			std::cout << "Float Height: " << floatHeight << std::endl;
-			std::cout << "yModifier: " << yModifier << std::endl;	
-			//The first corner of the window
-			tempArray[0] = this->originPosition[0] + 
-				rendering->GetRelativeFloat1D(window->x, parentInfo->width)
-				* this->xModifier;
-		       	tempArray[1] = this->originPosition[1] +
-				rendering->GetRelativeFloat1D(window->y, parentInfo->height)
-				* this->yModifier;
-
-			//The second corner of the window
-			tempSecondArray[0] = this->originPosition[0] +
-				rendering->GetRelativeFloat1D(window->x + window->width, parentInfo->width)
-				* this->xModifier;
-			tempSecondArray[1] = tempArray[1] + floatHeight
-					* this->yModifier;
-			break;
-		
-		case WINDOW_FIXED_W:
-			
-			//Convert the width into a float value
-			floatWidth = rendering->PixelToFloat1D(window->width,
-					this->screenWidth)
-					* this->xModifier;
-
-			//The first corner of the window
-			tempArray[0] = this->originPosition[0] +
-				rendering->GetRelativeFloat1D(window->x + parentInfo->width,
-					this->screenWidth);
-			tempArray[1] = this->originPosition[1] +
-				rendering->GetRelativeFloat1D(window->y + parentInfo->height,
-					this->screenHeight);
-
-			//The second corner of the window
-			tempSecondArray[0] = this->originPosition[0] + floatWidth
-					* this->xModifier;
-			tempSecondArray[1] = this->originPosition[1] +
-				rendering->GetRelativeFloat1D(window->y + window->height, parentInfo->height)
-				* this->yModifier;
-			break;	
-	}
-
-	//Store the point values in the 2D array
-	windowVectors[0][0] = tempArray[0];
-	windowVectors[0][1] = tempArray[1];
-	windowVectors[1][0] = tempSecondArray[0];
-	windowVectors[1][1] = tempSecondArray[1];
-	
-	
-	//Set the colour
-	glColor4ub(this->colour[0], 
-			this->colour[1], 
-			this->colour[2], 
-			this->colour[3]);
-	
-	//Draw the window. Based on the origin point we may need to adjust the order
-	
-	switch (this->origin) {
-
-	case bottomLeft:
-		//The default origin. Here, out two points are the bottom left and
-		// top right respectively.
-		glBegin(GL_QUADS);
-		glVertex2f(windowVectors[0][0], windowVectors[0][1]);
-		glVertex2f(windowVectors[1][0], windowVectors[0][1]);
-		glVertex2f(windowVectors[1][0], windowVectors[1][1]);
-		glVertex2f(windowVectors[0][0], windowVectors[1][1]);
-		glEnd();
-		break;
-
-	case bottomRight:
-		//In this case, our two points are the bottom right and the top left
-		glBegin(GL_QUADS);
-		glVertex2f(windowVectors[1][0], windowVectors[0][1]);
-		glVertex2f(windowVectors[0][0], windowVectors[0][1]);
-		glVertex2f(windowVectors[0][0], windowVectors[1][1]);
-		glVertex2f(windowVectors[1][0], windowVectors[1][1]);
-		glEnd();
-		break;
-
-	case topLeft:
-		//Here, the points are the top left and the bottom right
-		glBegin(GL_QUADS);
-		glVertex2f(windowVectors[0][0], windowVectors[1][1]);
-		glVertex2f(windowVectors[1][0], windowVectors[1][1]);
-		glVertex2f(windowVectors[1][0], windowVectors[0][1]);
-		glVertex2f(windowVectors[0][0], windowVectors[0][1]);
-		glEnd();
-		break;
-
-	case topRight:
-		//And finally, the points here are the top right and the bottom left.
-		glBegin(GL_QUADS);
-		glVertex2f(windowVectors[1][0], windowVectors[1][1]);
-		glVertex2f(windowVectors[0][0], windowVectors[1][1]);
-		glVertex2f(windowVectors[0][0], windowVectors[0][1]);
-		glVertex2f(windowVectors[1][0], windowVectors[0][1]);
-		glEnd();
-		break;	
-	}
-	//DEBUG
-	/* cout << "********************************************" << endl
-	<< "Window: " << this->elementInfo->index << endl
-	<< "Position:" << endl
-	<< windowVectors[0][0] << "," << windowVectors[0][1] << "," << windowVectors[1][0] << "," << windowVectors[1][1] << endl
-	<< "Parent Data: " << endl
-	<< this->elementInfo->parent->elementInfo->x << "," << this->elementInfo->parent->elementInfo->y << endl
-	<< this->elementInfo->parent->elementInfo->width << "," << this->elementInfo->parent->elementInfo->height << endl
-	<< "********************************************" << endl; */
-	//Draw the border
-	if (this->border == true) {	
-		glColor4ub(this->borderColour[0],
-				this->borderColour[1],
-				this->borderColour[2],
-				this->borderColour[3]);
-
-		switch (this->origin) {
-
-		case bottomLeft:
-			//The default origin. Here, out two points are the bottom left and
-			// top right respectively.
-			glBegin(GL_LINE_LOOP);
-			glVertex2f(windowVectors[0][0], windowVectors[0][1]);
-			glVertex2f(windowVectors[1][0], windowVectors[0][1]);
-			glVertex2f(windowVectors[1][0], windowVectors[1][1]);
-			glVertex2f(windowVectors[0][0], windowVectors[1][1]);
-			glEnd();
-			break;
-	
-		case bottomRight:
-			//In this case, our two points are the bottom right and the top left
-			glBegin(GL_LINE_LOOP);
-			glVertex2f(windowVectors[1][0], windowVectors[0][1]);
-			glVertex2f(windowVectors[0][0], windowVectors[0][1]);
-			glVertex2f(windowVectors[0][0], windowVectors[1][1]);
-			glVertex2f(windowVectors[1][0], windowVectors[1][1]);
-			glEnd();
-			break;
-
-		case topLeft:
-			//Here, the points are the top left and the bottom right
-			glBegin(GL_LINE_LOOP);
-			glVertex2f(windowVectors[0][0], windowVectors[1][1]);
-			glVertex2f(windowVectors[1][0], windowVectors[1][1]);
-			glVertex2f(windowVectors[1][0], windowVectors[0][1]);
-			glVertex2f(windowVectors[0][0], windowVectors[0][1]);
-			glEnd();
-			break;
-
-		case topRight:
-			//And finally, the points here are the top right and the bottom left.
-			glBegin(GL_LINE_LOOP);
-			glVertex2f(windowVectors[1][0], windowVectors[1][1]);
-			glVertex2f(windowVectors[0][0], windowVectors[1][1]);
-			glVertex2f(windowVectors[0][0], windowVectors[0][1]);
-			glVertex2f(windowVectors[1][0], windowVectors[0][1]);
-			glEnd();
-			break;	
-		}
-	}
+	rendering->DrawWindow(this);
 
 	//Draw each of the child elements
 	for (int i = 0; i < childCount; ++i){
@@ -358,6 +155,7 @@ void Window::Draw() {
 bool Window::Create() {
 	//Firstly, update the x and y co-ordinates. That way, child elements
 	//can be moved whilst still animating.
+
 	this->targetDimensions.x = this->elementInfo->x;
 	this->targetDimensions.y = this->elementInfo->y;
 	
@@ -719,75 +517,4 @@ void Window::SetBorder(bool enabled, int* colour) {
 void Window::PassData(void * input) {
 	int placeholder = *(int*)input;
 	placeholder++;	//Just to shut up YCM
-}
-
-
-//This function is called as needed to update the origin point of
-// the element.
-void Window::UpdateOriginPoint() {
-	//Calculate the origin point and modifiers
-	switch(origin) {
-
-		case bottomLeft:	
-			rendering->GetRelativeFloat(
-				-1.0f, 
-				-1.0f, 
-				this->originPosition, 
-				this->elementInfo->
-					parent->elementInfo);
-			this->originPosition[0] += this->elementInfo->
-							parent->elementInfo->x;
-			this->originPosition[1] += this->elementInfo->
-							parent->elementInfo->y;
-			this->xModifier = 1;
-			this->yModifier = 1;
-			break;
-
-		case bottomRight:
-			rendering->GetRelativeFloat(
-				1.0f, 
-				-1.0f,
-				this->originPosition, 
-				this->elementInfo->
-					parent->elementInfo);
-
-			this->originPosition[0] += this->elementInfo->
-							parent->elementInfo->x;
-			this->originPosition[1] += this->elementInfo->
-							parent->elementInfo->y;
-			this->xModifier = -1;
-			this->yModifier = 1;
-			break;
-
-		case topLeft:
-			rendering->GetRelativeFloat(
-				-1.0f,
-				1.0f, 
-				this->originPosition, 
-				this->elementInfo->
-				parent->elementInfo);
-			this->originPosition[0] += this->elementInfo->
-							parent->elementInfo->x;
-			this->originPosition[1] += this->elementInfo->
-							parent->elementInfo->y;
-			this->xModifier = 1;
-			this->yModifier = -1;
-			break;
-
-		case topRight:
-			rendering->GetRelativeFloat(
-				1.0f,
-				1.0f,
-				this->originPosition, 
-				this->elementInfo->
-					parent->elementInfo);
-			this->originPosition[0] += this->elementInfo->
-							parent->elementInfo->x;
-			this->originPosition[1] += this->elementInfo->
-							parent->elementInfo->y;
-			this->xModifier = -1;
-			this->yModifier = -1;
-			break;
-	}
-
 }
