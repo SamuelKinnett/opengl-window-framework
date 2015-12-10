@@ -236,6 +236,9 @@ int Window::Click(int x, int y, int* clickLocation) {
 	if (this->inAnimation)
 		return 0;
 	
+	//Update origin point
+	this->rendering->UpdateOriginPoint(this);
+
 	int tempArray[2];
 	int tempSizeArray[2];
 	float relativePosition[2];
@@ -248,18 +251,24 @@ int Window::Click(int x, int y, int* clickLocation) {
 		
 		case WINDOW_DISCRETE:
 			int parentPixel[2];
-			this->rendering->FloatToPixel(parentInfo->x, parentInfo->y, parentPixel);
-			if (x < parentPixel[0] + this->elementInfo->x + 
-					this->elementInfo->width
-				&& x > parentPixel[0] + this->elementInfo->x
-				&& y < parentPixel[1] + this->elementInfo->y +
-					this->elementInfo->height
-				&& y > parentPixel[1] + this->elementInfo->y) {
+
+			this->rendering->FloatToPixel(originPosition[0],
+											originPosition[1], 
+											parentPixel);
+			if (x < parentPixel[0] + (this->elementInfo->x * this->xModifier) 
+						+ (this->elementInfo->width * this->xModifier)
+				&& x > parentPixel[0] + (this->elementInfo->x * 
+											this->xModifier)
+				&& y < parentPixel[1] + (this->elementInfo->y * 
+											this->yModifier) 
+						+ (this->elementInfo->height * this->yModifier)
+				&& y > parentPixel[1] + (this->elementInfo->y *
+											this->yModifier)) {
 
 				clickLocation[0] = x - (parentPixel[0] +
-						this->elementInfo->x);
+						(this->elementInfo->x * this->xModifier));
 				clickLocation[1] = y - (parentPixel[1] +
-						this->elementInfo->y);
+						(this->elementInfo->y * this->yModifier));
 				
 				//Check to see if any of the child items have
 				//been clicked and are draggable.
@@ -270,9 +279,9 @@ int Window::Click(int x, int y, int* clickLocation) {
 							clickLocation
 							) == 1) {
 						clickLocation[0] = x - (parentPixel[0] +
-								this->elementInfo->x);
+							(this->elementInfo->x * this->xModifier));
 						clickLocation[1] = y - (parentPixel[1] +
-								this->elementInfo->y);
+							(this->elementInfo->y * this->yModifier));
 						return 1;	
 					}
 				//Otherwise, If this window can be dragged, we return 1
@@ -284,33 +293,35 @@ int Window::Click(int x, int y, int* clickLocation) {
 			break;
 
 	 	case WINDOW_SCALING:
-			this->rendering->GetRelativeFloat(this->elementInfo->x,
+			/*this->rendering->GetRelativeFloat(this->elementInfo->x,
 					this->elementInfo->y,
 					relativePosition,
-					parentInfo);
+					parentInfo);*/
 
-			this->rendering->GetRelativeFloat(this->elementInfo->x +
+			/*this->rendering->GetRelativeFloat(this->elementInfo->x +
 						this->elementInfo->width,
 					this->elementInfo->y + 
 						this->elementInfo->height,
 					relativeSize,
-					parentInfo);
+					parentInfo);*/
 
-			this->rendering->FloatToPixel(relativePosition[0],
+			/*this->rendering->FloatToPixel(relativePosition[0],
 					relativePosition[1],
-					tempArray);
+					tempArray);*/
 
-			this->rendering->FloatToPixel(relativeSize[0],
-					relativeSize[1],
+			this->rendering->FloatToPixel(originPosition[0] + 
+						(this->elementInfo->width * this->xModifier),
+						originPosition[1] + 
+							(this->elementInfo->height * this->yModifier),
 					tempSizeArray);
 
 			if (x < tempSizeArray[0]
-				&& x > tempArray[0]
+				&& x > originPosition[0]
 				&& y < tempSizeArray[1]
-				&& y > tempArray[1]) {
+				&& y > originPosition[1]) {
 
-				clickLocation[0] = x - tempArray[0];
-				clickLocation[1] = y - tempArray[1];
+				clickLocation[0] = x - originPosition[0];
+				clickLocation[1] = y - originPosition[1];
 			
 				//Check to see if any of the child items have
 				//been clicked and are draggable.
@@ -320,8 +331,8 @@ int Window::Click(int x, int y, int* clickLocation) {
 							y, 
 							clickLocation
 							) == 1) {
-						clickLocation[0] = x - tempArray[0];
-						clickLocation[1] = y - tempArray[1];
+						clickLocation[0] = x - originPosition[0];
+						clickLocation[1] = y - originPosition[1];
 						return 1;	
 					}
 				//Otherwise, If this window can be dragged, we return 1
@@ -445,7 +456,6 @@ int Window::Click(int x, int y, int* clickLocation) {
 			}
 			break;
 	}
-	cout << "No Collision Detected" << endl;
 	return 0;
 }
 

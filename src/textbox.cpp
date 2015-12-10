@@ -3,6 +3,12 @@
 #include "rendering.h"
 #include "windowinfo.h"
 #include <string>
+
+#define TEXTBOX_DISCRETE 0
+#define TEXTBOX_SCALING 1
+#define TEXTBOX_FIXED_H 2
+#define TEXTBOX_FIXED_W 3
+
 using namespace std;
 
 //Floating point constructor. Places the textbox at a position and with a 
@@ -21,8 +27,8 @@ Textbox::Textbox(float x, float y, float width, float height, int index, Element
 	this->text = text;
 	this->rendering = rendering;
 
-	//this->glFont = new GLFont();
-	//glFont->Create("franklin_gothic.glf");
+	this->glFont = new GLFont();
+	glFont->Create("franklin_gothic.glf");
 }
 
 Textbox::~Textbox() {
@@ -78,12 +84,13 @@ void Textbox::Move(int x, int y) {
 }
 
 void Textbox::Draw() {
+	this->rendering->DrawWindow(this);
 	float tempArray[2];
 	window_t* parentInfo = this->elementInfo->parent->elementInfo;	
 	rendering->GetRelativeFloat(this->elementInfo->x, this->elementInfo->y, tempArray, parentInfo);
-	//glFont->Begin();
-	//glFont->RenderText(this->text.c_str(), this->elementInfo->x, this->elementInfo->y, 0, 1);
-	//glFont->End();
+	glFont->Begin();
+	glFont->RenderText(this->text.c_str(), this->elementInfo->x, this->elementInfo->y, 0, 1);
+	glFont->End();
 }
 
 void Textbox::SetColour(int r, int g, int b, int a) {

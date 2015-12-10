@@ -106,8 +106,6 @@ Button::~Button() {
 //Draws the button to the screen
 void Button::Draw() {
 	rendering->DrawWindow(this);
-	std::cout << "Button X: " << this->elementInfo->x << std::endl;
-	std::cout << "Button Y: " << this->elementInfo->y << std::endl;
 }
 
 bool Button::Create() {

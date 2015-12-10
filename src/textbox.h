@@ -13,7 +13,7 @@
 #include "element.h"
 #include "windowinfo.h"
 #include "rendering.h"
-//#include "glfont.h"
+#include "glfont.h"
 #include <string>
 
 class Textbox : public Element {
@@ -37,7 +37,7 @@ public:
 
 private:
 	std::string text;
-	//GLFont* glFont;
+	GLFont* glFont;
 };
 
 #endif
