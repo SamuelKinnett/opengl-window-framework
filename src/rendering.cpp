@@ -210,14 +210,14 @@ void Rendering::DrawWindow(Element* element) {
 
 		//The first corner of the window
 		tempArray[0] = element->originPosition[0] +
-			rendering->GetRelativeFloat1D(window->x + parentInfo->width,
-				this->screenWidth);
+			rendering->GetRelativeFloat1D(window->x, parentInfo->width)
+			* element->xModifier;
 		tempArray[1] = element->originPosition[1] +
-			rendering->GetRelativeFloat1D(window->y + parentInfo->height,
-				this->screenHeight);
+			rendering->GetRelativeFloat1D(window->y, parentInfo->height)
+			* element->yModifier;
 
 		//The second corner of the window
-		tempSecondArray[0] = element->originPosition[0] + floatWidth
+		tempSecondArray[0] = tempArray[0] + floatWidth
 			* element->xModifier;
 		tempSecondArray[1] = element->originPosition[1] +
 			rendering->GetRelativeFloat1D(window->y + window->height, parentInfo->height)
@@ -334,5 +334,181 @@ void Rendering::DrawWindow(Element* element) {
 			glEnd();
 			break;
 		}
+	}
+}
+
+void Rendering::GetWindowBounds(Element * element, int * returnArray) {
+	float floatWidth, floatHeight;
+	float relativeSize[2];
+	float relativePosition[2];
+	int tempArray[2];
+	int tempSizeArray[2];
+
+
+	switch (element->windowType) {
+
+	case WINDOW_DISCRETE:
+
+		//The first corner of the window
+		relativePosition[0] = element->originPosition[0] +
+			PixelToFloat1D(element->elementInfo->x,
+				element->screenWidth)
+			* element->xModifier;
+
+		relativePosition[1] = element->originPosition[1] +
+			PixelToFloat1D(element->elementInfo->y,
+				element->screenHeight)
+			* element->yModifier;
+
+		//The second corner of the window
+		relativeSize[0] = element->originPosition[0] +
+			PixelToFloat1D(element->elementInfo->x +
+				element->elementInfo->width,
+				element->screenWidth)
+			* element->xModifier;
+		relativeSize[1] = element->originPosition[1] +
+			PixelToFloat1D(element->elementInfo->y +
+				element->elementInfo->height,
+				element->screenHeight)
+			* element->yModifier;
+
+		FloatToPixel(relativePosition[0],
+			relativePosition[1],
+			tempArray);
+
+		FloatToPixel(relativeSize[0],
+			relativeSize[1],
+			tempSizeArray);
+
+		break;
+
+	case WINDOW_SCALING:
+		//The first corner of the window
+		relativePosition[0] = element->originPosition[0] +
+			GetRelativeFloat1D(element->elementInfo->x,
+				element->elementInfo->parent->elementInfo->width)
+			* element->xModifier;
+		relativePosition[1] = element->originPosition[1] +
+			GetRelativeFloat1D(element->elementInfo->y,
+				element->elementInfo->parent->elementInfo->height)
+			* element->yModifier;
+
+		//The second corner of the window
+		relativeSize[0] = element->originPosition[0] +
+			GetRelativeFloat1D(element->elementInfo->x +
+				element->elementInfo->width,
+				element->elementInfo->parent->elementInfo->width)
+			* element->xModifier;
+		relativeSize[1] = element->originPosition[1] +
+			GetRelativeFloat1D(element->elementInfo->y +
+				element->elementInfo->height,
+				element->elementInfo->parent->elementInfo->height)
+			* element->yModifier;
+
+		FloatToPixel(relativePosition[0],
+			relativePosition[1],
+			tempArray);
+
+		FloatToPixel(relativeSize[0],
+			relativeSize[1],
+			tempSizeArray);
+		break;
+
+	case WINDOW_FIXED_W:
+
+		//Convert the width into a float value
+		floatWidth = element->rendering->PixelToFloat1D(element->elementInfo->
+			width,
+			element->screenWidth);
+
+		//The first corner of the window
+		relativePosition[0] = element->originPosition[0] +
+			GetRelativeFloat1D(element->elementInfo->x,
+				element->elementInfo->parent->elementInfo->width)
+			* element->xModifier;
+		relativePosition[1] = element->originPosition[1] +
+			GetRelativeFloat1D(element->elementInfo->y,
+				element->elementInfo->parent->elementInfo->height)
+			* element->yModifier;
+
+		//The second corner of the window
+		relativeSize[0] = relativePosition[0] + floatWidth
+			* element->xModifier;
+		relativeSize[1] = element->originPosition[1] +
+			GetRelativeFloat1D(element->elementInfo->y +
+				element->elementInfo->height, element->elementInfo->
+				parent->elementInfo->height)
+			* element->yModifier;
+
+		FloatToPixel(relativePosition[0],
+			relativePosition[1],
+			tempArray);
+
+		FloatToPixel(relativeSize[0],
+			relativeSize[1],
+			tempSizeArray);
+		break;
+
+	case WINDOW_FIXED_H:
+
+		//Convert the height into a float value
+		floatHeight = PixelToFloat1D(element->elementInfo->height,
+			element->screenHeight);
+
+		//The first corner of the window
+		relativePosition[0] = element->originPosition[0] +
+			GetRelativeFloat1D(element->elementInfo->x,
+				element->elementInfo->parent->elementInfo->width)
+			* element->xModifier;
+		relativePosition[1] = element->originPosition[1] +
+			GetRelativeFloat1D(element->elementInfo->y,
+				element->elementInfo->parent->elementInfo->height)
+			* element->yModifier;
+
+		//The second corner of the window
+		relativeSize[0] = element->originPosition[0] +
+			GetRelativeFloat1D(element->elementInfo->x +
+				element->elementInfo->width, element->elementInfo->
+				parent->elementInfo->width)
+			* element->xModifier;
+		relativeSize[1] = relativePosition[1] + floatHeight
+			* element->yModifier;
+
+		FloatToPixel(relativePosition[0],
+			relativePosition[1],
+			tempArray);
+
+		FloatToPixel(relativeSize[0],
+			relativeSize[1],
+			tempSizeArray);
+		break;
+	}
+
+	//Work out the boundaries of the box, accounting for situations
+	//where the anchor point isn't the bottom left.
+	if (tempArray[0] > tempSizeArray[0]) {
+		returnArray[1] = tempArray[0];
+		returnArray[0] = tempSizeArray[0];
+	}
+	else if (tempArray[0] < tempSizeArray[0]) {
+		returnArray[1] = tempSizeArray[0];
+		returnArray[0] = tempArray[0];
+	}
+	else {
+		returnArray[1] = tempArray[0];
+		returnArray[0] = tempSizeArray[0];
+	}
+
+	if (tempArray[1] > tempSizeArray[1]) {
+		returnArray[3] = tempArray[1];
+		returnArray[2] = tempSizeArray[1];
+	}
+	else if (tempArray[1] < tempSizeArray[1]) {
+		returnArray[3] = tempSizeArray[1];
+		returnArray[2] = tempArray[1];
+	}
+	else {
+		returnArray[3] = tempArray[1];
+		returnArray[2] = tempSizeArray[1];
 	}
 }

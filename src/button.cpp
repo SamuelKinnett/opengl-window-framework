@@ -134,49 +134,23 @@ void Button::RemoveChild(int index) {
 int Button::Click(int x, int y, int* clickLocation) {
 	
 	window_t* parentInfo = this->elementInfo->parent->elementInfo;
-	float relativePosition[2];	//float storing the postion of the 
-	//bottom left corner of the button in the world
-	float relativeSize[2];		//float storing the position of the
-	//top right corner of the button in the world
-	int tempArray[2];	//used to store the position of the bottom
-	//left corner of the button as a pixel co-ordinate
-	int tempSizeArray[2];	//used to store the position of the top right
-	//corner of the button as a pixel co-ordinate
+	int windowBounds[4];
 
-	this->rendering->GetRelativeFloat(this->elementInfo->x,
-			this->elementInfo->y,
-			relativePosition,
-			parentInfo);
+	this->rendering->GetWindowBounds(this, windowBounds);
 
-	this->rendering->GetRelativeFloat(this->elementInfo->x +
-				this->elementInfo->width,
-			this->elementInfo->y + 
-				this->elementInfo->height,
-			relativeSize,
-			parentInfo);
+	if (x < windowBounds[1]
+		&& x > windowBounds[0]
+		&& y < windowBounds[3]
+		&& y > windowBounds[2]) {
 
-	this->rendering->FloatToPixel(relativePosition[0],
-			relativePosition[1],
-			tempArray);
+		clickLocation[0] = x - windowBounds[0];
+		clickLocation[1] = y - windowBounds[2];
 
-	this->rendering->FloatToPixel(relativeSize[0],
-			relativeSize[1],
-			tempSizeArray);
+		std::cout << "I was clicked!" << std::endl;
 
-	if (x < tempSizeArray[0]
-		&& x > tempArray[0]
-		&& y < tempSizeArray[1]
-		&& y > tempArray[1]) {
-
-		clickLocation[0] = x - tempArray[0];
-		clickLocation[1] = y - tempArray[1];
-		std::cout << "I was clicked!" << std::endl;	
 		buttonCallback();	
 		
-		if (this->draggable)
-			return 1;
-		else
-			return 0;
+		return 1;
 	}
 	return 0;
 }

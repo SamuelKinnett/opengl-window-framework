@@ -53,6 +53,10 @@ public:
 	//element that provides the neccessary information to do so
 	void DrawWindow(Element* element);
 
+	//Returns four values describing the smallest x, largest x, smallest y and
+	//largest y values of the window in pixel co-ordinates.
+	void GetWindowBounds(Element* element, int* returnArray);
+
 private:
 	int screenWidth, screenHeight;
 

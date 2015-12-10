@@ -59,8 +59,6 @@ private:
 	void Initialise(float x, float y, float width, float height,
 			int index, Rendering* rendering, Element* parent,
 			originPoints origin);
-
-	void GetWindowBounds(int* returnArray);
 };
 
 #endif
