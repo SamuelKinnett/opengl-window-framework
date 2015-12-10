@@ -19,21 +19,23 @@ using namespace std;
 //instantiated with this constructor will remain the same size and in the same
 //position regardless of the main window resizing.
 Window::Window(int x, int y, int width, int height,
-		Rendering* rendering, Element* parent) {
+		Rendering* rendering, Element* parent,
+		originPoints origin) {
 	int index = parent->childCount;
 	this->windowType = WINDOW_DISCRETE;
 	this->Initialise((float)x, (float)y, (float)width, (float)height,
-			index, rendering, parent);
+			index, rendering, parent, origin);
 }
 
 //Float constructor taking arguments as values between 0 and 1 A window 
 //instantiated with this constructor will remain at a relative size and
 //position to the main window, according to the float values.
 Window::Window(float x, float y, float width, float height,
-		Rendering* rendering, Element* parent) {
+		Rendering* rendering, Element* parent,
+		originPoints origin) {
 	int index = parent->childCount;
 	this->windowType = WINDOW_SCALING;
-	this->Initialise(x, y, width, height, index, rendering, parent);
+	this->Initialise(x, y, width, height, index, rendering, parent, origin);
 }
 
 //Composite constructor accepting both float and iteger values. This
@@ -41,11 +43,12 @@ Window::Window(float x, float y, float width, float height,
 //its parent window is resized, however only the width will scale with the
 //window.
 Window::Window(float x, float y, float width, int height,
-		Rendering* rendering, Element* parent) {
+		Rendering* rendering, Element* parent,
+		originPoints origin) {
 	int index = parent->childCount;
 	this->windowType = WINDOW_FIXED_H;
 	this->Initialise(x, y, width, (float)height, index, rendering,
-			parent);
+			parent, origin);
 }
 
 //Composite constructor accepting both float and iteger values. This 
@@ -53,17 +56,18 @@ Window::Window(float x, float y, float width, int height,
 //its parent window is resized, however only the height will scale with the
 //window.
 Window::Window(float x, float y, int width, float height,
-		Rendering* rendering, Element* parent) {
+		Rendering* rendering, Element* parent,
+		originPoints origin) {
 	int index = parent->childCount;
 	this->windowType = WINDOW_FIXED_W;
 	this->Initialise(x, y, (float)width, height, index, rendering,
-			parent);
+			parent, origin);
 }
 
 //The initialise function is used for instantiation that is common accross
 //all window types.
 void Window::Initialise(float x, float y, float width, float height, int index,
-		Rendering* rendering, Element* parent) {
+		Rendering* rendering, Element* parent, originPoints origin) {
 	float viewportData[4];
 
 	//Get information about the size of the viewport
@@ -71,6 +75,35 @@ void Window::Initialise(float x, float y, float width, float height, int index,
 
 	this->screenWidth = viewportData[2];
 	this->screenHeight = viewportData[3];
+
+	this->origin = origin;
+
+
+	//Based on the new origin, we may need to convert the user's input
+	//to make things easier for them. For example, if the new origin is
+	//the top right (useful for close buttons), the user's x and y values
+	//will be inverted!
+	switch (this->origin) {
+
+	case bottomRight:
+		x = x * -1.0f;
+		y = y;
+		break;
+
+	case topLeft:
+		x = x;
+		y = y * -1.0f;
+		break;
+
+	case topRight:
+		x = x * -1.0f;
+		y = y * -1.0f;
+
+	default:
+		x = x;
+		y = y;
+		break;
+	}
 
 	this->border = true;
 	this->elementInfo = new window_t;
@@ -114,156 +147,8 @@ void Window::Draw() {
 	} else if (animState == closing) {
 		this->inAnimation = this->Close();
 	}
-	
-	float windowVectors[2][2];	
-	//2D array containing the vector of each point of the window
-	
-	float tempArray[2];	
-	//Stores the bottom left co-ordinates until they are inserted into
-	//the 2D array
-	
-	float tempSecondArray[2];
-	//Stores the top right co-ordinates until they are inserted into the
-	//2D array
-	
-	//Initialise variables here to prevent scope issues in the 
-	//switch statement
-	float floatWidth = 0;
-	float floatHeight = 0;
 
-	window_t* parentInfo = this->elementInfo->parent->elementInfo;
-
-	switch (windowType) {
-		case WINDOW_DISCRETE:
-			//We need to convert the pixel co-ordinates to 
-			//world co-ordinates
-			int parentPixel[2];
-			this->rendering->FloatToPixel(parentInfo->x, 
-					parentInfo->y, 
-					parentPixel);
-			
-			//The bottom left corner of the window
-			this->rendering->PixelToFloat(parentPixel[0] + 
-					this->elementInfo->x, 
-					parentPixel[1] + this->elementInfo->y,
-				       	tempArray);	
-	
-			//The top right corner of the window
-			this->rendering->PixelToFloat(parentPixel[0] + 
-					this->elementInfo->x + 
-						this->elementInfo->width, 
-					parentPixel[1] + 
-						this->elementInfo->y + 
-						this->elementInfo->height, 
-					tempSecondArray);
-			break;
-
-		case WINDOW_SCALING:
-			//The bottom left corner of the window
-			this->rendering->GetRelativeFloat(this->elementInfo->x, 
-					this->elementInfo->y, 
-					tempArray, 
-					parentInfo);
-
-			//The top right corner of the window
-			this->rendering->GetRelativeFloat(this->elementInfo->x + 
-						this->elementInfo->width,
-					this->elementInfo->y + 
-						this->elementInfo->height,
-					tempSecondArray, 
-					parentInfo);
-			break;
-
-		case WINDOW_FIXED_H:
-			
-			//Convert the height into a float value
-			floatHeight = this->rendering->PixelToFloat1D(
-					this->rendering->FloatToPixel1D(this->elementInfo->y, 
-						this->screenHeight) +
-				      		this->elementInfo->height,
-						this->screenHeight);
-			
-			//The bottom left corner of the window
-			this->rendering->GetRelativeFloat(this->elementInfo->x, 
-					this->elementInfo->y, 
-					tempArray, 
-					parentInfo);
-
-			//The top right corner of the window
-			this->rendering->GetRelativeFloat(this->elementInfo->x +
-				    	this->elementInfo->width,
-					floatHeight,
-					tempSecondArray, 
-					parentInfo);
-			break;
-		
-		case WINDOW_FIXED_W:
-			
-			//Convert the width into a float value
-			floatWidth = this->rendering->PixelToFloat1D(
-					this->rendering->FloatToPixel1D(this->elementInfo->x,
-						this->screenWidth) + 
-						this->elementInfo->width,
-			      			this->screenWidth);
-
-			//The bottom left corner of the window	
-			this->rendering->GetRelativeFloat(this->elementInfo->x,
-					this->elementInfo->y,
-					tempArray,
-					parentInfo);
-
-			//The top right corner of the window
-			this->rendering->GetRelativeFloat(floatWidth,
-					this->elementInfo->y + 
-					this->elementInfo->height,
-					tempSecondArray, 
-					parentInfo);
-			break;	
-	}
-
-	//Store the point values in the 2D array
-	windowVectors[0][0] = tempArray[0];
-	windowVectors[0][1] = tempArray[1];
-	windowVectors[1][0] = tempSecondArray[0];
-	windowVectors[1][1] = tempSecondArray[1];
-	
-	
-	//Set the colour
-	glColor4ub(this->colour[0], 
-			this->colour[1], 
-			this->colour[2], 
-			this->colour[3]);
-	
-	glBegin(GL_QUADS);
-	glVertex2f(windowVectors[0][0], windowVectors[0][1]);
-	glVertex2f(windowVectors[1][0], windowVectors[0][1]);
-	glVertex2f(windowVectors[1][0], windowVectors[1][1]);
-	glVertex2f(windowVectors[0][0], windowVectors[1][1]);
-	glEnd();
-
-	//DEBUG
-	/* cout << "********************************************" << endl
-	<< "Window: " << this->elementInfo->index << endl
-	<< "Position:" << endl
-	<< windowVectors[0][0] << "," << windowVectors[0][1] << "," << windowVectors[1][0] << "," << windowVectors[1][1] << endl
-	<< "Parent Data: " << endl
-	<< this->elementInfo->parent->elementInfo->x << "," << this->elementInfo->parent->elementInfo->y << endl
-	<< this->elementInfo->parent->elementInfo->width << "," << this->elementInfo->parent->elementInfo->height << endl
-	<< "********************************************" << endl; */
-	//Draw the border
-	if (this->border == true) {	
-		glColor4ub(this->borderColour[0],
-				this->borderColour[1],
-				this->borderColour[2],
-				this->borderColour[3]);
-
-		glBegin(GL_LINE_LOOP);
-		glVertex2f(windowVectors[0][0], windowVectors[0][1]);
-		glVertex2f(windowVectors[1][0], windowVectors[0][1]);
-		glVertex2f(windowVectors[1][0], windowVectors[1][1]);
-		glVertex2f(windowVectors[0][0], windowVectors[1][1]);
-		glEnd();
-	}
+	rendering->DrawWindow(this);
 
 	//Draw each of the child elements
 	for (int i = 0; i < childCount; ++i){
@@ -275,6 +160,7 @@ void Window::Draw() {
 bool Window::Create() {
 	//Firstly, update the x and y co-ordinates. That way, child elements
 	//can be moved whilst still animating.
+
 	this->targetDimensions.x = this->elementInfo->x;
 	this->targetDimensions.y = this->elementInfo->y;
 	
@@ -334,6 +220,9 @@ bool Window::Close() {
 void Window::Resize(int width, int height) {
 	this->screenWidth = width;
 	this->screenHeight = height;
+
+	for (int curChild = 0; curChild < childCount; ++curChild)
+		this->children[curChild]->Resize(width, height);
 }
 
 
@@ -346,242 +235,86 @@ int Window::Click(int x, int y, int* clickLocation) {
 	//If we're in an animation, ignore everything and return false.
 	if (this->inAnimation)
 		return 0;
-	
-	int tempArray[2];
-	int tempSizeArray[2];
+
+	//Update origin point
+	this->rendering->UpdateOriginPoint(this);
+
 	float relativePosition[2];
 	float relativeSize[2];
+	int tempArray[2];
+	int tempSizeArray[2];
+
+	int windowBounds[4];
 	float floatHeight = 0;
 	float floatWidth = 0;
 	window_t* parentInfo = this->elementInfo->parent->elementInfo;
 
-	switch (windowType) {
-		
-		case WINDOW_DISCRETE:
-			int parentPixel[2];
-			this->rendering->FloatToPixel(parentInfo->x, parentInfo->y, parentPixel);
-			if (x < parentPixel[0] + this->elementInfo->x + 
-					this->elementInfo->width
-				&& x > parentPixel[0] + this->elementInfo->x
-				&& y < parentPixel[1] + this->elementInfo->y +
-					this->elementInfo->height
-				&& y > parentPixel[1] + this->elementInfo->y) {
+	//Get the bounds of the window.
+	this->rendering->GetWindowBounds(this, windowBounds);
 
-				clickLocation[0] = x - (parentPixel[0] +
-						this->elementInfo->x);
-				clickLocation[1] = y - (parentPixel[1] +
-						this->elementInfo->y);
-				
-				//Check to see if any of the child items have
-				//been clicked and are draggable.
-				for (int i = 0; i < childCount; ++i) 
-					if (children[i]->Click(
-							x, 
-							y, 
-							clickLocation
-							) == 1) {
-						clickLocation[0] = x - (parentPixel[0] +
-								this->elementInfo->x);
-						clickLocation[1] = y - (parentPixel[1] +
-								this->elementInfo->y);
-						return 1;	
-					}
-				//Otherwise, If this window can be dragged, we return 1
-				if (this->draggable)
+	if (x < windowBounds[1]
+		&& x > windowBounds[0]
+		&& y < windowBounds[3]
+		&& y > windowBounds[2]) {
+
+		clickLocation[0] = x - windowBounds[0];
+		clickLocation[1] = y - windowBounds[2];
+
+		std::cout << "Window clicked" << std::endl;
+
+		//Check to see if any of the child items have
+		//been clicked and are draggable.
+		for (int i = 0; i < childCount; ++i) {
+			if (children[i]->Click(
+				x,
+				y,
+				clickLocation
+				) == 1) {
+				clickLocation[0] = x - windowBounds[0];
+				clickLocation[1] = y - windowBounds[2];
+				if (children[i]->draggable)
 					return 1;
-				else 
+				else
 					return 0;
 			}
-			break;
-
-	 	case WINDOW_SCALING:
-			this->rendering->GetRelativeFloat(this->elementInfo->x,
-					this->elementInfo->y,
-					relativePosition,
-					parentInfo);
-
-			this->rendering->GetRelativeFloat(this->elementInfo->x +
-						this->elementInfo->width,
-					this->elementInfo->y + 
-						this->elementInfo->height,
-					relativeSize,
-					parentInfo);
-
-			this->rendering->FloatToPixel(relativePosition[0],
-					relativePosition[1],
-					tempArray);
-
-			this->rendering->FloatToPixel(relativeSize[0],
-					relativeSize[1],
-					tempSizeArray);
-
-			if (x < tempSizeArray[0]
-				&& x > tempArray[0]
-				&& y < tempSizeArray[1]
-				&& y > tempArray[1]) {
-
-				clickLocation[0] = x - tempArray[0];
-				clickLocation[1] = y - tempArray[1];
-			
-				//Check to see if any of the child items have
-				//been clicked and are draggable.
-				for (int i = 0; i < childCount; ++i) 
-					if (children[i]->Click(
-							x, 
-							y, 
-							clickLocation
-							) == 1) {
-						clickLocation[0] = x - tempArray[0];
-						clickLocation[1] = y - tempArray[1];
-						return 1;	
-					}
-				//Otherwise, If this window can be dragged, we return 1
-				if (this->draggable)
-					return 1;
-				else 
-					return 0;
-				
-			}
-			break;
-
-	 	case WINDOW_FIXED_H:
-			floatHeight = this->rendering->PixelToFloat1D(
-					this->rendering->FloatToPixel1D(
-						this->elementInfo->y,
-						this->screenHeight) + 
-						this->elementInfo->height,
-					this->screenHeight);
-
-			this->rendering->GetRelativeFloat(this->elementInfo->x,
-					this->elementInfo->y,
-					relativePosition,
-					parentInfo);
-
-			this->rendering->GetRelativeFloat(this->elementInfo->x +
-					this->elementInfo->width,
-					floatHeight,
-					relativeSize,
-					parentInfo);
-			
-			this->rendering->FloatToPixel(relativePosition[0],
-					relativePosition[1],
-					tempArray);
-			
-			this->rendering->FloatToPixel(relativeSize[0],
-					relativeSize[1],
-					tempSizeArray);
-			
-			if (x < tempSizeArray[0]
-				&& x > tempArray[0]
-				&& y < tempSizeArray[1]
-				&& y > tempArray[1]) {
-
-				clickLocation[0] = x - tempArray[0];
-				clickLocation[1] = y - tempArray[1];
-			
-				//Check to see if any of the child items have
-				//been clicked and are draggable.
-				for (int i = 0; i < childCount; ++i) 
-					if (children[i]->Click(
-							x, 
-							y, 
-							clickLocation
-							) == 1) {
-						clickLocation[0] = x - tempArray[0];
-						clickLocation[1] = y - tempArray[1];
-						return 1;	
-					}
-				//Otherwise, If this window can be dragged, we return 1
-				if (this->draggable)
-					return 1;
-				else 
-					return 0;
-				
-			}
-			break;
-
-	 	case WINDOW_FIXED_W:
-			floatWidth = this->rendering->PixelToFloat1D(
-					this->rendering->FloatToPixel1D(
-						this->elementInfo->x,
-						this->screenWidth) + 
-						this->elementInfo->width,
-					this->screenWidth);
-
-			this->rendering->GetRelativeFloat(this->elementInfo->x,
-					this->elementInfo->y,
-					relativePosition,
-					parentInfo);
-
-			this->rendering->GetRelativeFloat(floatWidth,
-					this->elementInfo->y +
-					this->elementInfo->height,
-					relativeSize,
-					parentInfo);
-			
-			this->rendering->FloatToPixel(relativePosition[0],
-					relativePosition[1],
-					tempArray);
-
-			this->rendering->FloatToPixel(relativeSize[0],
-					relativeSize[1],
-					tempSizeArray);
-			
-			if (x < tempSizeArray[0]
-				&& x > tempArray[0]
-				&& y < tempSizeArray[1]
-				&& y > tempArray[1]) {
-
-				clickLocation[0] = x - tempArray[0];
-				clickLocation[1] = y - tempArray[1];
-			
-				//Check to see if any of the child items have
-				//been clicked and are draggable.
-				for (int i = 0; i < childCount; ++i) 
-					if (children[i]->Click(
-							x, 
-							y, 
-							clickLocation
-							) == 1) {
-						clickLocation[0] = x - tempArray[0];
-						clickLocation[1] = y - tempArray[1];
-						return 1;	
-					}
-				//Otherwise, If this window can be dragged, we return 1
-				if (this->draggable)
-					return 1;
-				else 
-					return 0;
-				
-			}
-			break;
+		}
+		//Otherwise, If this window can be dragged, we return 1
+		if (this->draggable)
+			return 1;
+		else
+			return 0;
 	}
-	cout << "No Collision Detected" << endl;
 	return 0;
 }
 
 //Moves the window to the specified position. Eventually, this could be
-//extended to allow for moving animations and the like. X and Y are screen
-//position values given in pixels and so need to be converted if the window
-//is a scaling type.
+// extended to allow for moving animations and the like. X and Y are screen
+// position values given in pixels and so need to be converted if the window
+// is a scaling type.
 void Window::Move(int x, int y) {
 	window_t* parentInfo = this->elementInfo->parent->elementInfo;
 	
+	this->rendering->UpdateOriginPoint(this);
+
 	if (windowType == WINDOW_DISCRETE) {
-		int parentPixel[2];
-		this->rendering->FloatToPixel(parentInfo->x, parentInfo->y, parentPixel);
-		this->elementInfo->x = parentPixel[0] + x;
-		this->elementInfo->y = parentPixel[1] + y;
+		//int parentPixel[2];
+		//this->rendering->FloatToPixel(parentInfo->x, 
+		//				parentInfo->y, 
+		//				parentPixel);
+		//this->elementInfo->x = parentPixel[0] + x;
+		//this->elementInfo->y = parentPixel[1] + y;
 	} else {
 		//All other window types use float values to store their
 		//position.
 		float tempArray[2];
 		float relativePosition[2];
 		this->rendering->PixelToFloat(x, y, tempArray);
-		this->rendering->GetRelativeFloat(tempArray[0], tempArray[1],
-					relativePosition, parentInfo);
-		this->elementInfo->x = relativePosition[0];
-		this->elementInfo->y = relativePosition[1];
+		//this->rendering->GetRelativeFloat(this->originPosition[0] + 
+		//		tempArray[0] * this->xModifier, 
+		//	this->originPosition[1] + tempArray[1] * this->yModifier,
+		//			relativePosition, parentInfo);
+		this->elementInfo->x = this->originPosition[0] + (tempArray[0] * 2);
+		this->elementInfo->y = this->originPosition[1] + (tempArray[1] * 2);
 	}
 }
 

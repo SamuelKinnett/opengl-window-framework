@@ -18,19 +18,19 @@ class Window : public Element {
 public:
 	//WINDOW_DISCRETE
 	Window(int x, int y, int width, int height, Rendering* rendering,
-			Element* parent);		
+			Element* parent, originPoints origin);		
 	
 	//WINDOW_SCALING
-	Window(float x, float y, float width, float height,
-			Rendering* rendering, Element* parent);
+	Window(float x, float y, float width, float height, Rendering* rendering, 
+			Element* parent, originPoints origin);
 
 	//WINDOW_FIXED_H
-	Window(float x, float y, float width, int height,
-			Rendering* rendering, Element* parent);
+	Window(float x, float y, float width, int height, Rendering* rendering,
+			Element* parent, originPoints origin);
 
 	//WINDOW_FIXED_W
-	Window(float x, float y, int width, float height,
-			Rendering* rendering, Element* parent);
+	Window(float x, float y, int width, float height, Rendering* rendering,
+			Element* parent, originPoints origin);
 	
 	~Window();
 
@@ -47,9 +47,8 @@ public:
 	virtual void AddChild(Element*);
 	virtual void RemoveChild(int);
 	virtual void PassData(void * input);
+
 private:
-	int windowType;	//WINDOW_DISCRETE, WINDOW_SCALING, WINDOW_FIXED_H
-	//or WINDOW_FIXED_W
 
 	char *windowTitle;
 
@@ -57,9 +56,9 @@ private:
 	animationState animState;
 	window_t  targetDimensions;
 
-	int screenWidth, screenHeight, childCount;
 	void Initialise(float x, float y, float width, float height,
-			int index, Rendering* rendering, Element* parent);
+			int index, Rendering* rendering, Element* parent,
+			originPoints origin);
 };
 
 #endif

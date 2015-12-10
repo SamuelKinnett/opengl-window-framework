@@ -3,6 +3,11 @@
 #ifndef RENDERING_H
 #define RENDERING_H
 #include "windowinfo.h"
+#include "element.h"
+#ifdef _WIN32
+#include "Windows.h"
+#endif
+#include "GL/gl.h"
 
 //forward declaration
 struct window_t;
@@ -35,6 +40,22 @@ public:
 	//position of the element relative to said parent.
 	void GetRelativeFloat(float x, float y, float* returnArray, 
 				window_t* parentInfo);
+
+	//Returns a float value representing the relative value of the passed
+	// float to the axis size
+	float GetRelativeFloat1D(float value, float axisSize);
+
+	//Updates the origin point, used for drawing relative to the parent
+	//element
+	void UpdateOriginPoint(Element* element);
+
+	//Draws a box with (or without) a border to the screen, given an
+	//element that provides the neccessary information to do so
+	void DrawWindow(Element* element);
+
+	//Returns four values describing the smallest x, largest x, smallest y and
+	//largest y values of the window in pixel co-ordinates.
+	void GetWindowBounds(Element* element, int* returnArray);
 
 private:
 	int screenWidth, screenHeight;

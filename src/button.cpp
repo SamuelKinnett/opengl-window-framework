@@ -5,14 +5,76 @@
 #include "button.h"
 #include <iostream>
 
+#define BUTTON_DISCRETE 0
+#define BUTTON_SCALING 1
+#define BUTTON_FIXED_H 2
+#define BUTTON_FIXED_W 3
+
+//Constructor creating a scaling button
 Button::Button(float x, float y, float width, float height,
 		Element* parent, Rendering* rendering,
-		int buttonType, Container* GUI) {
+		int buttonType, Container* GUI,
+		originPoints origin) {
 
+	this->windowType = BUTTON_SCALING;
+	this->Initialise(x, y, width, height, parent, rendering, buttonType, GUI, origin);
+}
+
+//Discrete constuctor
+Button::Button(int x, int y, int width, int height, 
+		Element * parent, Rendering * rendering, 
+		int buttonType, Container * GUI,
+		originPoints origin) {
+
+	this->windowType = BUTTON_DISCRETE;
+	this->Initialise(x, y, width, height, parent, rendering, buttonType, GUI, origin);
+}
+
+//Fixed width constructor
+Button::Button(float x, float y, int width, float height, Element * parent, Rendering * rendering, int buttonType, Container * GUI,
+				originPoints origin) {
+
+	this->windowType = BUTTON_FIXED_W;
+	this->Initialise(x, y, (float)width, height, parent, rendering, buttonType, GUI, origin);
+}
+
+//Fixed height constructor
+Button::Button(float x, float y, float width, int height, Element * parent, Rendering * rendering, int buttonType, Container * GUI,
+				originPoints origin) {
+
+	this->windowType = BUTTON_FIXED_H;
+	this->Initialise(x, y, width, (float)height, parent, rendering, buttonType, GUI, origin);
+}
+
+void Button::Initialise(float x, float y, float width, float height, Element *parent, Rendering * rendering, int buttonType, Container * GUI, originPoints origin) {
 	this->elementInfo = new window_t;
 
-	this->elementInfo->x = x;
-	this->elementInfo->y = y;
+	this->origin = origin;
+
+	//Based on the new origin, we may need to convert the user's input
+	//to make things easier for them. 
+	switch (this->origin) {
+
+	case bottomRight:
+		this->elementInfo->x = x * -1.0f;
+		this->elementInfo->y = y;
+		break;
+
+	case topLeft:
+		this->elementInfo->x = x;
+		this->elementInfo->y = y * -1.0f;
+		break;
+
+	case topRight:
+		this->elementInfo->x = x * -1.0f;
+		this->elementInfo->y = y * -1.0f;
+
+	default:
+		this->elementInfo->x = x;
+		this->elementInfo->y = y;
+		break;
+	}
+
 	this->elementInfo->width = width;
 	this->elementInfo->height = height;
 	this->elementInfo->index = parent->childCount;
@@ -32,66 +94,18 @@ Button::Button(float x, float y, float width, float height,
 	//its method. Using std::bind also allows us to remove the need to
 	//provide 'this' as an argument every time we want to call the 
 	//callback.
-	this->buttonCallback = std::bind(&Container::ButtonCallback, 
-					GUI, 
-					this);
+	this->buttonCallback = std::bind(&Container::ButtonCallback,
+		GUI,
+		this);
+}
+
+Button::~Button() {
+	delete this->elementInfo;
 }
 
 //Draws the button to the screen
 void Button::Draw() {
-	window_t* parentInfo = this->elementInfo->parent->elementInfo;
-	
-	float buttonPositions[2][2];	//Stores the co-ordinates of the
-	//bottom left and top right corners of the button.
-	
-	float tempArray[2];	//Stores values before they are inserted into
-	//the buttonPositions array
-	
-	//The bottom left corner of the window
-	this->rendering->GetRelativeFloat(this->elementInfo->x, 
-					this->elementInfo->y, 
-					tempArray, 
-					parentInfo);
-	buttonPositions[0][0] = tempArray[0];
-	buttonPositions[0][1] = tempArray[1];
-
-	//The top right corner of the window
-	this->rendering->GetRelativeFloat(this->elementInfo->x + 
-						this->elementInfo->width,
-					this->elementInfo->y + 
-						this->elementInfo->height,
-					tempArray, 
-					parentInfo);
-	buttonPositions[1][0] = tempArray[0];
-	buttonPositions[1][1] = tempArray[1];
-	
-	//Set the colour
-	glColor4ub(this->colour[0], 
-			this->colour[1], 
-			this->colour[2], 
-			this->colour[3]);
-	
-	glBegin(GL_QUADS);
-	glVertex2f(buttonPositions[0][0], buttonPositions[0][1]);
-	glVertex2f(buttonPositions[1][0], buttonPositions[0][1]);
-	glVertex2f(buttonPositions[1][0], buttonPositions[1][1]);
-	glVertex2f(buttonPositions[0][0], buttonPositions[1][1]);
-	glEnd();
-	
-	//Draw the border
-	if (this->border == true) {	
-		glColor4ub(this->borderColour[0],
-				this->borderColour[1],
-				this->borderColour[2],
-				this->borderColour[3]);
-
-		glBegin(GL_LINE_LOOP);
-		glVertex2f(buttonPositions[0][0], buttonPositions[0][1]);
-		glVertex2f(buttonPositions[1][0], buttonPositions[0][1]);
-		glVertex2f(buttonPositions[1][0], buttonPositions[1][1]);
-		glVertex2f(buttonPositions[0][0], buttonPositions[1][1]);
-		glEnd();
-	}
+	rendering->DrawWindow(this);
 }
 
 bool Button::Create() {
@@ -105,7 +119,8 @@ bool Button::Close() {
 }
 
 void Button::Resize(int screenWidth, int screenHeight) {
-	//Does nothing for now
+	this->screenWidth = screenWidth;
+	this->screenHeight = screenHeight;
 }
 
 void Button::AddChild(Element* newChild) {
@@ -119,49 +134,23 @@ void Button::RemoveChild(int index) {
 int Button::Click(int x, int y, int* clickLocation) {
 	
 	window_t* parentInfo = this->elementInfo->parent->elementInfo;
-	float relativePosition[2];	//float storing the postion of the 
-	//bottom left corner of the button in the world
-	float relativeSize[2];		//float storing the position of the
-	//top right corner of the button in the world
-	int tempArray[2];	//used to store the position of the bottom
-	//left corner of the button as a pixel co-ordinate
-	int tempSizeArray[2];	//used to store the position of the top right
-	//corner of the button as a pixel co-ordinate
+	int windowBounds[4];
 
-	this->rendering->GetRelativeFloat(this->elementInfo->x,
-			this->elementInfo->y,
-			relativePosition,
-			parentInfo);
+	this->rendering->GetWindowBounds(this, windowBounds);
 
-	this->rendering->GetRelativeFloat(this->elementInfo->x +
-				this->elementInfo->width,
-			this->elementInfo->y + 
-				this->elementInfo->height,
-			relativeSize,
-			parentInfo);
+	if (x < windowBounds[1]
+		&& x > windowBounds[0]
+		&& y < windowBounds[3]
+		&& y > windowBounds[2]) {
 
-	this->rendering->FloatToPixel(relativePosition[0],
-			relativePosition[1],
-			tempArray);
+		clickLocation[0] = x - windowBounds[0];
+		clickLocation[1] = y - windowBounds[2];
 
-	this->rendering->FloatToPixel(relativeSize[0],
-			relativeSize[1],
-			tempSizeArray);
+		std::cout << "I was clicked!" << std::endl;
 
-	if (x < tempSizeArray[0]
-		&& x > tempArray[0]
-		&& y < tempSizeArray[1]
-		&& y > tempArray[1]) {
-
-		clickLocation[0] = x - tempArray[0];
-		clickLocation[1] = y - tempArray[1];
-		std::cout << "I was clicked!" << std::endl;	
 		buttonCallback();	
 		
-		if (this->draggable)
-			return 1;
-		else
-			return 0;
+		return 1;
 	}
 	return 0;
 }

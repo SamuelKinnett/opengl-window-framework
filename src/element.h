@@ -2,6 +2,7 @@
 #include <vector>
 #include "windowinfo.h"
 #include "rendering.h"
+#include "originpoints.h"
 
 #ifndef ELEMENT_H
 #define ELEMENT_H
@@ -18,12 +19,25 @@ public:
 	Rendering* rendering;
 	
 	int colour[4];
+	int screenWidth, screenHeight;	//Used to locally store the dimensions of the screen for resizing and suchlike
 	bool border;
+	int windowType;	//The type of window (e.g. scaling, discrete etc.)
 	bool draggable;
 	bool inAnimation;	//Is the element currently in an animation?
 	int defaultColour[4]{ 26, 35, 34, 202 };
 	int borderColour[4]{ 157, 242, 201, 255 };
 	int childCount; //How many children does the element have?
+	
+	originPoints origin;
+	
+	//This variable stores the x and y position of the origin point of the
+	//element.
+	float originPosition[2];
+	//These modifiers are used to make the width and/or height of the
+	//element positive or negative as required by the origin.
+	int xModifier, yModifier;
+	
+
 
 	//Called to draw the element to the screen
 	virtual void Draw() = 0;	

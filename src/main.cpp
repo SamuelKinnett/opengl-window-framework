@@ -33,14 +33,13 @@ void Initialise(int argc, char* argv[]) {
 
 	//Create the GUI
 	GUI = new Container(-1.0f, -1.0f, 2.0f, 2.0f, rendering);
-
+	
 	//TESTING
 	//Add two windows to the beginning of the windows vector
 	//Then add a child window to the scaling window
 	//...And a "task bar" along the bottom of the screen
 	
-	Window* window1 = GUI->CreateWindow(0.0f, 0.0f, 0.5f, 0.5f);
-	
+	Window* window1 = GUI->InstantiateWindow(0.0f, 0.0f, 0.5f, 0.5f);
 	//Start running GLut's loop
 	glutMainLoop();
 }
@@ -76,6 +75,12 @@ void InitWindow(int argc, char* argv[]) {
 	//Sets the Resize function to be called whenever the main window is
 	//resized.
 	glutReshapeFunc(Resize);
+	//Sets the HandleButtonPress function to be called whenever a button is
+	//pressed.
+	glutKeyboardFunc(HandleButtonPress);
+	//Sets the HandleSpecialButtonPress function to be called whenever a 
+	//special key such as the arrow keys or the escape key is pressed
+	glutSpecialFunc(HandleSpecialButtonPress);
 }
 
 //Initialises OpenGL
@@ -148,6 +153,19 @@ void HandleMouseMoving(int x, int y) {
 		//windows[activeWindow]->Move(x - mouseRelativePosition[0], 
 		//	(screenSize[1] - y) - mouseRelativePosition[1]);
 	}
+}
+
+void HandleButtonPress(unsigned char key, int x, int y) {
+	switch (key) {
+	case 27:
+		//Escape key, close the program
+		delete GUI;
+		exit(EXIT_SUCCESS);
+	}
+}
+
+void HandleSpecialButtonPress(int key, int x, int y) {
+
 }
 
 //Handles the freeglut window being resized

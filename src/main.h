@@ -32,5 +32,7 @@ void MainLoop(int);
 //Input handling
 void HandleMouseClick(int, int, int, int);
 void HandleMouseMoving(int, int);
+void HandleButtonPress(unsigned char, int, int);
+void HandleSpecialButtonPress(int, int, int);
 
 #endif
