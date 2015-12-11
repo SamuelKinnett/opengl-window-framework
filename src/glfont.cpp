@@ -283,37 +283,16 @@ void GLFont::RenderText (const char* String, float size, Element* element)
 	float x = topLeft[0];
 	float y = topLeft[1];
 
-	int verticalLines;
-	
-	//Calculate how many vetical lines of text will fit in the box
-	float charHeight = (this->Font.TexHeight * size);
-
-	verticalLines = ceil(window->height / charHeight);
-
-	//Get length of string
 	int Length = strlen(String);
-
-	//Calculate if we'll need to "squash" the text or not
-	float squashMod;
-	float charWidth = (this->Font.TexWidth * size);
-	if (((charWidth * size) * Length) / verticalLines < window->width)
-		squashMod = 1;
-	else
-		squashMod = window->width / (((charWidth * size) * Length) / verticalLines);
-
-	//Get characters per line
-	int charPerLine = floor(window->width / (charWidth * squashMod));
 
 	//Begin rendering quads
 	glBegin(GL_TRIANGLE_STRIP);
 
 	glColor4ub(
-		element->colour[0],
-		element->colour[1],
-		element->colour[2],
-		element->colour[3]);
-
-	int spaceLeft = charPerLine;
+		element->borderColour[0],
+		element->borderColour[1],
+		element->borderColour[2],
+		element->borderColour[3]);
 
 	//Loop through characters
 	for (int i = 0; i < Length; i++)
@@ -321,10 +300,8 @@ void GLFont::RenderText (const char* String, float size, Element* element)
 		//Get pointer to glFont character
 		GLFONTCHAR *Char = &Font.Char[(int)String[i] - Font.IntStart];
 		
-		float dx = Char->dx*size * squashMod;
+		float dx = Char->dx*size;
 		float dy = Char->dy*size;
-
-
 
 		//Specify vertices and texture coordinates
 		glTexCoord2f(Char->tx1, Char->ty2);
@@ -335,22 +312,8 @@ void GLFont::RenderText (const char* String, float size, Element* element)
 		glVertex2f(x + dx, y - dy);
 		glTexCoord2f(Char->tx2, Char->ty1);
 		glVertex2f(x + dx, y);
-		/*glTexCoord2f(Char->tx1, Char->ty2);
-		glVertex2f(x, y);
-		glTexCoord2f(Char->tx2, Char->ty2);
-		glVertex2f(x + dx, y);
-		glTexCoord2f(Char->tx2, Char->ty1);
-		glVertex2f(x + dx, y + dy);
-		glTexCoord2f(Char->tx1, Char->ty1);
-		glVertex2f(x, y + dy);*/
 
 		//Move to next character
-		spaceLeft--;
-		if (spaceLeft == 0) {
-			spaceLeft = charPerLine;
-			x = topLeft[0] - dx;
-			y += dy;
-		}
 		x += dx;
 	}
 

@@ -48,7 +48,10 @@ void Textbox::Initialise(float x, float y, float width, float height, Element * 
 	this->elementInfo->index = parent->childCount;
 	this->elementInfo->parent = parent;
 
-	this->SetColour(255, 255, 255, 255);
+	this->colour[0] = this->defaultColour[0];
+	this->colour[0] = this->defaultColour[0];
+	this->colour[0] = this->defaultColour[0];
+	this->colour[0] = this->defaultColour[0];
 
 	this->text = text;
 	this->rendering = rendering;

@@ -121,7 +121,7 @@ void Container::ButtonCallback(Button*) {
 
 //This method allows the user to quickly and easily create new windows. It
 // returns a pointer to the newly added window, to allow for easy manipulation.
-Window* Container::InstantiateWindow(float x, float y, float width, float height) {
+Window* Container::InstantiateWindow(float x, float y, float width, float height, std::string windowText) {
 	
 	//Create the base window
 	this->AddChild(new Window(x, y, width, height, rendering, this, bottomLeft));
@@ -135,13 +135,16 @@ Window* Container::InstantiateWindow(float x, float y, float width, float height
 	currentWindow->children[0]->draggable = false;
 
 	//Add a title bar
-	currentWindow->AddChild(new Window(-1.0f, 1.0f, 2.0f, 30, rendering, 
+	if (windowText != "") {
+		currentWindow->AddChild(new Textbox(-1.0f, -1.0f, 2.0f, 30, currentWindow, windowText, rendering));
+		currentWindow->children[2]->origin = topLeft;
+		currentWindow->children[2]->draggable = false;
+		return (Window*)currentWindow;
+	}
+	else
+	{
+		currentWindow->AddChild(new Window(-1.0f, 1.0f, 2.0f, 30, rendering,
 			currentWindow, topLeft));
-	currentWindow->children[1]->draggable = true;
-	
-	//Add the window text to the titlebar
-	currentWindow->AddChild(new Textbox(-1.0f, -1.0f, 2.0f, 30, currentWindow, "Test", rendering));
-	currentWindow->children[2]->origin = topLeft;
-	currentWindow->children[2]->draggable = false;
-	return (Window*)currentWindow;
+		currentWindow->children[1]->draggable = true;
+	}
 }

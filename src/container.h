@@ -14,6 +14,7 @@
 #include "textbox.h"
 #include "rendering.h"
 #include "originpoints.h"
+#include <string>
 
 //foward declaration
 class Button;
@@ -37,7 +38,7 @@ public:
 	virtual void PassData(void *);
 
 	void ButtonCallback(Button*);
-	Window* InstantiateWindow(float x, float y, float width, float height); 
+	Window* InstantiateWindow(float x, float y, float width, float height, std::string windowText = ""); 
 private:
 	int activeWindow;
 	bool movingWindow;
