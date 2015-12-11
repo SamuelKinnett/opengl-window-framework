@@ -205,7 +205,7 @@ void Rendering::DrawWindow(Element* element) {
 
 		//Convert the width into a float value
 		floatWidth = rendering->PixelToFloat1D(window->width,
-			this->screenWidth)
+			element->screenWidth)
 			* element->xModifier;
 
 		//The first corner of the window

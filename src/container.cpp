@@ -134,11 +134,14 @@ Window* Container::InstantiateWindow(float x, float y, float width, float height
 		rendering, 1, this, topRight));
 	currentWindow->children[0]->draggable = false;
 
-	//Add a title bar (currently a window until I can fix the textbox class
-	//TODO: Fix the textbox class and add it here
+	//Add a title bar
 	currentWindow->AddChild(new Window(-1.0f, 1.0f, 2.0f, 30, rendering, 
 			currentWindow, topLeft));
 	currentWindow->children[1]->draggable = true;
 	
+	//Add the window text to the titlebar
+	currentWindow->AddChild(new Textbox(-1.0f, -1.0f, 2.0f, 30, currentWindow, "Test", rendering));
+	currentWindow->children[2]->origin = topLeft;
+	currentWindow->children[2]->draggable = false;
 	return (Window*)currentWindow;
 }

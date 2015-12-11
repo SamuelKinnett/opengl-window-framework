@@ -17,6 +17,8 @@
 #define FALSE	0
 #endif
 
+class Element;
+
 namespace GLFontError {
 	struct InvalidFile{};
 	struct InvalidFont{};
@@ -29,8 +31,10 @@ public:
 	virtual ~GLFontBase();
 
 	virtual void Create(const char* Filename) {;}
-	virtual void RenderText(const char* String, float x, float y, float z, float size) {;}
-	virtual void RenderText(const char* String, int x, int y, int z) {;}
+
+	//Removed z arguments, unnecessary in this situation
+	virtual void RenderText(const char* String, float x, float y, float size, Element* element) {;}
+	virtual void RenderText(const char* String, int x, int y) {;}
 	void End();
 
 protected:
@@ -70,17 +74,9 @@ public:
 	GLFont();
 	virtual ~GLFont(){;}
 	virtual void Create(const char* FileName);
-	virtual void RenderText (const char* String, float x, float y, float z, float size);
+	//Removed z argument, unnecessary in this situation
+	virtual void RenderText (const char* String, float size, Element* element);
 };
-
-class PixelPerfectGLFont : public GLFontBase {
-public:
-	PixelPerfectGLFont();
-	virtual ~PixelPerfectGLFont(){;}
-	virtual void Create(const char *FileName);
-	virtual void RenderText (const char* String, int x, int y, int z);
-};
-
 #endif
 //End of file
 

@@ -48,6 +48,8 @@ void Textbox::Initialise(float x, float y, float width, float height, Element * 
 	this->elementInfo->index = parent->childCount;
 	this->elementInfo->parent = parent;
 
+	this->SetColour(255, 255, 255, 255);
+
 	this->text = text;
 	this->rendering = rendering;
 
@@ -124,18 +126,13 @@ void Textbox::Draw() {
 	float tempArray[2];
 
 	this->rendering->UpdateOriginPoint(this);
-	this->rendering->DrawWindow(this);
+	//this->rendering->DrawWindow(this);
 	
 	//TODO: Account for different origin points/window types.
 	//Currently just uses the bottom left corner.
 
-	window_t* parentInfo = this->elementInfo->parent->elementInfo;	
-	/*rendering->GetRelativeFloat(this->originPosition[0] + this->elementInfo->x,
-		this->originPosition[1] + this->elementInfo->y, 
-		tempArray, 
-		parentInfo);*/
 	glFont->Begin();
-	glFont->RenderText(this->text.c_str(), this->elementInfo->x, this->elementInfo->y, 0, 0.025);
+	glFont->RenderText(this->text.c_str(), 0.025, this);
 	glFont->End();
 }
 

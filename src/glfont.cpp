@@ -15,6 +15,13 @@
 //Minsi Chen
 //*********************************************************
 
+//*********************************************************
+//Modified rendering to work with my window framework, allowing
+//anchoring and proper scaling/rendering.
+//
+//Sam Kinnett
+//*********************************************************
+
 #if _WIN32
 #include <windows.h>
 #endif
@@ -28,6 +35,9 @@
 #endif
 
 #include "GLFont.h"
+#include "element.h"
+#include "windowinfo.h"
+#include <cmath>
 
 //*********************************************************
 //GLFontBase
@@ -138,64 +148,6 @@ GLFontBase::~GLFontBase ()
 }
 
 //*********************************************************
-//PixelPerfectGLFont
-//*********************************************************
-
-PixelPerfectGLFont::PixelPerfectGLFont()
-{
-}
-//*********************************************************
-void PixelPerfectGLFont::Create(const char *Filename)
-{
-	GLFontBase::CreateImpl(Filename, TRUE);
-	for (int i = 0; i < Font.IntEnd - Font.IntStart + 1; i++)
-	{
-		Font.Char[i].width = (int)((Font.Char[i].tx2 - Font.Char[i].tx1)*Font.TexWidth);
-		Font.Char[i].height = (int)((Font.Char[i].ty2 - Font.Char[i].ty1)*Font.TexHeight);
-	}
-}
-//*********************************************************
-void PixelPerfectGLFont::RenderText (const char* String, int x, int y, int z)
-{
-	//Return if we don't have a valid glFont
-	if (!ok)
-	{
-		throw GLFontError::InvalidFont();
-	}
-
-	//Get length of string
-	int Length = strlen(String);
-
-	//Begin rendering quads
-	glBegin(GL_TRIANGLE_STRIP);
-
-	glColor4ub(255, 255, 255, 255);
-
-	//Loop through characters
-	for (int i = 0; i < Length; i++)
-	{
-		//Get pointer to glFont character
-		GLFONTCHAR *Char = &Font.Char[(int)String[i] - Font.IntStart];
-
-		//Specify vertices and texture coordinates
-		glTexCoord2f(Char->tx1, Char->ty2);
-		glVertex3i(x, y - Char->height, z);
-		glTexCoord2f(Char->tx1, Char->ty1);
-		glVertex3i(x, y, z);
-		glTexCoord2f(Char->tx2, Char->ty2);
-		glVertex3i(x + Char->width, y - Char->height, z);
-		glTexCoord2f(Char->tx2, Char->ty1);
-		glVertex3i(x + Char->width, y, z);
-
-		//Move to next character
-		x += Char->width;
-	}
-
-	//Stop rendering quads
-	glEnd();
-}
-
-//*********************************************************
 //GLFont
 //*********************************************************
 
@@ -208,7 +160,7 @@ void GLFont::Create(const char* Filename)
 	GLFontBase::CreateImpl(Filename, FALSE);
 }
 //*********************************************************
-void GLFont::RenderText (const char* String, float x, float y, float z, float size)
+void GLFont::RenderText (const char* String, float size, Element* element)
 {
 	//Return if we don't have a valid glFont
 	if (!ok)
@@ -216,13 +168,152 @@ void GLFont::RenderText (const char* String, float x, float y, float z, float si
 		throw GLFontError::InvalidFont();
 	}
 
+	float floatWidth, floatHeight;
+	float tempArray[2];
+	float tempSecondArray[2];
+	window_t* window = element->elementInfo;
+	window_t* parentInfo = window->parent->elementInfo;
+
+	//Work out the bounds of the textbox
+	switch (element->windowType) {
+	case 0:
+
+		//The first corner of the window
+		tempArray[0] = element->originPosition[0] +
+			element->rendering->PixelToFloat1D(window->x, element->screenWidth)
+			* element->xModifier;
+		tempArray[1] = element->originPosition[1] +
+			element->rendering->PixelToFloat1D(window->y, element->screenHeight)
+			* element->yModifier;
+
+		//The second corner of the window
+		tempSecondArray[0] = element->originPosition[0] +
+			element->rendering->PixelToFloat1D(window->x + window->width,
+				element->screenWidth)
+			* element->xModifier;
+		tempSecondArray[1] = element->originPosition[1] +
+			element->rendering->PixelToFloat1D(window->y + window->height,
+				element->screenHeight)
+			* element->yModifier;
+		break;
+
+	case 1:
+		//The first corner of the window
+		tempArray[0] = element->originPosition[0] +
+			element->rendering->GetRelativeFloat1D(window->x, parentInfo->width)
+			* element->xModifier;
+		tempArray[1] = element->originPosition[1] +
+			element->rendering->GetRelativeFloat1D(window->y, parentInfo->height)
+			* element->yModifier;
+
+		//The second corner of the window
+		tempSecondArray[0] = element->originPosition[0] +
+			element->rendering->GetRelativeFloat1D(window->x + window->width, parentInfo->width)
+			* element->xModifier;
+		tempSecondArray[1] = element->originPosition[1] +
+			element->rendering->GetRelativeFloat1D(window->y + window->height, parentInfo->height)
+			* element->yModifier;
+
+		break;
+
+	case 2:
+
+		//Convert the height into a float value
+		floatHeight = element->rendering->PixelToFloat1D(window->height,
+			element->screenHeight);
+		//The first corner of the window
+		tempArray[0] = element->originPosition[0] +
+			element->rendering->GetRelativeFloat1D(window->x, parentInfo->width)
+			* element->xModifier;
+		tempArray[1] = element->originPosition[1] +
+			element->rendering->GetRelativeFloat1D(window->y, parentInfo->height)
+			* element->yModifier;
+
+		//The second corner of the window
+		tempSecondArray[0] = element->originPosition[0] +
+			element->rendering->GetRelativeFloat1D(window->x + window->width, parentInfo->width)
+			* element->xModifier;
+		tempSecondArray[1] = tempArray[1] + floatHeight
+			* element->yModifier;
+		break;
+
+	case 3:
+
+		//Convert the width into a float value
+		floatWidth = element->rendering->PixelToFloat1D(window->width,
+			element->screenWidth)
+			* element->xModifier;
+
+		//The first corner of the window
+		tempArray[0] = element->originPosition[0] +
+			element->rendering->GetRelativeFloat1D(window->x, parentInfo->width)
+			* element->xModifier;
+		tempArray[1] = element->originPosition[1] +
+			element->rendering->GetRelativeFloat1D(window->y, parentInfo->height)
+			* element->yModifier;
+
+		//The second corner of the window
+		tempSecondArray[0] = tempArray[0] + floatWidth
+			* element->xModifier;
+		tempSecondArray[1] = element->originPosition[1] +
+			element->rendering->GetRelativeFloat1D(window->y + window->height, parentInfo->height)
+			* element->yModifier;
+		break;
+	}
+
+	float topLeft[2];
+
+	//Work out the co-ordinates of the bottom left and top right of the
+	//textbox.
+
+	if (tempArray[0] < tempSecondArray[0]) {
+		topLeft[0] = tempArray[0];
+	}
+	else {
+		topLeft[0] = tempSecondArray[0];
+	}
+
+	if (tempArray[1] < tempSecondArray[1]) {
+		topLeft[1] = tempSecondArray[1];
+	}
+	else {
+		topLeft[1] = tempArray[1];
+	}
+
+	float x = topLeft[0];
+	float y = topLeft[1];
+
+	int verticalLines;
+	
+	//Calculate how many vetical lines of text will fit in the box
+	float charHeight = (this->Font.TexHeight * size);
+
+	verticalLines = ceil(window->height / charHeight);
+
 	//Get length of string
 	int Length = strlen(String);
+
+	//Calculate if we'll need to "squash" the text or not
+	float squashMod;
+	float charWidth = (this->Font.TexWidth * size);
+	if (((charWidth * size) * Length) / verticalLines < window->width)
+		squashMod = 1;
+	else
+		squashMod = window->width / (((charWidth * size) * Length) / verticalLines);
+
+	//Get characters per line
+	int charPerLine = floor(window->width / (charWidth * squashMod));
 
 	//Begin rendering quads
 	glBegin(GL_TRIANGLE_STRIP);
 
-	glColor4ub(255, 255, 255, 255);
+	glColor4ub(
+		element->colour[0],
+		element->colour[1],
+		element->colour[2],
+		element->colour[3]);
+
+	int spaceLeft = charPerLine;
 
 	//Loop through characters
 	for (int i = 0; i < Length; i++)
@@ -230,20 +321,36 @@ void GLFont::RenderText (const char* String, float x, float y, float z, float si
 		//Get pointer to glFont character
 		GLFONTCHAR *Char = &Font.Char[(int)String[i] - Font.IntStart];
 		
-		float dx = Char->dx*size;
+		float dx = Char->dx*size * squashMod;
 		float dy = Char->dy*size;
+
+
 
 		//Specify vertices and texture coordinates
 		glTexCoord2f(Char->tx1, Char->ty2);
-		glVertex3f(x, y - dy, z);
+		glVertex2f(x, y - dy);
 		glTexCoord2f(Char->tx1, Char->ty1);
-		glVertex3f(x, y, z);
+		glVertex2f(x, y);
 		glTexCoord2f(Char->tx2, Char->ty2);
-		glVertex3f(x + dx, y - dy, z);
+		glVertex2f(x + dx, y - dy);
 		glTexCoord2f(Char->tx2, Char->ty1);
-		glVertex3f(x + dx, y, z);
+		glVertex2f(x + dx, y);
+		/*glTexCoord2f(Char->tx1, Char->ty2);
+		glVertex2f(x, y);
+		glTexCoord2f(Char->tx2, Char->ty2);
+		glVertex2f(x + dx, y);
+		glTexCoord2f(Char->tx2, Char->ty1);
+		glVertex2f(x + dx, y + dy);
+		glTexCoord2f(Char->tx1, Char->ty1);
+		glVertex2f(x, y + dy);*/
 
 		//Move to next character
+		spaceLeft--;
+		if (spaceLeft == 0) {
+			spaceLeft = charPerLine;
+			x = topLeft[0] - dx;
+			y += dy;
+		}
 		x += dx;
 	}
 
