@@ -117,8 +117,8 @@ void GLFontBase::Begin ()
 	{
 		throw GLFontError::InvalidFont();
 	}
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_TEXTURE_2D);
 	//glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, Font.Tex);
@@ -127,7 +127,7 @@ void GLFontBase::Begin ()
 void GLFontBase::End ()
 {
 	//glActiveTexture(GL_TEXTURE0);
-	glDisable(GL_BLEND);
+	//glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -168,6 +168,8 @@ void PixelPerfectGLFont::RenderText (const char* String, int x, int y, int z)
 
 	//Begin rendering quads
 	glBegin(GL_TRIANGLE_STRIP);
+
+	glColor4ub(255, 255, 255, 255);
 
 	//Loop through characters
 	for (int i = 0; i < Length; i++)
@@ -219,6 +221,8 @@ void GLFont::RenderText (const char* String, float x, float y, float z, float si
 
 	//Begin rendering quads
 	glBegin(GL_TRIANGLE_STRIP);
+
+	glColor4ub(255, 255, 255, 255);
 
 	//Loop through characters
 	for (int i = 0; i < Length; i++)

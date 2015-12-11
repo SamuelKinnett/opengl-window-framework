@@ -11,28 +11,53 @@
 
 using namespace std;
 
+Textbox::Textbox(int x, int y, int width, int height, Element * parent, 
+			string text, Rendering * rendering) {
+	this->windowType = TEXTBOX_DISCRETE;
+	Initialise((float)x, (float)y, (float)width, (float)height, parent, text, rendering);
+}
+
 //Floating point constructor. Places the textbox at a position and with a 
 //size always relative to the parent window.
-Textbox::Textbox(float x, float y, float width, float height, int index, Element* parent,
-	       string text, Rendering* rendering) {
+Textbox::Textbox(float x, float y, float width, float height, Element* parent,
+			string text, Rendering* rendering) {
+	this->windowType = TEXTBOX_SCALING;
+	Initialise(x, y, width, height, parent, text, rendering);
+}
+
+Textbox::Textbox(float x, float y, int width, float height, Element * parent, 
+			string text, Rendering * rendering) {
+	this->windowType = TEXTBOX_FIXED_W;
+	Initialise(x, y, (float)width, height, parent, text, rendering);
+}
+
+Textbox::Textbox(float x, float y, float width, int height, Element * parent, 
+			string text, Rendering * rendering) {
+	this->windowType = TEXTBOX_FIXED_H;
+	Initialise(x, y, width, (float)height, parent, text, rendering);
+}
+
+void Textbox::Initialise(float x, float y, float width, float height, Element * parent, std::string text, Rendering * rendering)
+{
 	this->elementInfo = new window_t;
-	
+
 	this->elementInfo->x = x;
 	this->elementInfo->y = y;
 	this->elementInfo->width = width;
 	this->elementInfo->height = height;
-	this->elementInfo->index = index;
+	this->elementInfo->index = parent->childCount;
 	this->elementInfo->parent = parent;
 
 	this->text = text;
 	this->rendering = rendering;
 
 	this->glFont = new GLFont();
-	glFont->Create("franklin_gothic.glf");
+	glFont->Create("sf_square_head.glf");
 }
 
-Textbox::~Textbox() {
 
+Textbox::~Textbox() {
+	delete this->elementInfo;
 }
 
 bool Textbox::Create() {
@@ -48,9 +73,8 @@ bool Textbox::Close() {
 void Textbox::Resize(int screenWidth, int screenHeight) {
 	//Nothing doing here at the moment. To shut GCC up, I've added a
 	//completely useless body.
-	int placeHolder[2];
-	placeHolder[0] = screenWidth;
-	placeHolder[1] = screenHeight;
+	this->screenHeight = screenHeight;
+	this->screenWidth = screenWidth;
 }
 
 void Textbox::AddChild(Element* newChild) {
@@ -64,13 +88,25 @@ void Textbox::RemoveChild(int index) {
 }
 
 int Textbox::Click(int x, int y, int* clickLocation) {
-	int placeHolder[3];
-	window_t* placeHolder2;
 
-	placeHolder[0] = x;
-	placeHolder[1] = y;
-	placeHolder[2] = *clickLocation;
-	placeHolder2 = this->elementInfo->parent->elementInfo;
+	int windowBounds[4];
+
+	this->rendering->GetWindowBounds(this, windowBounds);
+
+	if (x < windowBounds[1]
+		&& x > windowBounds[0]
+		&& y < windowBounds[3]
+		&& y > windowBounds[2]) {
+
+		clickLocation[0] = x - windowBounds[0];
+		clickLocation[1] = y - windowBounds[2];
+
+		//If this textbox can be dragged, we return a 1
+		if (this->draggable)
+			return 1;
+		else
+			return 0;
+	}
 	return 0;
 }
 
@@ -84,12 +120,22 @@ void Textbox::Move(int x, int y) {
 }
 
 void Textbox::Draw() {
-	this->rendering->DrawWindow(this);
+
 	float tempArray[2];
+
+	this->rendering->UpdateOriginPoint(this);
+	this->rendering->DrawWindow(this);
+	
+	//TODO: Account for different origin points/window types.
+	//Currently just uses the bottom left corner.
+
 	window_t* parentInfo = this->elementInfo->parent->elementInfo;	
-	rendering->GetRelativeFloat(this->elementInfo->x, this->elementInfo->y, tempArray, parentInfo);
+	/*rendering->GetRelativeFloat(this->originPosition[0] + this->elementInfo->x,
+		this->originPosition[1] + this->elementInfo->y, 
+		tempArray, 
+		parentInfo);*/
 	glFont->Begin();
-	glFont->RenderText(this->text.c_str(), this->elementInfo->x, this->elementInfo->y, 0, 1);
+	glFont->RenderText(this->text.c_str(), this->elementInfo->x, this->elementInfo->y, 0, 0.025);
 	glFont->End();
 }
 

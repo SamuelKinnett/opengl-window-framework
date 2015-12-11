@@ -38,8 +38,12 @@ void Initialise(int argc, char* argv[]) {
 	//Add two windows to the beginning of the windows vector
 	//Then add a child window to the scaling window
 	//...And a "task bar" along the bottom of the screen
-	
+	system("cd");
+
 	Window* window1 = GUI->InstantiateWindow(0.0f, 0.0f, 0.5f, 0.5f);
+	Window* window2 = GUI->InstantiateWindow(-1.0f, -0.3f, 0.6f, 0.3f);
+	GUI->AddChild(new Textbox(0.0f, 0.0f, 0.5f, 0.5f, GUI, "Hello, world!",
+		rendering));
 	//Start running GLut's loop
 	glutMainLoop();
 }

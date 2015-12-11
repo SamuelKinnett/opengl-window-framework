@@ -11,6 +11,7 @@
 #include "element.h"
 #include "button.h"
 #include "window.h"
+#include "textbox.h"
 #include "rendering.h"
 #include "originpoints.h"
 

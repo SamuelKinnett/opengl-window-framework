@@ -297,6 +297,7 @@ void Window::Move(int x, int y) {
 	this->rendering->UpdateOriginPoint(this);
 
 	if (windowType == WINDOW_DISCRETE) {
+		//TODO
 		//int parentPixel[2];
 		//this->rendering->FloatToPixel(parentInfo->x, 
 		//				parentInfo->y, 

@@ -133,7 +133,6 @@ void Button::RemoveChild(int index) {
 
 int Button::Click(int x, int y, int* clickLocation) {
 	
-	window_t* parentInfo = this->elementInfo->parent->elementInfo;
 	int windowBounds[4];
 
 	this->rendering->GetWindowBounds(this, windowBounds);
