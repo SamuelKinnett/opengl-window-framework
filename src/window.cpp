@@ -13,7 +13,7 @@ using namespace std;
 #define AXIS_Y 1
 
 //temporary, used to determine animation speed
-#define ANIMATION_SPEED 10
+#define ANIMATION_SPEED 5
 
 //Standard constructor, taking arguments in terms of pixels A window
 //instantiated with this constructor will remain the same size and in the same
@@ -144,8 +144,12 @@ void Window::Draw() {
 	//If we are, run the animation for a frame
 	if (animState == opening) {
 		this->inAnimation = this->Create();
+		rendering->DrawWindow(this);
+		return;
 	} else if (animState == closing) {
 		this->inAnimation = this->Close();
+		rendering->DrawWindow(this);
+		return;
 	}
 
 	rendering->DrawWindow(this);
@@ -269,20 +273,20 @@ int Window::Click(int x, int y, int* clickLocation) {
 				x,
 				y,
 				clickLocation
-				) == 1) {
+				) > 0) {
 				clickLocation[0] = x - windowBounds[0];
 				clickLocation[1] = y - windowBounds[2];
 				if (children[i]->draggable)
-					return 1;
+					return 2;
 				else
-					return 0;
+					return 1;
 			}
 		}
-		//Otherwise, If this window can be dragged, we return 1
+		//Otherwise, If this window can be dragged, we return 2
 		if (this->draggable)
-			return 1;
+			return 2;
 		else
-			return 0;
+			return 1;
 	}
 	return 0;
 }

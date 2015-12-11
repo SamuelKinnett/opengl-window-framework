@@ -15,6 +15,7 @@
 #include "rendering.h"
 #include "originpoints.h"
 #include <string>
+#include <vector>
 
 //foward declaration
 class Button;
@@ -30,7 +31,8 @@ public:
 	virtual bool Close();
 	virtual void Resize(int, int);		
 	virtual void AddChild(Element*);
-	virtual void RemoveChild(int);	
+	virtual void RemoveChild(int);
+	virtual void RemoveChild(Element*);	
 	virtual int Click(int, int, int*);
 	virtual void Move(int, int);		 
 	virtual void SetColour(int, int, int, int);
@@ -38,9 +40,13 @@ public:
 	virtual void PassData(void *);
 
 	void ButtonCallback(Button*);
+	void Update();
 	Window* InstantiateWindow(float x, float y, float width, float height, std::string windowText = ""); 
 private:
 	int activeWindow;
+
+	//Stores the indexes of elements to delete on the next update.
+	std::vector<Element*> flaggedForDeletion;
 	bool movingWindow;
 	Rendering* rendering;
 };

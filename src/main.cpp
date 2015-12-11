@@ -108,7 +108,7 @@ bool InitOpenGL() {
 
 //Handles any input and/or updates that need to be made
 void Update() {
-	//Nothing needs doing at the moment!
+	GUI->Update();
 }
 
 //Handles any rendering to be done
@@ -137,9 +137,12 @@ void MainLoop(int val) {
 //Handles mouse clicks
 void HandleMouseClick(int button, int state, int x, int y) {
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-		draggingWindow = GUI->Click(x,
-					screenSize[1] - y,
-					mouseRelativePosition);
+		if (GUI->Click(x, screenSize[1] - y, mouseRelativePosition) == 2) {
+			draggingWindow = true;
+		}
+		else {
+			draggingWindow = false;
+		}
 	}
 
 	//cout << "Mouse X: " << x << endl;

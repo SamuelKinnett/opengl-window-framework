@@ -51,37 +51,56 @@ void Container::AddChild(Element* newChild) {
 	this->childCount += 1;
 }
 
-void Container::RemoveChild(int index) {
+//No longer used
+void Container::RemoveChild(int){}
+
+void Container::RemoveChild(Element* child) {
+	int index = child->elementInfo->index;
 	if (index < childCount) {
-		this->children.erase(this->children.begin() + index);
-		this->childCount -= 1;
-		//Update the indicies of the child items
-		for (int i = 0; i < childCount; ++i)
-			this->children[i]->elementInfo->index = i;
+		for (int i = 0; i < childCount; ++i) {
+			if (this->children[i]->elementInfo->index == index) {
+				delete this->children[i];
+				this->children.erase(this->children.begin() + i);
+				this->childCount -= 1;
+				//Update the indicies of the child items
+				for (int curChild = 0; curChild < childCount; ++curChild)
+					this->children[curChild]->elementInfo->index = curChild;
+			}
+		}
 	}
 }
 
 int Container::Click(int x, int y, int* clickLocation) {
+	
+	int clickResult = 0;
 	this->activeWindow = -1;
-	for (int curWindow = 0; curWindow < this->childCount; ++curWindow) {
+	for (int curWindow = this->childCount - 1; curWindow > -1; --curWindow) {
 		//Loop through and check each window to see if it's been
 		//clicked.
-		if (children[curWindow]->Click(x, y, clickLocation))
+		clickResult = children[curWindow]->Click(x, y, clickLocation);
+
+		if (clickResult > 0) {
 			this->activeWindow = curWindow;
+			break;
+		}
 	}
 	if (this->activeWindow > -1) {
 		//If the user has clicked on a window, move it to the
 		//back of the vector, causing it to be drawn last and
 		//therefore at the "front".
-		
+
 		this->children.push_back(children[this->activeWindow]);
-		this->children.erase(this->children.begin() + 
-					this->activeWindow);
+		this->children.erase(this->children.begin() +
+			this->activeWindow);
 
 		//The active window will now be incorrect, so let's
 		//update it.
 		this->activeWindow = children.size() - 1;
-		return 1;
+
+		if (clickResult == 2)
+			return 2;
+		else if (clickResult == 1)
+			return 1;
 	} else {
 		//Nothing was clicked, return 0
 		return 0;
@@ -115,8 +134,26 @@ void Container::PassData(void * newData) {
 	++toShutUpYCM;
 }
 
-void Container::ButtonCallback(Button*) {
+void Container::ButtonCallback(Button* clickedButton) {
 	std::cout << "A button was clicked!" << std::endl;
+	switch (clickedButton->buttonType) {
+		//This is where the user can specify the functions to be executed for
+		//each button type.
+	case 1:
+		//Close button
+		flaggedForDeletion.push_back(clickedButton->elementInfo->parent);
+		break;
+	}
+}
+
+//Called every time to glut loop function is ran. This is where the user can
+//add any window-relevant code.
+void Container::Update()
+{
+	for (int i = 0; i < flaggedForDeletion.size(); ++i) {
+		this->RemoveChild(flaggedForDeletion[i]);
+		flaggedForDeletion.erase(flaggedForDeletion.begin() + i);
+	}
 }
 
 //This method allows the user to quickly and easily create new windows. It

@@ -106,11 +106,11 @@ int Textbox::Click(int x, int y, int* clickLocation) {
 		clickLocation[0] = x - windowBounds[0];
 		clickLocation[1] = y - windowBounds[2];
 
-		//If this textbox can be dragged, we return a 1
+		//If this textbox can be dragged, we return a 2
 		if (this->draggable)
-			return 1;
+			return 2;
 		else
-			return 0;
+			return 1;
 	}
 	return 0;
 }
