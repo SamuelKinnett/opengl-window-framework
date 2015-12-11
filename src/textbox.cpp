@@ -53,6 +53,8 @@ void Textbox::Initialise(float x, float y, float width, float height, Element * 
 	this->colour[0] = this->defaultColour[0];
 	this->colour[0] = this->defaultColour[0];
 
+	this->border = true;
+
 	this->text = text;
 	this->rendering = rendering;
 
@@ -63,6 +65,7 @@ void Textbox::Initialise(float x, float y, float width, float height, Element * 
 
 Textbox::~Textbox() {
 	delete this->elementInfo;
+	delete this->glFont;
 }
 
 bool Textbox::Create() {
@@ -129,7 +132,7 @@ void Textbox::Draw() {
 	float tempArray[2];
 
 	this->rendering->UpdateOriginPoint(this);
-	//this->rendering->DrawWindow(this);
+	this->rendering->DrawWindow(this);
 	
 	//TODO: Account for different origin points/window types.
 	//Currently just uses the bottom left corner.

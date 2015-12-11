@@ -30,18 +30,15 @@ void Initialise(int argc, char* argv[]) {
 
 	//Create a new rendering class that will be used by all child elements
 	rendering = new Rendering(screenSize[0], screenSize[1]); 
-
+	
 	//Create the GUI
 	GUI = new Container(-1.0f, -1.0f, 2.0f, 2.0f, rendering);
-	
-	//TESTING
-	//Add two windows to the beginning of the windows vector
-	//Then add a child window to the scaling window
-	//...And a "task bar" along the bottom of the screen
-	system("cd");
 
-	Window* window1 = GUI->InstantiateWindow(0.0f, 0.0f, 0.5f, 0.5f);
-	Window* window2 = GUI->InstantiateWindow(-1.0f, -0.3f, 0.6f, 0.3f);
+	//TESTING
+	//Add two windows
+	Window* window1 = GUI->InstantiateWindow(0.0f, 0.0f, 0.5f, 0.5f, "Main Window");
+	Window* window2 = GUI->InstantiateWindow(-1.0f, -0.3f, 0.6f, 0.3f, "Another Window");
+	
 	//Start running GLut's loop
 	glutMainLoop();
 }
@@ -166,6 +163,10 @@ void HandleButtonPress(unsigned char key, int x, int y) {
 		//Escape key, close the program
 		delete GUI;
 		exit(EXIT_SUCCESS);
+	case 'w':
+		//Create a new window
+		Window* tempWindow = GUI->InstantiateWindow(0, 0, 0.5f, 0.5f, "Window");
+		tempWindow->Resize(screenSize[0], screenSize[1]);
 	}
 }
 

@@ -174,9 +174,8 @@ Window* Container::InstantiateWindow(float x, float y, float width, float height
 	//Add a title bar
 	if (windowText != "") {
 		currentWindow->AddChild(new Textbox(-1.0f, -1.0f, 2.0f, 30, currentWindow, windowText, rendering));
-		currentWindow->children[2]->origin = topLeft;
-		currentWindow->children[2]->draggable = false;
-		return (Window*)currentWindow;
+		currentWindow->children[1]->origin = topLeft;
+		currentWindow->children[1]->draggable = true;
 	}
 	else
 	{
@@ -184,4 +183,6 @@ Window* Container::InstantiateWindow(float x, float y, float width, float height
 			currentWindow, topLeft));
 		currentWindow->children[1]->draggable = true;
 	}
+
+	return (Window*)currentWindow;
 }
