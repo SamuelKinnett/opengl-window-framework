@@ -129,8 +129,19 @@ void Render() {
 //The main program loop
 void MainLoop(int val) {
 
+	//_int64 counter1 = 0;	//start time
+	//_int64 counter2 = 0;	//stop time
+	//_int64 frequency = 0;//clock frequency
+
+	//QueryPerformanceCounter((LARGE_INTEGER *)&counter1);
+
 	Update();
 	Render();
+
+	//QueryPerformanceCounter((LARGE_INTEGER *)&counter2);
+	//QueryPerformanceFrequency((LARGE_INTEGER *)&frequency);
+
+	//std::cout << GUI->childCount << " windows, execution time: " << (counter1 - counter2) * 1.0 / frequency << " seconds." << std::endl;
 
 	//Set another timed function call. In this way, the main loop is
 	//looped at the framerate specified by the FPS constant
@@ -179,8 +190,6 @@ void HandleButtonPress(unsigned char key, int x, int y) {
 		tempWindowPointer = GUI->InstantiateWindow(0, 0, 0.5f, 0.5f, 
 			windowTitle);
 		tempWindowPointer->Resize(screenSize[0], screenSize[1]);
-		std::cout << "New window created! Current window count: " << 
-			GUI->childCount << std::endl;
 	}
 }
 

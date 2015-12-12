@@ -12,6 +12,7 @@
 #include <GL/gl.h>
 #include <vector>
 #include <iostream>
+#include <ctime> //Used for benchmarking
 
 //Custom classes
 #include "container.h"
