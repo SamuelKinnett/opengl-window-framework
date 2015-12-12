@@ -18,9 +18,8 @@ using namespace std;
 //Standard constructor, taking arguments in terms of pixels A window
 //instantiated with this constructor will remain the same size and in the same
 //position regardless of the main window resizing.
-Window::Window(int x, int y, int width, int height,
-		Rendering* rendering, Element* parent,
-		originPoints origin) {
+Window::Window(int x, int y, int width, int height, Element* parent,
+		Rendering* rendering, originPoints origin) {
 	int index = parent->childCount;
 	this->windowType = WINDOW_DISCRETE;
 	this->Initialise((float)x, (float)y, (float)width, (float)height,
@@ -30,9 +29,8 @@ Window::Window(int x, int y, int width, int height,
 //Float constructor taking arguments as values between 0 and 1 A window 
 //instantiated with this constructor will remain at a relative size and
 //position to the main window, according to the float values.
-Window::Window(float x, float y, float width, float height,
-		Rendering* rendering, Element* parent,
-		originPoints origin) {
+Window::Window(float x, float y, float width, float height, Element* parent,
+		Rendering* rendering, originPoints origin) {
 	int index = parent->childCount;
 	this->windowType = WINDOW_SCALING;
 	this->Initialise(x, y, width, height, index, rendering, parent, origin);
@@ -42,9 +40,8 @@ Window::Window(float x, float y, float width, float height,
 //constructor creates a window that remains at the same relative space when
 //its parent window is resized, however only the width will scale with the
 //window.
-Window::Window(float x, float y, float width, int height,
-		Rendering* rendering, Element* parent,
-		originPoints origin) {
+Window::Window(float x, float y, float width, int height, Element* parent,
+		Rendering* rendering, originPoints origin) {
 	int index = parent->childCount;
 	this->windowType = WINDOW_FIXED_H;
 	this->Initialise(x, y, width, (float)height, index, rendering,
@@ -55,9 +52,8 @@ Window::Window(float x, float y, float width, int height,
 //constructor creates a window that remains at the same relative space when
 //its parent window is resized, however only the height will scale with the
 //window.
-Window::Window(float x, float y, int width, float height,
-		Rendering* rendering, Element* parent,
-		originPoints origin) {
+Window::Window(float x, float y, int width, float height, Element* parent,
+		Rendering* rendering, originPoints origin) {
 	int index = parent->childCount;
 	this->windowType = WINDOW_FIXED_W;
 	this->Initialise(x, y, (float)width, height, index, rendering,

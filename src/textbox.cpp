@@ -11,34 +11,43 @@
 
 using namespace std;
 
-Textbox::Textbox(int x, int y, int width, int height, Element * parent, 
-			string text, Rendering * rendering) {
+Textbox::Textbox(int x, int y, int width, int height, Element * parent,
+			string text, Rendering * rendering, GLFont* font,
+			originPoints origin) {
 	this->windowType = TEXTBOX_DISCRETE;
-	Initialise((float)x, (float)y, (float)width, (float)height, parent, text, rendering);
+	Initialise((float)x, (float)y, (float)width, (float)height, parent, 
+		text, rendering, font, origin);
 }
 
 //Floating point constructor. Places the textbox at a position and with a 
 //size always relative to the parent window.
 Textbox::Textbox(float x, float y, float width, float height, Element* parent,
-			string text, Rendering* rendering) {
+			string text, Rendering* rendering, GLFont* font,
+			originPoints origin) {
 	this->windowType = TEXTBOX_SCALING;
-	Initialise(x, y, width, height, parent, text, rendering);
+	Initialise(x, y, width, height, parent, text, rendering, font, origin);
 }
 
 Textbox::Textbox(float x, float y, int width, float height, Element * parent, 
-			string text, Rendering * rendering) {
+			string text, Rendering * rendering, GLFont* font,
+			originPoints origin) {
 	this->windowType = TEXTBOX_FIXED_W;
-	Initialise(x, y, (float)width, height, parent, text, rendering);
+	Initialise(x, y, (float)width, height, parent, text, rendering, 
+		font, origin);
 }
 
 Textbox::Textbox(float x, float y, float width, int height, Element * parent, 
-			string text, Rendering * rendering) {
+			string text, Rendering * rendering, GLFont* font,
+			originPoints origin) {
 	this->windowType = TEXTBOX_FIXED_H;
-	Initialise(x, y, width, (float)height, parent, text, rendering);
+	Initialise(x, y, width, (float)height, parent, text, rendering,
+		font, origin);
 }
 
-void Textbox::Initialise(float x, float y, float width, float height, Element * parent, std::string text, Rendering * rendering)
-{
+void Textbox::Initialise(float x, float y, float width, float height, 
+			Element * parent, std::string text, Rendering * rendering,
+			GLFont* font, originPoints origin) {
+
 	this->elementInfo = new window_t;
 
 	this->elementInfo->x = x;
@@ -57,9 +66,9 @@ void Textbox::Initialise(float x, float y, float width, float height, Element * 
 
 	this->text = text;
 	this->rendering = rendering;
+	this->glFont = font;
 
-	this->glFont = new GLFont();
-	glFont->Create("sf_square_head.glf");
+	this->origin = origin;
 }
 
 

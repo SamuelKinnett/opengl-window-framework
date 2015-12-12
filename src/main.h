@@ -20,6 +20,7 @@
 #include "rendering.h"
 #include "textbox.h"
 #include "button.h"
+#include "glfont.h"
 
 void Initialise(int, char*[]);
 void InitWindow(int, char*[]);

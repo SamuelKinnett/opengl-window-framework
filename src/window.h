@@ -17,20 +17,20 @@ class Window : public Element {
 
 public:
 	//WINDOW_DISCRETE
-	Window(int x, int y, int width, int height, Rendering* rendering,
-			Element* parent, originPoints origin);		
+	Window(int x, int y, int width, int height, Element* parent, 
+			Rendering* rendering, originPoints origin);
 	
 	//WINDOW_SCALING
-	Window(float x, float y, float width, float height, Rendering* rendering, 
-			Element* parent, originPoints origin);
+	Window(float x, float y, float width, float height, Element* parent, 
+			Rendering* rendering, originPoints origin);
 
 	//WINDOW_FIXED_H
-	Window(float x, float y, float width, int height, Rendering* rendering,
-			Element* parent, originPoints origin);
+	Window(float x, float y, float width, int height, Element* parent, 
+			Rendering* rendering, originPoints origin);
 
 	//WINDOW_FIXED_W
-	Window(float x, float y, int width, float height, Rendering* rendering,
-			Element* parent, originPoints origin);
+	Window(float x, float y, int width, float height, Element* parent, 
+			Rendering* rendering, originPoints origin);
 	
 	~Window();
 

@@ -21,16 +21,20 @@ class Textbox : public Element {
 public:
 	//Discrete
 	Textbox(int, int, int, int, Element*,
-			std::string, Rendering*);
+			std::string, Rendering*, GLFont*, 
+			originPoints);
 	//Scaling
 	Textbox(float, float, float, float, Element*,
-		std::string, Rendering*);
+			std::string, Rendering*, GLFont*,
+			originPoints);
 	//Fixed Width
 	Textbox(float, float, int, float, Element*,
-		std::string, Rendering*);
+			std::string, Rendering*, GLFont*,
+			originPoints);
 	//Fixed Height
 	Textbox(float, float, float, int, Element*,
-		std::string, Rendering*);
+			std::string, Rendering*, GLFont*,
+			originPoints);
 	~Textbox();
 
 	virtual void Draw();
@@ -47,7 +51,7 @@ public:
 
 private:
 	void Initialise(float, float, float, float, Element*,
-		std::string, Rendering*);
+		std::string, Rendering*, GLFont*, originPoints);
 	std::string text;
 	GLFont* glFont;
 };

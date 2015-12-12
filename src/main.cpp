@@ -16,7 +16,10 @@ int screenSize[2] = {DEFAULT_WIDTH, DEFAULT_HEIGHT};
 
 Container* GUI;		//The main GUI, holding all of the windows.
 Rendering* rendering;	//Rendering class, used for world to screenspace
-			// conversion
+						// conversion and other rendering functions common
+						// across elements.
+GLFont* titleFont;	//Font used by all windows for the title bar.
+
 std::function<void(Button*)> buttonCallback;
 
 int main(int argc, char* argv[]) {
@@ -30,9 +33,12 @@ void Initialise(int argc, char* argv[]) {
 
 	//Create a new rendering class that will be used by all child elements
 	rendering = new Rendering(screenSize[0], screenSize[1]); 
+	//Create a new title font
+	titleFont = new GLFont();
+	titleFont->Create("sf_square_head.glf");
 	
 	//Create the GUI
-	GUI = new Container(-1.0f, -1.0f, 2.0f, 2.0f, rendering);
+	GUI = new Container(-1.0f, -1.0f, 2.0f, 2.0f, rendering, titleFont);
 
 	//TESTING
 	//Add two windows
@@ -158,15 +164,23 @@ void HandleMouseMoving(int x, int y) {
 }
 
 void HandleButtonPress(unsigned char key, int x, int y) {
+	
+	std::string windowTitle;
+	Window* tempWindowPointer;
+
 	switch (key) {
 	case 27:
 		//Escape key, close the program
 		delete GUI;
 		exit(EXIT_SUCCESS);
 	case 'w':
-		//Create a new window
-		Window* tempWindow = GUI->InstantiateWindow(0, 0, 0.5f, 0.5f, "Window");
-		tempWindow->Resize(screenSize[0], screenSize[1]);
+		//Create a new scaling window
+		windowTitle = "Window " + std::to_string(GUI->childCount + 1);
+		tempWindowPointer = GUI->InstantiateWindow(0, 0, 0.5f, 0.5f, 
+			windowTitle);
+		tempWindowPointer->Resize(screenSize[0], screenSize[1]);
+		std::cout << "New window created! Current window count: " << 
+			GUI->childCount << std::endl;
 	}
 }
 

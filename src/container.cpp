@@ -2,7 +2,7 @@
 #include <iostream>
 
 Container::Container(float x, float y, float width, float height,
-		Rendering* rendering) {
+		Rendering* rendering, GLFont* titleFont) {
 
 	this->elementInfo = new window_t;
 
@@ -12,6 +12,7 @@ Container::Container(float x, float y, float width, float height,
 	this->elementInfo->height = height;
 	
 	this->rendering = rendering;
+	this->titleFont = titleFont;
 
 	childCount = 0;
 	activeWindow = -1;
@@ -161,7 +162,7 @@ void Container::Update()
 Window* Container::InstantiateWindow(float x, float y, float width, float height, std::string windowText) {
 	
 	//Create the base window
-	this->AddChild(new Window(x, y, width, height, rendering, this, bottomLeft));
+	this->AddChild(new Window(x, y, width, height, this, rendering, bottomLeft));
 	Element* currentWindow = this->children[childCount - 1];
 	currentWindow->draggable = false;
 
@@ -173,14 +174,18 @@ Window* Container::InstantiateWindow(float x, float y, float width, float height
 
 	//Add a title bar
 	if (windowText != "") {
-		currentWindow->AddChild(new Textbox(-1.0f, -1.0f, 2.0f, 30, currentWindow, windowText, rendering));
-		currentWindow->children[1]->origin = topLeft;
+		currentWindow->AddChild(new Textbox(-1.0f, -1.0f, 2.0f, 30, 
+											currentWindow, 
+											windowText, 
+											rendering,
+											titleFont,
+											topLeft));
 		currentWindow->children[1]->draggable = true;
 	}
 	else
 	{
-		currentWindow->AddChild(new Window(-1.0f, 1.0f, 2.0f, 30, rendering,
-			currentWindow, topLeft));
+		currentWindow->AddChild(new Window(-1.0f, 1.0f, 2.0f, 30, currentWindow,
+			rendering, topLeft));
 		currentWindow->children[1]->draggable = true;
 	}
 

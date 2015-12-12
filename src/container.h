@@ -23,7 +23,7 @@ class Container : public Element {
 	
 public:
 	Container(float x, float y, float width, float height,
-		       	Rendering* rendering);
+		       	Rendering* rendering, GLFont* titleFont);
 	~Container();
 
 	virtual void Draw();	
@@ -49,6 +49,7 @@ private:
 	std::vector<Element*> flaggedForDeletion;
 	bool movingWindow;
 	Rendering* rendering;
+	GLFont* titleFont;
 };
 
 #endif
